@@ -1,0 +1,8 @@
+(** @canonical MiniML.Ast *)
+module Ast = MiniML__Ast
+
+(** @canonical MiniML.Lexer *)
+module Lexer = MiniML__Lexer
+
+(** @canonical MiniML.Parser *)
+module Parser = MiniML__Parser
