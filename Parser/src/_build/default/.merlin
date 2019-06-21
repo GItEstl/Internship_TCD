@@ -13,5 +13,5 @@ S /Users/estelle/.opam/ocaml-base-compiler.4.07.1/lib/ppx_inline_test/config
 S /Users/estelle/.opam/ocaml-base-compiler.4.07.1/lib/ppx_inline_test/runtime-lib
 S /Users/estelle/.opam/ocaml-base-compiler.4.07.1/lib/sexplib0
 S .
-FLG -ppx '/Users/estelle/Documents/Pi-calculus/src/_build/default/.ppx/5ccac8911c4cff291e9b1f2cc80dcb66/ppx.exe --as-ppx --cookie '\''library-name="miniML"'\'''
+FLG -ppx '/Users/estelle/Documents/Intern_git/Internship_TCD/Parser/src/_build/default/.ppx/5ccac8911c4cff291e9b1f2cc80dcb66/ppx.exe --as-ppx --cookie '\''library-name="miniML"'\'''
 FLG -open MiniML -w @a-4-29-40-41-42-44-45-48-58-59-60-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A

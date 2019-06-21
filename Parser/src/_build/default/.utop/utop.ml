@@ -27,7 +27,7 @@ Clflags.include_dirs :=
   ; "/Users/estelle/.opam/ocaml-base-compiler.4.07.1/lib/sexplib0"
   ; "/Users/estelle/.opam/ocaml-base-compiler.4.07.1/lib/utop"
   ; "/Users/estelle/.opam/ocaml-base-compiler.4.07.1/lib/zed"
-  ; "/Users/estelle/Documents/Pi-calculus/src/_build/default/.miniML.objs/byte"
-  ; "/Users/estelle/Documents/Pi-calculus/src/_build/default/.miniML.objs/native"
+  ; "/Users/estelle/Documents/Intern_git/Internship_TCD/Parser/src/_build/default/.miniML.objs/byte"
+  ; "/Users/estelle/Documents/Intern_git/Internship_TCD/Parser/src/_build/default/.miniML.objs/native"
   ];
 UTop_main.main ();
