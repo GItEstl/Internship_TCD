@@ -1,0 +1,13 @@
+(ocamllex lexer)
+
+(menhir
+ (modules parser))
+(env
+  (dev
+    (flags (:standard -warn-error -A))))
+
+(library
+ (name miniML)
+ (inline_tests)
+ (preprocess
+  (pps ppx_inline_test)))
