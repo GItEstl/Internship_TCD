@@ -5,7 +5,7 @@ open Ast
 
 %token <int> NumberToken
 %token <string> IdentToken
-%token <char> CharValueToken
+%token <string> CharValueToken
 %token ArrowToken
 %token IfToken
 %token ElseToken
@@ -31,11 +31,12 @@ open Ast
 %token ReceiveToken, SendToken, NewToken, SpawnToken, TauToken
 %token ChooseToken, ChoiceToken
 %token HeadToken, TailToken, OddToken, EvenToken
-%token StartToken, CallToken
+%token StartToken, CallToken, ReturnToken
 %token NoopToken
 %token EOF
 
 %right AssignToken
+%right ReturnToken
 %right OrToken
 %right AndToken
 %left DifferentToken, EqualToken
@@ -101,6 +102,7 @@ binstruction :
  | SpawnToken LeftParenthesisToken f = IdentToken ComaToken e = expr RightParenthesisToken                                {SpawnNode (f,e)}
  | a = expr AssignToken NewToken LeftParenthesisToken t = typ RightParenthesisToken                                    {NewNode (a,t)}
  | NoopToken                                                                                                            {NoopNode}
+ | ReturnToken e = expr                                                                                                 {ReturnNode (e)} 
 
 choices : 
  | p = prefix ArrowToken LeftBracketToken i = instruction RightBracketToken cs = choices                                  {ChoicesNode(p,i,Some(cs))}
@@ -141,8 +143,8 @@ exprs :
  | e1 = expr ComaToken e2 = exprs                                                                                                  {ExprsNode (e1,Some(e2))}
 
 cst : 
- | c = NumberToken                                                                                                            {IntegerNode(c)}
- | SimpleQuoteToken c = CharValueToken SimpleQuoteToken                                                                   {CharNode (c)}
+ | c = NumberToken                                                                                                        {IntegerNode(c)}
+ | c = CharValueToken                                                                                                    {CharNode (c)}
  | DoubleQuoteToken c = IdentToken DoubleQuoteToken                                                                       {StringNode (c)}
  | TrueToken                                                                                                              {TrueNode}
  | FalseToken                                                                                                             {FalseNode}
@@ -173,4 +175,4 @@ funcType :
  | t = typ                                                                                                            {FuncTNode (Some (t))}
 
 callMain :
- | StartToken f = IdentToken LeftParenthesisToken e = expr RightParenthesisToken                                             {CallNode (f,e)} 
+ | StartToken f = IdentToken LeftParenthesisToken e = expr RightParenthesisToken                                       {CallNode (f,e)} 

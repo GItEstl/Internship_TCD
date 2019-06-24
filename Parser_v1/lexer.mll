@@ -10,8 +10,9 @@ let digit = ['0'-'9']
 let lowercase = ['a' - 'z']
 let uppercase = ['A' - 'Z']
 let alphabet = lowercase | uppercase
-let char = alphabet | digit | '_'
-let id = char char*
+let alphanum = alphabet | digit | '_'
+let id = alphanum alphanum*
+let char = '\'' alphanum '\''
 
 rule token = parse
   | '\n'  (* ignore newlines but count them *)
@@ -69,12 +70,13 @@ rule token = parse
   | "start"   {StartToken}
   | "call"    {CallToken}
   | "noop"    {NoopToken}
+  | "return"  {ReturnToken}
   | digit+ as inum
               {NumberToken (int_of_string inum)}
+  | char as text
+              {CharValueToken (String.sub text 1 1)}
   | id as text
               {IdentToken text}
-  | char as text
-              {CharValueToken text}
 | eof         { EOF }
 | _
 { raise (Error ("Unexpected char: "^(Lexing.lexeme lexbuf)^" at "^(string_of_int (Lexing.lexeme_start

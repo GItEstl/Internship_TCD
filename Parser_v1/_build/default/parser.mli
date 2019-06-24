@@ -17,6 +17,7 @@ type token =
   | RightSqBracketToken
   | RightParenthesisToken
   | RightBracketToken
+  | ReturnToken
   | ReceiveToken
   | OrToken
   | OddToken
@@ -48,7 +49,7 @@ type token =
   | ComaToken
   | ChooseToken
   | ChoiceToken
-  | CharValueToken of (char)
+  | CharValueToken of (string)
   | CharToken
   | ChannelToken
   | CallToken

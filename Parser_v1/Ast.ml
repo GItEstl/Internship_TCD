@@ -69,7 +69,7 @@ type ast =
   | ChoicesNode of ast * ast * ast option
   | PrefixNode of ast option * prefixAction * string option * ast option
   | IntegerNode of int
-  | CharNode of char
+  | CharNode of string
   | StringNode of string
   | ChannelNode of ast 
   | ListNode of ast * ast
@@ -85,6 +85,7 @@ type ast =
   | TypeSeqNode of ast * ast option
   | FuncTNode of ast option
   | NoopNode
+  | ReturnNode of ast
 ;;
 
 (* Convert an AST into a string *)
@@ -141,7 +142,9 @@ match tree with
     | (NewNode (a,t)) ->
   (string_of_ast a) ^ " = new(" ^ (string_of_ast t) ^ ")" 
     | (NoopNode) ->
-  ""  
+  ""
+    | (ReturnNode (e)) ->
+  "return " ^ (string_of_ast e)  
     | (ChoicesNode(p,i,Some(cs))) -> 
   (string_of_ast p) ^ " -> {" ^ (string_of_ast i) ^ "} \n" ^ (string_of_ast cs)
     | (ChoicesNode(p,i,None)) -> 
@@ -201,7 +204,7 @@ match tree with
     | (IntegerNode (c)) ->
   (string_of_int c)
     | (CharNode (c)) ->
-  "\'" ^ (String.make 1 c) ^ "\'"
+  "'" ^ c ^ "'"
     | (StringNode (c)) ->
   "\"" ^ c ^ "\""
     | (TrueNode) ->

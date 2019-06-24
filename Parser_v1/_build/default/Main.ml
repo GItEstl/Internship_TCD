@@ -1,9 +1,7 @@
 open Ast 
 open Lexer
 open Parser
-(* open Semantics *)
 open Lexing
-(* open Types *)
 
 let report_error filename lexbuf msg =
  let (b,e) = (lexeme_start_p lexbuf, lexeme_end_p lexbuf) in
