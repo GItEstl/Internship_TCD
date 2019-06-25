@@ -13,7 +13,7 @@ First you have to build the folder, execute the following command in the Parser_
 When the folder is successfully build you have to import the library corresponding to the programming language :
         open MyML;;
 You will now be able to compile any examples by executing the following command :
-        Main.main "<path of the file you wanted to compile>";;
+        Main.main "<path of the file you want to compile>";;
 For example :
         Main.main "examples/example-00.mml";;        
 
