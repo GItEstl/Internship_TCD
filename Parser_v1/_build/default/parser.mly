@@ -10,7 +10,7 @@ open Ast
 %token IfToken
 %token ElseToken
 %token WhileToken
-%token LetToken, InToken
+%token DefToken, InToken
 %token TrueToken
 %token FalseToken
 %token LeftParenthesisToken
@@ -24,7 +24,7 @@ open Ast
 %token AddToken, SubToken
 %token MulToken, DivToken
 %token ComaToken
-%token SimpleQuoteToken, DoubleQuoteToken
+%token DoubleQuoteToken
 %token BoolToken, StringToken, IntegerToken, CharToken, ChannelToken, ListToken
 %token VoidToken
 %token FunctionToken
@@ -32,11 +32,8 @@ open Ast
 %token ChooseToken, ChoiceToken
 %token HeadToken, TailToken, OddToken, EvenToken
 %token StartToken, CallToken, ReturnToken
-%token NoopToken
 %token EOF
 
-%right AssignToken
-%right ReturnToken
 %right OrToken
 %right AndToken
 %left DifferentToken, EqualToken
@@ -69,7 +66,7 @@ parameters :
 
 body :
  | LeftBracketToken i = instruction RightBracketToken                                                           {BodyNode (None,i)}
- | LeftBracketToken v = variableDeclas SequenceToken i = instruction RightBracketToken                       {BodyNode (Some(v),i)}
+ | LeftBracketToken DefToken v = variableDeclas InToken i = instruction RightBracketToken                       {BodyNode (Some(v),i)}
 
 variableDecla :
  | t = typ n = IdentToken                                                                                   {VariableDeclaNode (t,StringNode(n))}
@@ -80,29 +77,31 @@ tupleDecla :
  | n = IdentToken ComaToken idents = tupleDecla                                                             {TupleDeclaNode (n,Some(idents))} 
 
 variableDeclas :
- | v = variableDecla vs = variableDeclas                                                                     {VariableDeclasNode (v,Some(vs))} 
- | v = variableDecla                                                                                         {VariableDeclasNode (v,None)} 
+ | v = variableDecla                                                                                         {VariableDeclasNode (v,None)}
+ | v = variableDecla SequenceToken                                                                           {VariableDeclasNode (v,None)}
+ | v = variableDecla SequenceToken vs = variableDeclas                                                       {VariableDeclasNode (v,Some(vs))}  
 
 instruction :
+ |                                                                                                         {InstrSeqNode(NoopNode,None)}
+ | SequenceToken i = instruction                                                                           {InstrSeqNode(NoopNode,Some(i))}
  | bi = binstruction                                                                                       {InstrSeqNode (bi,None)}
- | bi = binstruction i = instruction                                                                      {InstrSeqNode (bi,Some(i))}
+ | bi = binstruction SequenceToken i = instruction                                                         {InstrSeqNode (bi,Some(i))}
 
 binstruction :
  | a = expr AssignToken e = expr                                                                                  {BinaryNode (a,Assign,e)}
- | a = expr AssignToken CallToken f = IdentToken LeftParenthesisToken e = expr RightParenthesisToken              {BinaryNode (a,Assign,CallNode (f,e))} 
- | CallToken f = IdentToken LeftParenthesisToken e = expr RightParenthesisToken                                    {CallNode (f,e)}
+ | a = expr AssignToken CallToken f = IdentToken LeftParenthesisToken e = exprs RightParenthesisToken              {BinaryNode (a,Assign,CallNode (f,e))} 
+ | CallToken f = IdentToken LeftParenthesisToken e = exprs RightParenthesisToken                                    {CallNode (f,e)}
  | a = expr AssignToken ReceiveToken LeftParenthesisToken n = IdentToken RightParenthesisToken                  {ReceiveNode (a,n)}
  | SendToken LeftParenthesisToken n = IdentToken ComaToken e = expr RightParenthesisToken                            {SendNode (n,e)}
  | IfToken LeftParenthesisToken cond = expr RightParenthesisToken 
       LeftBracketToken i1 = instruction RightBracketToken 
       ElseToken LeftBracketToken i2 = instruction RightBracketToken                                             {IfthenelseInstrNode (cond,i1,i2)}
- | LetToken a = expr AssignToken e = expr InToken LeftBracketToken i = instruction RightBracketToken     {LetinInstrNode (a,e,i)}
  | WhileToken LeftParenthesisToken e = expr RightParenthesisToken LeftBracketToken i = instruction RightBracketToken          {WhileNode (e,i)}
  | ChooseToken LeftBracketToken c = choices RightBracketToken                                                     {ChooseNode (c)}
- | SpawnToken LeftParenthesisToken f = IdentToken ComaToken e = expr RightParenthesisToken                                {SpawnNode (f,e)}
- | a = expr AssignToken NewToken LeftParenthesisToken t = typ RightParenthesisToken                                    {NewNode (a,t)}
- | NoopToken                                                                                                            {NoopNode}
- | ReturnToken e = expr                                                                                                 {ReturnNode (e)} 
+ | SpawnToken f = IdentToken LeftParenthesisToken e = exprs RightParenthesisToken                                         {SpawnNode (f,e)}
+ | a = expr AssignToken NewToken LeftParenthesisToken RightParenthesisToken                                         {NewNode (a)}
+ | ReturnToken                                                                                                          {ReturnNode (None)}
+ | ReturnToken e = expr                                                                                                 {ReturnNode (Some (e))}
 
 choices : 
  | p = prefix ArrowToken LeftBracketToken i = instruction RightBracketToken cs = choices                                  {ChoicesNode(p,i,Some(cs))}
@@ -112,8 +111,8 @@ prefix :
  | ChoiceToken TauToken                                                                                                                {PrefixNode(None,Tau,None,None)}
  | ChoiceToken SendToken LeftParenthesisToken n = IdentToken ComaToken e = expr RightParenthesisToken                                {PrefixNode(None,Send,Some(n),Some(e))}
  | ChoiceToken a = expr AssignToken ReceiveToken LeftParenthesisToken n = IdentToken RightParenthesisToken                         {PrefixNode(Some(a),Receive,Some(n),None)}
- | ChoiceToken a = expr AssignToken NewToken LeftParenthesisToken t = typ RightParenthesisToken                                     {PrefixNode(Some(a),New,None,Some(t))}
- | ChoiceToken SpawnToken LeftParenthesisToken f = IdentToken ComaToken e = expr RightParenthesisToken                                  {PrefixNode(None,Spawn,Some(f),Some(e))}
+ | ChoiceToken a = expr AssignToken NewToken LeftParenthesisToken RightParenthesisToken                                             {PrefixNode(Some(a),New,None,None)}
+ | ChoiceToken SpawnToken f = IdentToken LeftParenthesisToken e = expr RightParenthesisToken                                  {PrefixNode(None,Spawn,Some(f),Some(e))}
  
 expr :
  | SubToken e = expr                                             {UnaryNode (Negate,e)}
@@ -131,7 +130,6 @@ expr :
  | e1 = expr DifferentToken e2 = expr                                                                                                 {BinaryNode (e1,Different,e2)}
  | e1 = expr LesserToken e2 = expr                                                                                                    {BinaryNode (e1,Lesser,e2)}
  | e1 = expr GreaterToken e2 = expr                                                                                                   {BinaryNode (e1,Greater,e2)}
- | LetToken a = expr AssignToken e1 = expr InToken LeftParenthesisToken e2 = expr RightParenthesisToken                    {LetinExprNode (a,e1,e2)}
  | IfToken LeftParenthesisToken cond = expr RightParenthesisToken 
       LeftBracketToken e1 = expr RightBracketToken ElseToken LeftBracketToken e2 = expr RightBracketToken                         {IfthenelseExprNode (cond,e1,e2)}
  | LeftParenthesisToken e = exprs RightParenthesisToken                                                                           {ExprNode (e)}
@@ -162,7 +160,7 @@ typ :
  | BoolToken                                                                                                              {TypeNode (BooleanT)}    
  | StringToken                                                                                                            {TypeNode (StringT)}
  | CharToken                                                                                                              {TypeNode (CharT)}
- | ChannelToken                                                                                                           {TypeNode (ChannT)}
+ | ChannelToken t = typ                                                                                                   {ChanTNode (t)}
  | ListToken LeftSqBracketToken t = typ RightSqBracketToken                                                               {ListTNode (t)}
  | LeftParenthesisToken tSeq = types RightParenthesisToken                                                              {TupleTNode (tSeq)}                                                                                                              
 

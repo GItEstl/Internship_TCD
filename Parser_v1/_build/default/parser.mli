@@ -11,7 +11,6 @@ type token =
   | StringToken
   | StartToken
   | SpawnToken
-  | SimpleQuoteToken
   | SequenceToken
   | SendToken
   | RightSqBracketToken
@@ -22,11 +21,9 @@ type token =
   | OrToken
   | OddToken
   | NumberToken of (int)
-  | NoopToken
   | NewToken
   | MulToken
   | ListToken
-  | LetToken
   | LesserToken
   | LeftSqBracketToken
   | LeftParenthesisToken
@@ -46,6 +43,7 @@ type token =
   | DoubleQuoteToken
   | DivToken
   | DifferentToken
+  | DefToken
   | ComaToken
   | ChooseToken
   | ChoiceToken

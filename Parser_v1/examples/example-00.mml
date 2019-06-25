@@ -1,4 +1,4 @@
-func void main (int x) {noop}
+func void main (int x) {}
 
 start main(0)     
 

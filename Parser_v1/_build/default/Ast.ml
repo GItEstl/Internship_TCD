@@ -28,7 +28,6 @@ type typ =
   | BooleanT
   | CharT
   | StringT
-  | ChannT
 ;;
 
 (* prefix Type *)
@@ -56,11 +55,9 @@ type ast =
   | TupleDeclaNode of string * ast option
   | BodyNode of ast option * ast
   | WhileNode of ast * ast
-  | LetinInstrNode of ast * ast * ast
-  | LetinExprNode of ast * ast * ast
   | ReceiveNode of ast * string
   | SendNode of string * ast
-  | NewNode of ast * ast
+  | NewNode of ast
   | SpawnNode of string * ast
   | CallNode of string * ast
   | IfthenelseExprNode of ast * ast * ast
@@ -80,12 +77,13 @@ type ast =
   | TrueNode
   | FalseNode
   | TypeNode of typ
+  | ChanTNode of ast
   | ListTNode of ast
   | TupleTNode of ast
   | TypeSeqNode of ast * ast option
   | FuncTNode of ast option
   | NoopNode
-  | ReturnNode of ast
+  | ReturnNode of ast option
 ;;
 
 (* Convert an AST into a string *)
@@ -100,25 +98,29 @@ match tree with
     | (ParamsNode (t,n,Some(params))) -> 
   (string_of_ast t) ^ " " ^ n ^ ", " ^ (string_of_ast params)
     | (BodyNode (Some(v),i)) ->
-  "{\n" ^ (string_of_ast v) ^ ";\n" ^ (string_of_ast i) ^ "}\n"    
+  "{\ndef \n" ^ (string_of_ast v) ^ "in \n" ^ (string_of_ast i) ^ "}\n"    
     | (BodyNode (None,i)) ->
   "{\n" ^ (string_of_ast i) ^ "}\n"
     | (VariableDeclaNode (t,StringNode(n))) -> 
-  (string_of_ast t) ^ " " ^ n ^ "\n"
+  (string_of_ast t) ^ " " ^ n
     | (VariableDeclaNode (t,idents)) -> 
-  (string_of_ast t) ^ " (" ^ (string_of_ast idents) ^ ")\n"
+  (string_of_ast t) ^ " (" ^ (string_of_ast idents) ^ ")"
     | (TupleDeclaNode (n,None)) ->
   n
     | (TupleDeclaNode (n,Some(idents))) ->
   n ^ ", " ^ (string_of_ast idents)
     | (VariableDeclasNode (v,None)) -> 
-  (string_of_ast v)
+  (string_of_ast v) ^ "\n"
     | (VariableDeclasNode (v,Some(vs))) -> 
-  (string_of_ast v) ^ (string_of_ast vs)
+  (string_of_ast v) ^ ";\n" ^ (string_of_ast vs)
+    | (InstrSeqNode (NoopNode,Some(i))) ->
+  ";\n" ^ (string_of_ast i)
+    | (InstrSeqNode (NoopNode,None)) ->
+  ""
     | (InstrSeqNode (bi,None)) ->
   (string_of_ast bi) ^ "\n"
     | (InstrSeqNode (bi,Some(i))) ->
-  (string_of_ast bi) ^ "\n" ^ (string_of_ast i)
+  (string_of_ast bi) ^ ";\n" ^ (string_of_ast i)
     | (BinaryNode (a,Assign,e)) -> 
   (string_of_ast a) ^ " = " ^ (string_of_ast e)
     | (CallNode (f,e)) ->
@@ -127,24 +129,20 @@ match tree with
   (string_of_ast a) ^ " = receive(" ^ n ^ ")"
     | (SendNode (n,e)) ->
   "send(" ^ n ^ ", " ^ (string_of_ast e) ^ ")"
-  | (IfthenelseInstrNode (cond,i1,InstrSeqNode(NoopNode,None))) ->
-  "if (" ^ (string_of_ast cond) ^ ") {\n" ^ (string_of_ast i1) ^ "} else {}"
     | (IfthenelseInstrNode (cond,i1,i2)) ->
   "if (" ^ (string_of_ast cond) ^ ") {\n" ^ (string_of_ast i1) ^ "} else {\n" ^ (string_of_ast i2) ^ "}"
-    | (LetinInstrNode (a,e,i)) ->
-  "let " ^ (string_of_ast a) ^ " = " ^ (string_of_ast e) ^ " in {\n" ^ (string_of_ast i) ^ "}"
     | (WhileNode (e,i)) ->
   "while (" ^ (string_of_ast e) ^ ") {\n" ^ (string_of_ast i) ^ "}"
     | (ChooseNode (c)) ->
   "choose {\n" ^ (string_of_ast c) ^ "}"
     | (SpawnNode (f,e)) ->
-  "spawn(" ^ f ^ "," ^ (string_of_ast e) ^ ")" 
-    | (NewNode (a,t)) ->
-  (string_of_ast a) ^ " = new(" ^ (string_of_ast t) ^ ")" 
-    | (NoopNode) ->
-  ""
-    | (ReturnNode (e)) ->
-  "return " ^ (string_of_ast e)  
+  "spawn " ^ f ^ "(" ^ (string_of_ast e) ^ ")" 
+    | (NewNode (a)) ->
+  (string_of_ast a) ^ " = newChan()" 
+    | (ReturnNode (Some (e))) ->
+  "return " ^ (string_of_ast e)
+    | (ReturnNode (None)) ->
+  "return "   
     | (ChoicesNode(p,i,Some(cs))) -> 
   (string_of_ast p) ^ " -> {" ^ (string_of_ast i) ^ "} \n" ^ (string_of_ast cs)
     | (ChoicesNode(p,i,None)) -> 
@@ -155,10 +153,10 @@ match tree with
   " |send(" ^ n ^ ", " ^ (string_of_ast e) ^ ")"
     | (PrefixNode(Some(a),Receive,Some(n),None)) ->
   " |" ^ (string_of_ast a) ^ " = receive(" ^ n ^ ")"
-    | (PrefixNode(Some(a),New,None,Some(t))) ->
-  (string_of_ast a) ^ " = new(" ^ (string_of_ast t) ^ ")"  
+    | (PrefixNode(Some(a),New,None,None)) ->
+  (string_of_ast a) ^ " = newChan()"  
     | (PrefixNode(None,Spawn,Some(f),Some(e))) ->
-  " | spawn(" ^ f ^ ", " ^ (string_of_ast e) ^ ")"
+  " | spawn " ^ f ^ "(" ^ (string_of_ast e) ^ ")"
     | (UnaryNode (Negate,e)) ->
   "(-" ^ (string_of_ast e) ^ ")"
     | (UnaryNode (Head,e)) ->
@@ -189,8 +187,6 @@ match tree with
   "(" ^ (string_of_ast e1) ^ " < " ^ (string_of_ast e2) ^ ")"
     | (BinaryNode (e1,Greater,e2)) ->
   "(" ^ (string_of_ast e1) ^ " > " ^ (string_of_ast e2) ^ ")"
-    | (LetinExprNode (a,e1,e2)) ->
-  "let " ^ (string_of_ast a) ^ " = " ^ (string_of_ast e1) ^ " in (" ^ (string_of_ast e2) ^ ")"
     | (IfthenelseExprNode (cond,e1,e2)) ->
   "if (" ^ (string_of_ast cond) ^ ") {\n" ^ (string_of_ast e1) ^ "} else {\n" ^ (string_of_ast e2) ^ "}"
     | (ExprNode (e)) ->
@@ -229,8 +225,8 @@ match tree with
   "string"
     | (TypeNode (CharT)) ->
   "char" 
-    | (TypeNode (ChannT)) ->
-  "channel"
+    | (ChanTNode (t)) ->
+  "channel " ^ (string_of_ast t) 
     | (ListTNode (t)) ->
   "list[" ^ (string_of_ast t) ^ "]" 
     | (TupleTNode (t)) ->
@@ -242,7 +238,7 @@ match tree with
     | (FuncTNode (None)) ->
   "void"
     | (FuncTNode (Some (t))) ->
-  (string_of_ast t) 
+  (string_of_ast t)
     | _ -> 
   "unknownPrinting"
 

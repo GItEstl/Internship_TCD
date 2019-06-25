@@ -1,16 +1,20 @@
-func void main (int i) {
-    int i
-    boolean b
-    char c
-    string s
-    channel chan
-    list[int] l
-    (string,int,boolean) (name,age,student) ;
-    i = (2 + 2 * 3) / 4 - 1
-    b = true || (false && true) && true
-    c = 'a'
-    s = "test"
-    chan = new (list[int])  
+func void main (int num) {
+def
+    int i;
+    boolean b;
+    char c;
+    string s;
+    channel list[int] chan;
+    list[int] l;
+    (string,int,boolean) tuple
+in
+    i = (2 + 2 * 3) / 4 - 1;
+    b = true || (false && true) && true;
+    c = 'a';
+    s = "test";
+    chan = newChan();
+    tuple = ("John",20,true)
+    return;;;;
 }
 
 start main(0)

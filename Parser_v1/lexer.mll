@@ -36,7 +36,6 @@ rule token = parse
   | '-'       {SubToken}
   | '*'       {MulToken}
   | '/'       {DivToken}
-  | '''       {SimpleQuoteToken}
   | '"'       {DoubleQuoteToken}
   | "&&"      {AndToken}
   | "||"      {OrToken}
@@ -54,11 +53,10 @@ rule token = parse
   | "channel" {ChannelToken}
   | "list"    {ListToken}
   | "void"    {VoidToken}
-  | "let"     {LetToken}
   | "while"   {WhileToken}
   | "receive" {ReceiveToken}
   | "send"    {SendToken}
-  | "new"     {NewToken}
+  | "newChan" {NewToken}
   | "spawn"   {SpawnToken}
   | "choose"  {ChooseToken}
   | '|'       {ChoiceToken}
@@ -69,8 +67,8 @@ rule token = parse
   | "tau"     {TauToken}
   | "start"   {StartToken}
   | "call"    {CallToken}
-  | "noop"    {NoopToken}
   | "return"  {ReturnToken}
+  | "def"     {DefToken}
   | digit+ as inum
               {NumberToken (int_of_string inum)}
   | char as text
