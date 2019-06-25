@@ -15,5 +15,5 @@ When the folder is successfully build you have to import the library correspondi
 You will now be able to compile any examples by executing the following command :
         Main.main "<path of the file you wanted to compile>";;
 For example :
-        Main.main "examples/xample-00.mml";;        
+        Main.main "examples/example-00.mml";;        
 
