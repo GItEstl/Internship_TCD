@@ -1,0 +1,5 @@
+func void main (int x) {noop}
+
+start main(0)     
+
+

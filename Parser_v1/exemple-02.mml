@@ -1,9 +1,0 @@
-func boolean main (int i) {
-    if (i + 1 == 1) {
-        return true
-    } else {
-        return false
-    }
-}
-
-start main(0)
