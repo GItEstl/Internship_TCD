@@ -4,6 +4,7 @@ You will need to use opam to install dune and menhir.
 You can use the following commands :
         opam install dune
         opam install menhir
+        opam install utop
 /!\ You have to autorize opam to install all the necessary packages for both installations
 
 
