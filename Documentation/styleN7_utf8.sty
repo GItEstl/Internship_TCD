@@ -1,0 +1,165 @@
+%%%%% Identification Part %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{styleN7_utf8}[2016/12/07 macros pour la rédaction de rapports]
+
+
+%%%% Package loading %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\RequirePackage[T1]{fontenc}
+\newcommand{\warn}[1]{\textcolor{red}{\textbf{\danger~Attention~:}} #1}
+\RequirePackage{lmodern}
+\RequirePackage{fancyhdr}
+\RequirePackage{graphics}
+\RequirePackage{graphicx}
+\RequirePackage{xspace}
+\RequirePackage{moreverb}
+\RequirePackage{float}
+\RequirePackage[hidelinks]{hyperref}
+\RequirePackage{url}
+\RequirePackage[french]{babel}
+\RequirePackage{listings}
+\RequirePackage{ucs}
+\RequirePackage[utf8]{inputenc}
+\RequirePackage{array}
+\RequirePackage[dvipsnames,svgnames,table]{xcolor}
+\RequirePackage[
+  top=3.5cm,
+  right=2.5cm,
+  left=2.5cm,
+  bottom=3.25cm,
+  headheight=26pt]{geometry}
+
+  % Mise en page des chapitres
+\RequirePackage{titlesec}
+  % Annexes
+\RequirePackage[titletoc,title]{appendix}
+  % Prendre des TODO dans le rapport
+\RequirePackage{todonotes}
+\newcommand{\inlinetodo}[1]{\todo[inline]{#1}}
+  % Générer du lorem ipsum
+\RequirePackage{lipsum}
+
+
+%%%% Modification de la mise page %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Ajout de commandes utiles à la mise en page
+\newcommand{\shorttitle}{}
+\newcommand{\subject}{}
+\newcommand{\discipline}{}
+\newcommand{\promotion}{}
+
+\renewcommand{\shorttitle}[1]{\renewcommand{\shorttitle}{{#1}}}
+\renewcommand{\subject}[1]{\renewcommand{\subject}{{#1}}}
+\renewcommand{\discipline}[1]{\renewcommand{\discipline}{{#1}}}
+\renewcommand{\promotion}[1]{\renewcommand{\promotion}{{#1}}}
+
+%% Page de titre
+\renewcommand{\maketitle}{%
+  \par\begin{center}
+    \vspace*{2.5em}
+    \scalebox{0.75}{\includegraphics{inp-enseeiht}}\vspace*{1em}\par
+    \LARGE{\bf{\thedoctitle}}\vspace*{0.7em}\par
+    \Large{\bf{\subject}}\vspace*{1em}\par
+    \Large{\@author}\vspace*{2.5em}\par
+  \end{center}
+
+  %% Mise en page
+  \thispagestyle{pagegarde}
+}
+
+
+%% A placer en début de document, après définition des valeurs
+%% des commandes précédentes
+\AtBeginDocument{%
+
+  %% Création des commandes utiles 
+  \makeatletter
+  \let\thedoctitle\@title
+  \let\theauthor\@author
+  \let\thedate\@date
+  \makeatother
+
+  %% Mise en page de titre
+  \fancypagestyle{pagegarde}{%
+    %% En-tête
+    \fancyhead[L]{\scriptsize \emph{\promotion}\\\textsc{\small\discipline}}
+    \fancyhead[C]{}
+    \fancyhead[R]{\scriptsize \thedate\\\subject}
+    \renewcommand{\headrulewidth}{0pt}
+
+    %% Pied de page
+    \fancyfoot[L]{}
+    \fancyfoot[C]{\thepage}
+    \fancyfoot[R]{}
+  }
+
+  %% Mise en page normale
+  \fancypagestyle{plain}{%
+    %% En-tête
+    \fancyhead[LE]{\emph{\promotion}\\\textsc{\small\discipline}}
+    \fancyhead[RE]{\thedate\vspace*{0.2em}}
+    \fancyhead[C]{}
+    \fancyhead[LO]{\subject}
+    \fancyhead[RO]{\textsc{\small\thedoctitle}}
+    \renewcommand{\headrulewidth}{0.1pt}
+
+    %% Pied de page
+    \fancyfoot[LE]{}
+    \fancyfoot[RE]{}
+    \fancyfoot[C]{\thepage}
+    \fancyfoot[LO]{}
+    \fancyfoot[RO]{}
+    \renewcommand{\footrulewidth}{0.1pt}
+
+  }
+
+  %% Mise en page des chapitres
+  \titleformat{\chapter} % command
+	      [hang] % shape
+	      {\normalfont\huge\bfseries\raggedright} % format
+	      {Chapitre \thechapter~:} % label
+	      {0.5em} % sep
+	      {} % before-code
+	      [] % after-code
+  \titlespacing*{\chapter}{0pt}{0pt}{1.5em}
+
+  %% Validation de la mise en page
+  \pagestyle{plain}
+}
+
+%%% Mise en page du code verbatim %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\RequirePackage{fancyvrb}
+
+%%% Pour afficher des algorithmes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+
+%%%% Tableaux %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\makeatletter
+  \newcommand*{\@rowstyle}{}
+
+  \newcommand*{\rowstyle}[1]{% sets the style of the next row
+    \gdef\@rowstyle{#1}%
+    \@rowstyle\ignorespaces%
+  }
+
+  \newcolumntype{=}{% resets the row style
+    >{\gdef\@rowstyle{}}%
+  }
+
+  \newcolumntype{+}{% adds the current row style to the next column
+    >{\@rowstyle}%
+  }
+
+\makeatother
+
+
+
+%%%% Commandes utiles %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\var}[1]{\texttt{#1}}
+\RequirePackage{multirow}
+
+%%%% Maths %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\RequirePackage{amsmath}
+\RequirePackage{amssymb}
+\RequirePackage{pifont}
+

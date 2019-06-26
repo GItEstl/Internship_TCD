@@ -34,8 +34,8 @@ open Ast
 %token StartToken, CallToken, ReturnToken
 %token EOF
 
-%right OrToken
-%right AndToken
+%left OrToken
+%left AndToken
 %left DifferentToken, EqualToken
 %nonassoc LesserToken, GreaterToken
 %left AddToken, SubToken

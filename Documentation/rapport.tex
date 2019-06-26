@@ -1,0 +1,297 @@
+\documentclass[11pt]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[top=2.5cm, bottom=2.5cm, left=2cm, right=2cm]{geometry}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{stmaryrd}
+\usepackage{titlesec}
+\usepackage{rotating}
+\usepackage{alltt}
+\usepackage{fancyvrb}
+\usepackage{verbatimbox}
+\usepackage{lipsum}
+\usepackage{setspace}
+\usepackage{tabto}
+\onehalfspacing
+\titleformat{\chapter}[hang]{\bf\huge}{\thechapter}{2pc}{}
+
+%-------------------------------------------------------
+\let\oldabstract\abstract
+\let\oldendabstract\endabstract
+\makeatletter
+\renewenvironment{abstract}
+{\renewenvironment{quotation}%
+               {\list{}{\addtolength{\leftmargin}{3em} % change this value to add or remove length to the the default
+                        \listparindent 1.5em%
+                        \itemindent    \listparindent%
+                        \rightmargin   \leftmargin%
+                        \parsep        \z@ \@plus\p@}%
+                \item\relax}%
+               {\endlist}%
+\oldabstract}
+{\oldendabstract}
+\makeatother
+
+\makeatletter
+\newcommand{\verbatimfont}[1]{\renewcommand{\verbatim@font}{\normalfont#1}}
+\makeatother
+
+\begin{document}
+\begin{center}
+\includegraphics[scale = 1]{index.png}
+\end{center}
+
+\pagestyle{empty}
+\vspace*{\stretch{8}}
+
+
+\centerline{\textbf{\Huge Parser Documentation}}
+\bigbreak\bigbreak
+\bigbreak\bigbreak
+
+\centerline{ {\Large Estelle Alauzy}}
+\vspace*{\stretch{1}}
+\centerline{ {\Large  Chervin Amirkaveh}}
+
+
+ \vfill
+ \vspace*{\stretch{10}}
+\centerline{\large June 2019}
+\vspace*{\stretch{1}}
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
+\centerline{\textbf{\Huge Context}}
+\vspace*{3pt}
+\vspace*{20pt}
+
+\tabto{1cm}Concurrency has become increasingly important in the last several years, increasing the need for verification tools for concurrent programs for languages such as Go, Erlang, and more. Although concurrent program equivalence has been studied for decades in the context of process algebras, a significant amount of theoretical results in this area have not reached the practice of software verification. 
+\\ \\
+\tabto{1cm}For example, one of the most well-established modelling language for concurrent, communicating systems is the pi-calculus. Researchers have used this language to develop some of the
+most powerful techniques for program equivalence in a concurrent setting, which are based on (weak) bisimulation and its extensions (environmental bisimulation, up-to-context technique, up-to-* technique). However there is a distinct absence of tools for verifying the equivalence of pi-calculus terms.
+\\ \\
+\tabto{1cm}It is in this context that we have started the project to create a language that could be use as an intermediate language for a tool using a “bisimulation engine” back-end to prove the equivalence of programs.
+
+\newpage
+\centerline{\textbf{\Huge Description of the language}}
+\vspace*{3pt}
+\vspace*{20pt}
+\tabto{1cm}First of all, this language is procedural meaning that procedures/functions are declared at top-level and can then be called anywhere in the program. This language contains basic and convenient features that you can find in most programming languages : basic types (integer, boolean, char, string), lists, 
+tuples, local and global variables, functions declaration and call, different binary and unary operators for expressions, if-then-else, while and return instructions, ...
+\\ \\
+\tabto{1cm}However, what is making this language different from others is the integration of pi-calculus notions inside the language. Indeed, it is possible to declare channels as variables. Those channels can be used in different instructions : newChan, send and receive.
+\begin{itemize}
+\item \ ch = newChan(): create a new channel of the same type as the variable ch and assign it this new channel to it.
+\item \ send(ch,e): send the expression e along the channel ch
+\item \ v = receive(ch): receive an expression along the channel ch and assign it to the variable v
+\end{itemize}
+
+\tabto{1cm}The notion of input-guarded choice is also available in this language thanks to the instruction choose. The choose instructions allows you to use prefixes (new, send, receive, spawn, tau). The purpose of this instruction is the following: when the action of the prefix is possible, the action is made and the instructions corresponding to that prefix are executed after. In the case where actions of two different prefixes are possible at the same time, the program will choose one of them in a non-deterministic way.
+\\ \\
+\tabto{1cm} Finally, we have also added the instruction spawn to represent the parallelization of processes. Spawn can be seen as the "|" operator of the pi-calculus. It is important to note that spawn is not representing the immediate launch of a new thread. Indeed, when you code a sequence of spawn instructions, it's represents a simultaneous launch of all processes and not a sequential launch. The function and expression passed in arguments of the spawn instruction are used to create the new process.
+\\ \\
+\tabto{1cm} You will find below the grammar describing the language and a section about technical decisions that have impacted the language.
+
+\newpage
+\centerline{\textbf{\Huge Grammar : Backus-Naur form (BNF)}}
+\vspace*{20 pt}
+\vspace*{3pt}
+\begin{Verbatim}[fontfamily=textsf]
+Program ::= FuncDecla Program
+            | VariableDecla Program
+            | FuncDecla CallMain
+            | VariableDecla CallMain
+\end{Verbatim}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+FuncDecla ::= func FuncType name (Parameters) Body
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Parameters ::= Typ identifier | Typ identifier , Parameters
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Body ::= { Instruction } | { VariableDeclas ; Instruction }
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+VariableDecla ::= Typ identifier | Typ ( TupleDecla )
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+TupleDecla ::= identifier | identifier , TupleDecla
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+VariableDeclas ::= VariableDecla VariableDeclas | VariableDecla
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Instruction ::= Bintruction | Binstruction Instruction
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Binstruction ::= Expression = Expression 
+                 | Expression = call name ( Expression )
+                 | call name ( Expression )
+                 | Expression = receive ( identifier )
+                 | send ( identifier , Expression )
+                 | if ( Expression ) { Instruction } else { Instruction }
+                 | let Expression = Expression in { Instruction }
+                 | while ( Expression ) { Instruction }
+                 | choose { Choices }
+                 | spawn ( name , Expression )
+                 | Expression = new ( Typ )
+                 | return Expression
+                 | noop
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Choices ::= Prefix -> { Instruction } Choices | Prefix -> { Instruction }
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Prefix ::= tau
+         | | send ( identifier , Expression )
+         | | Expression = receive ( identifier )
+         | | Expression = new ( Typ )
+         | | spawn ( name , Expression )
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Expression ::= - Expression
+               | head ( Expression )
+               | tail ( Expression )
+               | odd ( Expression )
+               | even ( name , Expression )
+               | Expression + Expression
+               | Expression - Expression
+               | Expression || Expression
+               | Expression * Expression
+               | Expression / Expression
+               | Expression && Expression
+               | Expression == Expression
+               | Expression < Expression
+               | Expression > Expression
+               | let Expression = Expression in ( Expression )
+               | if ( Expression ) { Expresssion } else { Expression }
+               | ( ExpressionSeq )
+               | Value
+               | identifier
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+ExpressionSeq ::= Expression | Expression , ExpressionSeq
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Constant ::= number
+             | ' char '
+             | " string "
+             | true
+             | false
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Value ::= Constant | { ValueSeq }
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+ValueSeq ::= Value | Value , ValueSeq
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Typ ::= int
+      | boolean
+      | string
+      | char
+      | channel
+      | list [ Typ ]
+      | ( Types ) 
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Types ::= Typ | Typ , Types
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+FuncType ::= void | Typ
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+CallMain ::= start name ( Expression )
+\end{verbnobox}
+\vspace*{3pt}
+
+\newpage
+\centerline{\textbf{\Huge Technical choices}}
+\vspace*{3pt}
+\vspace*{10pt}
+\tabto{0cm} {\Large \textbf{Conflicts resolution}}
+\\ \\
+\tabto{1cm} In order to remove ambiguities in our grammar and so resolve shift/reduce conflicts we have added some rules. By declaring precedence and associative rules for all tokens involved in the conflicts, this force derivations to be done in a particular way.  \\
+It is important to note that in our grammar all conflict refer to binary operators.
+\\ \\
+\tabto{2cm} \textbf{Associativity}
+\\ \\
+\tabto{1cm} The first way to make unambiguous our grammar is by establishing associative rules for an operator "op". Theses rules determines how to interpret the operator's repetition: if "x op y op z" must be considered as "(x op y) op z" or "x op (y op z)". \\ \\
+There are three different ways to specify them. 
+\begin{itemize}
+\item \%right:  makes the operator right-associative
+\item \%left: makes the operator left-associative
+\item \%nonassoc: makes the association incorrect, i.e.: "x op y op z" will be considered as a syntax error.
+\end{itemize}
+We have decided that the operators: $*$, $+$, $-$, $/$, $=$, $\ne$, $\&\&$ and $||$ are left-associative and that for the operators $>$ and $<$ the association is incorrect.
+\\ \\
+\tabto{2cm} \textbf{Precedence}
+\\ \\
+\tabto{1cm} The second way to make unambiguous our grammar is by imposing the precedence of one operator over the other. The relative precedence between the different operators is defined by the order in which they are declared. The first declared has the lowest precedence and so the last declared has the highest precedence. We have chosen the order of the precedence in way that the different operators respect the arithmetic logic.
+\\ \\ 
+\tabto{2cm} \textbf{Semi-column}
+
+\tabto{0cm} {\Large \textbf{Titre}}
+
+\newpage
+\centerline{\textbf{\Huge Examples}}
+\vspace*{3pt}
+\vspace*{20pt}
+Communicating and mobile systems : the $\pi$-calculus - Robin Milner : The mobile phones system
+
+\begin{center}
+\includegraphics[scale = 0.5]{mobile-phone-system.jpg}
+\end{center}
+Add the Description of the example from the book p-82
+
+To allow the control to know when it needs to act we add an other channel between Control and Trans named transmit1. This channel transmit the message received by Trans since Car. This message is an integer which represents the position of the car. We arbitrarily decide the position when links between the Trans and the car must be switch to the other trans : Idtrans. So, when the position is greater than the threshold the Control tells to Trans to lose the car and to IdTrans to gain the car.
+
+\end{document}
