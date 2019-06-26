@@ -10,7 +10,7 @@ in
         | send(i,c) -> {i = 0}
         | spawn main(2) -> {i = a - 1}
         | tau -> {i = i +1}
-    } 
+    };;;
 }
 
 start main(0)

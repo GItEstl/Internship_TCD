@@ -35,7 +35,7 @@ open Ast
 %token EOF
 
 %right OrToken
-%right AndToken
+%left AndToken
 %left DifferentToken, EqualToken
 %nonassoc LesserToken, GreaterToken
 %left AddToken, SubToken
@@ -112,7 +112,7 @@ prefix :
  | ChoiceToken SendToken LeftParenthesisToken n = IdentToken ComaToken e = expr RightParenthesisToken                                {PrefixNode(None,Send,Some(n),Some(e))}
  | ChoiceToken a = expr AssignToken ReceiveToken LeftParenthesisToken n = IdentToken RightParenthesisToken                         {PrefixNode(Some(a),Receive,Some(n),None)}
  | ChoiceToken a = expr AssignToken NewToken LeftParenthesisToken RightParenthesisToken                                             {PrefixNode(Some(a),New,None,None)}
- | ChoiceToken SpawnToken f = IdentToken LeftParenthesisToken e = expr RightParenthesisToken                                  {PrefixNode(None,Spawn,Some(f),Some(e))}
+ | ChoiceToken SpawnToken f = IdentToken LeftParenthesisToken e = exprs RightParenthesisToken                                  {PrefixNode(None,Spawn,Some(f),Some(e))}
  
 expr :
  | SubToken e = expr                                             {UnaryNode (Negate,e)}
