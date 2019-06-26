@@ -125,7 +125,7 @@ Parameters ::= Typ identifier | Typ identifier , Parameters
 \vspace*{3pt}
 
 \begin{verbnobox}[\normalfont]
-Body ::= { Instruction } | { VariableDeclas ; Instruction }
+Body ::= { Instruction } | { def VariableDeclas in Instruction }
 \end{verbnobox}
 \vspace*{3pt}
 
@@ -140,29 +140,34 @@ TupleDecla ::= identifier | identifier , TupleDecla
 \vspace*{3pt}
 
 \begin{verbnobox}[\normalfont]
-VariableDeclas ::= VariableDecla VariableDeclas | VariableDecla
+VariableDeclas ::= VariableDecla 
+                    | VariableDeclas ; 
+                    | VariableDecla ; VariableDeclas
 \end{verbnobox}
 \vspace*{3pt}
 
 \begin{verbnobox}[\normalfont]
-Instruction ::= Bintruction | Binstruction Instruction
+Instruction ::= ; Instruction
+               |
+               | Bintruction 
+               | Binstruction ; Instruction
 \end{verbnobox}
 \vspace*{3pt}
 
 \begin{verbnobox}[\normalfont]
 Binstruction ::= Expression = Expression 
-                 | Expression = call name ( Expression )
-                 | call name ( Expression )
+                 | Expression = name ( ExpressionSeq )
+                 | name ( ExpressionSeq )
                  | Expression = receive ( identifier )
                  | send ( identifier , Expression )
                  | if ( Expression ) { Instruction } else { Instruction }
-                 | let Expression = Expression in { Instruction }
                  | while ( Expression ) { Instruction }
                  | choose { Choices }
-                 | spawn ( name , Expression )
-                 | Expression = new ( Typ )
+                 | spawn name ( ExpressionSeq )
+                 | Expression = newChan()
+                 | return
                  | return Expression
-                 | noop
+                 | return name (ExpressionSeq)
 \end{verbnobox}
 \vspace*{3pt}
 
@@ -175,8 +180,8 @@ Choices ::= Prefix -> { Instruction } Choices | Prefix -> { Instruction }
 Prefix ::= tau
          | | send ( identifier , Expression )
          | | Expression = receive ( identifier )
-         | | Expression = new ( Typ )
-         | | spawn ( name , Expression )
+         | | Expression = newChan()
+         | | spawn name ( ExpressionSeq )
 \end{verbnobox}
 \vspace*{3pt}
 
@@ -185,7 +190,7 @@ Expression ::= - Expression
                | head ( Expression )
                | tail ( Expression )
                | odd ( Expression )
-               | even ( name , Expression )
+               | even ( Expression )
                | Expression + Expression
                | Expression - Expression
                | Expression || Expression
@@ -196,7 +201,7 @@ Expression ::= - Expression
                | Expression < Expression
                | Expression > Expression
                | let Expression = Expression in ( Expression )
-               | if ( Expression ) { Expresssion } else { Expression }
+               | if ( Expression ) { Expression } else { Expression }
                | ( ExpressionSeq )
                | Value
                | identifier
@@ -232,7 +237,7 @@ Typ ::= int
       | boolean
       | string
       | char
-      | channel
+      | channel Typ
       | list [ Typ ]
       | ( Types ) 
 \end{verbnobox}
@@ -249,7 +254,7 @@ FuncType ::= void | Typ
 \vspace*{3pt}
 
 \begin{verbnobox}[\normalfont]
-CallMain ::= start name ( Expression )
+CallMain ::= start name ( ExpressionSeq )
 \end{verbnobox}
 \vspace*{3pt}
 
@@ -258,10 +263,10 @@ CallMain ::= start name ( Expression )
 \vspace*{3pt}
 \vspace*{10pt}
 \tabto{0cm} {\Large \textbf{Conflicts resolution}}
-\\ \\
-\tabto{1cm} In order to remove ambiguities in our grammar and so resolve shift/reduce conflicts we have added some rules. By declaring precedence and associative rules for all tokens involved in the conflicts, this force derivations to be done in a particular way.  \\
-It is important to note that in our grammar all conflict refer to binary operators.
-\\ \\
+\\ \\ 
+\tabto{1cm} In order to remove ambiguities in our grammar and so resolve shift/reduce conflicts we have added some rules. It is important to note that in our grammar the majority of our conflicts refer to binary operators.  \\ \\ \\
+By declaring precedence and associative rules for all tokens involved in the conflicts, this force derivations to be done in a particular way.
+\\ \\ 
 \tabto{2cm} \textbf{Associativity}
 \\ \\
 \tabto{1cm} The first way to make unambiguous our grammar is by establishing associative rules for an operator "op". Theses rules determines how to interpret the operator's repetition: if "x op y op z" must be considered as "(x op y) op z" or "x op (y op z)". \\ \\
@@ -272,14 +277,22 @@ There are three different ways to specify them.
 \item \%nonassoc: makes the association incorrect, i.e.: "x op y op z" will be considered as a syntax error.
 \end{itemize}
 We have decided that the operators: $*$, $+$, $-$, $/$, $=$, $\ne$, $\&\&$ and $||$ are left-associative and that for the operators $>$ and $<$ the association is incorrect.
-\\ \\
+\\ \\ \\
 \tabto{2cm} \textbf{Precedence}
 \\ \\
 \tabto{1cm} The second way to make unambiguous our grammar is by imposing the precedence of one operator over the other. The relative precedence between the different operators is defined by the order in which they are declared. The first declared has the lowest precedence and so the last declared has the highest precedence. We have chosen the order of the precedence in way that the different operators respect the arithmetic logic.
-\\ \\ 
-\tabto{2cm} \textbf{Semi-column}
+\\ \\
+\newpage
+We have also used semi-colons to resolve conflicts. \\ \\
+\tabto{2cm} \textbf{Semi-colon} \\ \\
+\tabto{1cm}Semi-colons allow to separate instructions from each other and so that avoid shift-reduce conflicts at the level of the assign and return operators. It also makes our grammar more resistant and so easier for someone to add new instructions without causing conflicts. \\ \\
+\tabto{1cm} In our grammar, the semicolon should not be interpreted as an end of line indication but simply as a separator between variable declarations or instructions:
+\begin{itemize}
+\item For instructions: a semicolon sequence is translated by the parser as a sequence of empty instructions.
+\item For variable declarations: this is not possible, however it is possible to end the declarations with a semicolon without causing an error syntax but it makes no sense in our grammar. We have implemented this to avoid mistakes due to the use of other languages.
+\end{itemize}
 
-\tabto{0cm} {\Large \textbf{Titre}}
+\tabto{0cm} {\Large \textbf{Title}}
 
 \newpage
 \centerline{\textbf{\Huge Examples}}

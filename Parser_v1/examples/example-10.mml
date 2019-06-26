@@ -1,26 +1,26 @@
 func void system (int pos) {
 def
-    channel talk1;
-    channel switch1;
-    channel gain1;
-    channel lose1;
-    channel transmit1;
-    channel talk2;
-    channel switch2;
-    channel gain2;
-    channel lose2;
-    channel transmit2
+    channel int talk1;
+    channel (channel int,channel) switch1;
+    channel (channel int,channel) gain1;
+    channel (channel int,channel) lose1;
+    channel int transmit1;
+    channel int talk2;
+    channel (channel int,channel) switch2;
+    channel (channel int,channel) gain2;
+    channel (channel int,channel) lose2;
+    channel int transmit2
 in
-    talk1 = new (int);
-    switch1 = new ((channel,channel));
-    gain1 = new ((channel,channel));
-    lose1 = new ((channel,channel));
-    transmit1 = new (int);
-    talk2 = new (int);
-    switch2 = new ((channel,channel));
-    gain2 = new ((channel,channel));
-    lose2 = new ((channel,channel));
-    transmit2 = new (int);
+    talk1 = newChan();
+    switch1 = newChan();
+    gain1 = newChan();
+    lose1 = newChan();
+    transmit1 = newChan();
+    talk2 = newChan();
+    switch2 = newChan();
+    gain2 = newChan();
+    lose2 = newChan();
+    transmit2 = newChan();
     spawn car((talk1,switch1));
     spawn trans((talk1,switch1,gain1,lose1));
     spawn idTrans((gain2,lose2));
@@ -29,7 +29,7 @@ in
 
 func void car (channel talk, channel switch, int pos) {
 def
-    (channel,channel) (t,s);
+    (channel int,channel) (t,s);
     int newPos
 in
     newPos = call move(pos);
@@ -42,7 +42,7 @@ in
 func void trans (channel talk, channel switch, channel gain, channel loose, channel transmit) {
 def
     int pos;
-    (channel,channel) (t,s)
+    (channel int,channel) (t,s)
 in
     choose {
         | pos = receive (talk) -> {send(transmit,pos);
@@ -56,7 +56,7 @@ in
 
 func void idTrans (channel gain, channel lose) {
 def
-    (channel, channel, channel) (ta,s,tr)
+    (channel int, channel, channel int) (ta,s,tr)
 in
     (ta,s,tr) = receive (gain);
     spawn trans((t,s,gain,lose,tr))

@@ -89,8 +89,8 @@ instruction :
 
 binstruction :
  | a = expr AssignToken e = expr                                                                                  {BinaryNode (a,Assign,e)}
- | a = expr AssignToken CallToken f = IdentToken LeftParenthesisToken e = exprs RightParenthesisToken              {BinaryNode (a,Assign,CallNode (f,e))} 
- | CallToken f = IdentToken LeftParenthesisToken e = exprs RightParenthesisToken                                    {CallNode (f,e)}
+ | a = expr AssignToken f = IdentToken LeftParenthesisToken e = exprs RightParenthesisToken              {BinaryNode (a,Assign,CallNode (f,e))} 
+ | f = IdentToken LeftParenthesisToken e = exprs RightParenthesisToken                                              {CallNode (f,e)}
  | a = expr AssignToken ReceiveToken LeftParenthesisToken n = IdentToken RightParenthesisToken                  {ReceiveNode (a,n)}
  | SendToken LeftParenthesisToken n = IdentToken ComaToken e = expr RightParenthesisToken                            {SendNode (n,e)}
  | IfToken LeftParenthesisToken cond = expr RightParenthesisToken 
@@ -102,6 +102,7 @@ binstruction :
  | a = expr AssignToken NewToken LeftParenthesisToken RightParenthesisToken                                         {NewNode (a)}
  | ReturnToken                                                                                                          {ReturnNode (None)}
  | ReturnToken e = expr                                                                                                 {ReturnNode (Some (e))}
+ | ReturnToken f = IdentToken LeftParenthesisToken e = exprs RightParenthesisToken                                      {ReturnNode (Some (CallNode (f,e)))}
 
 choices : 
  | p = prefix ArrowToken LeftBracketToken i = instruction RightBracketToken cs = choices                                  {ChoicesNode(p,i,Some(cs))}
@@ -173,4 +174,4 @@ funcType :
  | t = typ                                                                                                            {FuncTNode (Some (t))}
 
 callMain :
- | StartToken f = IdentToken LeftParenthesisToken e = expr RightParenthesisToken                                       {CallNode (f,e)} 
+ | StartToken f = IdentToken LeftParenthesisToken e = exprs RightParenthesisToken                                       {CallNode (f,e)} 

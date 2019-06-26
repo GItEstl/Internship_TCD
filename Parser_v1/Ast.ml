@@ -124,7 +124,7 @@ match tree with
     | (BinaryNode (a,Assign,e)) -> 
   (string_of_ast a) ^ " = " ^ (string_of_ast e)
     | (CallNode (f,e)) ->
-  f ^ "(" ^ (string_of_ast e) ^ ")" 
+  "call " ^ f ^ "(" ^ (string_of_ast e) ^ ")" 
     | (ReceiveNode (a,n)) ->
   (string_of_ast a) ^ " = receive(" ^ n ^ ")"
     | (SendNode (n,e)) ->
