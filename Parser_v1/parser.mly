@@ -31,7 +31,8 @@ open Ast
 %token ReceiveToken, SendToken, NewToken, SpawnToken, TauToken
 %token ChooseToken, ChoiceToken
 %token HeadToken, TailToken, OddToken, EvenToken
-%token StartToken, CallToken, ReturnToken
+%token StartToken, ReturnToken
+%token TypeToken
 %token EOF
 
 %left OrToken
@@ -52,6 +53,7 @@ open Ast
 main : a = program EOF   {a}
 
 program :
+ | t = typeDecla p = program                                                                                {ProgramNode (t,p)} 
  | f = funcDecla p = program                                                                                 {ProgramNode (f,p)}
  | v = variableDecla p = program                                                                             {ProgramNode (v,p)}
  | f = funcDecla c = callMain                                                                                    {ProgramNode (f,c)}
@@ -59,6 +61,9 @@ program :
 
 funcDecla :
  | FunctionToken ft = funcType n = IdentToken LeftParenthesisToken params = parameters RightParenthesisToken b = body       {FunctionNode (ft,n,params,b)}
+
+ typeDecla :
+ | TypeToken tname = IdentToken AssignToken t = typ                                                          {TypeDeclaNode (tname,t)}
 
 parameters : 
  | t = typ n = IdentToken                                                                                   {ParamsNode (t,n,None)} 
@@ -163,7 +168,8 @@ typ :
  | CharToken                                                                                                              {TypeNode (CharT)}
  | ChannelToken t = typ                                                                                                   {ChanTNode (t)}
  | ListToken LeftSqBracketToken t = typ RightSqBracketToken                                                               {ListTNode (t)}
- | LeftParenthesisToken tSeq = types RightParenthesisToken                                                              {TupleTNode (tSeq)}                                                                                                              
+ | LeftParenthesisToken tSeq = types RightParenthesisToken                                                                {TupleTNode (tSeq)}
+ | t = IdentToken                                                                                                         {NamedTypeNode (t)}        
 
 types :
  | t = typ                                                                                                            {TypeSeqNode (t,None)}

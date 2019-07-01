@@ -1,15 +1,19 @@
+type IntChan = channel int
+type Switch = channel (IntChan,Switch)
+type GainLose = channel (IntChan,Switch) 
+
 func void system (int pos) {
 def
-    channel int talk1;
-    channel (channel int,channel) switch1;
-    channel (channel int,channel) gain1;
-    channel (channel int,channel) lose1;
-    channel int transmit1;
-    channel int talk2;
-    channel (channel int,channel) switch2;
-    channel (channel int,channel) gain2;
-    channel (channel int,channel) lose2;
-    channel int transmit2
+    IntChan talk1;
+    Switch switch1;
+    GainLose gain1;
+    GainLose lose1;
+    IntChan transmit1;
+    IntChan talk2;
+    Switch switch2;
+    GainLose gain2;
+    GainLose lose2;
+    IntChan transmit2
 in
     talk1 = newChan();
     switch1 = newChan();
@@ -27,22 +31,22 @@ in
     spawn control((talk1,switch1,gain1,lose1,transmit1,talk2,switch2,gain2,lose2,transmit2))
 }
 
-func void car (channel talk, channel switch, int pos) {
+func void car (IntChan talk, Switch switch, int pos) {
 def
-    (channel int,channel) (t,s);
+    (IntChan,Switch) (t,s);
     int newPos
 in
-    newPos = call move(pos);
+    newPos = move(pos);
     choose {
         | (t,s) = receive (switch) -> {spawn car((t,s,newPos))} 
         | send (talk,newPos) -> {spawn car((talk,switch,newPos))} 
     }
 }
 
-func void trans (channel talk, channel switch, channel gain, channel loose, channel transmit) {
+func void trans (IntChan talk, Switch switch, GainLose gain, GainLose lose, IntChan transmit) {
 def
     int pos;
-    (channel int,channel) (t,s)
+    (IntChan,Switch) (t,s)
 in
     choose {
         | pos = receive (talk) -> {send(transmit,pos);
@@ -54,16 +58,16 @@ in
     }
 }
 
-func void idTrans (channel gain, channel lose) {
+func void idTrans (GainLose gain, GainLose lose) {
 def
-    (channel int, channel, channel int) (ta,s,tr)
+    (IntChan, Switch, IntChan) (ta,s,tr)
 in
     (ta,s,tr) = receive (gain);
     spawn trans((t,s,gain,lose,tr))
 }
 
-func void control (channel talk1, channel switch1, channel gain1, channel lose1, channel transmit1,
-              channel talk2, channel switch2, channel gain2, channel lose2, channel transmit2) {
+func void control (IntChan talk1, Switch switch1, GainLose gain1, GainLose lose1, IntChan  transmit1,
+              IntChan  talk2, Switch switch2, GainLose gain2, GainLose lose2, IntChan  transmit2) {
 def
     int pos
 in

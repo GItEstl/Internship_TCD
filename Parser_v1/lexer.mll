@@ -51,6 +51,7 @@ rule token = parse
   | "int"     {IntegerToken}
   | "char"    {CharToken}
   | "channel" {ChannelToken}
+  | "type"    {TypeToken}
   | "list"    {ListToken}
   | "void"    {VoidToken}
   | "while"   {WhileToken}
@@ -66,7 +67,6 @@ rule token = parse
   | "even"    {EvenToken}
   | "tau"     {TauToken}
   | "start"   {StartToken}
-  | "call"    {CallToken}
   | "return"  {ReturnToken}
   | "def"     {DefToken}
   | digit+ as inum

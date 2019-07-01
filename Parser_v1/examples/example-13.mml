@@ -1,0 +1,58 @@
+type StringChan = channel string
+
+func void True(channel (StringChan,StringChan) l) {
+def
+    StringChan t;
+    StringChan f
+
+in 
+        (t,f) = receive(l);
+        send(t,"True")
+}
+
+func void False(channel (StringChan,StringChan) l) {
+def
+    StringChan t;
+    StringChan f
+
+in 
+        (t,f) = receive(l);
+        send(f,"False")
+}
+
+func void cond (channel (StringChan,StringChan) l) {
+def
+    StringChan t;
+    StringChan f;
+    String v
+in
+    t = newChan();
+    f = newChan();
+    send(l,(t,f));
+    choose {
+        | v = receive(t) -> {spawn test1(v)} 
+        | v = receive(f) -> {spawn test2(v)}
+    } 
+}
+
+func string test1(string s) {
+    return s
+}
+
+func string test2(string s) {
+    return s
+}
+
+func void main(string s) {
+def
+    channel (StringChan,StringChan) l
+in
+    l = newChan();
+    True(l);
+    cond(l);
+}
+
+start main("test")
+
+
+

@@ -1,0 +1,27 @@
+func void Nil(channel (typeN,typeC) k) {
+def
+    channel string n;
+    channel c
+in
+    (n,c) = receive(k);
+    send(n,"Nil")   
+}
+
+func void Cons(channel (typeN,typeC) k, int v) {
+def
+    channel l
+in
+    l = newChan();
+    spawn Node(k,v,l);
+    spawn L(l);
+}
+
+func void Node(channel (typeN,typeC) k, channel v, channel l) {
+    (n,c) = receive(k);
+    send(c,(v,l))
+}
+
+start main("test")
+
+
+

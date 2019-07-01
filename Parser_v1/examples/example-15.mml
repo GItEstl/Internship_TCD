@@ -1,0 +1,78 @@
+func void barmanNewTable (channel channel string bar, channel string table) {
+    send(bar,table);
+    spawn Barman(bar,table)
+}
+
+func void barmanFillTable (channel channel string bar, channel string table) {
+def
+    channel string ntable
+in
+    send(bar,table);
+    ntable = newChan();
+    spawn barmanNewTable(bar,ntable)
+}
+
+func void waitingWiseMan (channel channel string bar, string secret) {
+def
+    channel string table
+in
+    table = receive(bar);
+    spawn sitWiseMan(bar,secret,table)
+}
+
+func void sitWiseMan (channel channel string bar, string secret, channel string table) {
+def
+    string answer;
+    string notTheSecret
+in
+    notTheSecret = "notTheSecret";
+    choose {
+        | send(table,secret) -> {spawn waitingWiseMan(bar,secret)}
+        | answer = receive(table) -> {spawn waitingWiseMan(bar,secret)}
+        | send(table,notTheSecret) -> {spawn waitingWiseMan(bar,secret)}
+    }
+}
+
+func void WaitingNaiveMan (channel channel string bar) {
+def
+    channel string table
+in
+    table = receive(bar);
+    spawn sitNaiveMan(bar,table)
+}
+
+func void sitNaiveMan (channel channel string bar, channel string table) {
+def
+    string answer;
+    string notTheSecret
+in
+    notTheSecret = "notTheSecret";
+    choose {
+        | answer = receive(table) -> {if (answer == "notTheSecret") {
+                                         spawn waitingNaiveMan(bar)
+                                    } else {
+                                        spawn waitingWiseMan(bar,answer)
+                                    }}
+        | send(table,notTheSecret) -> {spawn waitingNaiveMan(bar,secret)}
+    }
+}
+
+func void main (string secret, int nbNaiveMan) {
+def
+    channel channel string bar;
+    channel string firstTable;
+    int c;
+in
+    bar = newChan();
+    firstTable = newChan();
+    spawn barmanNewTable(bar,firstTable);
+    spawn waitingWiseMan(bar,secret);
+    c = 0;
+    while (c < nbNaiveMan) {
+        spawn WaitingNaiveMan(bar);
+        c = c + 1
+    }
+}
+
+start main ("ItIsRaining",10)
+

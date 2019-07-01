@@ -84,6 +84,8 @@ type ast =
   | FuncTNode of ast option
   | NoopNode
   | ReturnNode of ast option
+  | NamedTypeNode of string
+  | TypeDeclaNode of string * ast
 ;;
 
 (* Convert an AST into a string *)
@@ -239,6 +241,10 @@ match tree with
   "void"
     | (FuncTNode (Some (t))) ->
   (string_of_ast t)
+    | (NamedTypeNode (t)) ->
+  t
+    | (TypeDeclaNode (n,t)) ->
+  "type " ^ n ^ " = " ^ (string_of_ast t) 
     | _ -> 
   "unknownPrinting"
 
