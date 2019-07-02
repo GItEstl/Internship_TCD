@@ -107,7 +107,8 @@ tuples, local and global variables, functions declaration and call, different bi
 \vspace*{20 pt}
 \vspace*{3pt}
 \begin{Verbatim}[fontfamily=textsf]
-Program ::= FuncDecla Program
+Program ::= TypeDecla Program
+            | FuncDecla Program
             | VariableDecla Program
             | FuncDecla CallMain
             | VariableDecla CallMain
@@ -116,6 +117,11 @@ Program ::= FuncDecla Program
 
 \begin{verbnobox}[\normalfont]
 FuncDecla ::= func FuncType name (Parameters) Body
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+TypeDecla ::= type name = Typ
 \end{verbnobox}
 \vspace*{3pt}
 
@@ -177,7 +183,7 @@ Choices ::= Prefix -> { Instruction } Choices | Prefix -> { Instruction }
 \vspace*{3pt}
 
 \begin{verbnobox}[\normalfont]
-Prefix ::= tau
+Prefix ::= | tau
          | | send ( identifier , Expression )
          | | Expression = receive ( identifier )
          | | Expression = newChan()
@@ -200,7 +206,6 @@ Expression ::= - Expression
                | Expression == Expression
                | Expression < Expression
                | Expression > Expression
-               | let Expression = Expression in ( Expression )
                | if ( Expression ) { Expression } else { Expression }
                | ( ExpressionSeq )
                | Value
@@ -238,8 +243,9 @@ Typ ::= int
       | string
       | char
       | channel Typ
-      | list [ Typ ]
-      | ( Types ) 
+      | list [ Types ]
+      | ( Types )
+      | identifier
 \end{verbnobox}
 \vspace*{3pt}
 
