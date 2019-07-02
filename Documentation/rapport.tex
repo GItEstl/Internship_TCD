@@ -15,6 +15,7 @@
 \usepackage{lipsum}
 \usepackage{setspace}
 \usepackage{tabto}
+\usepackage{bussproofs}
 \onehalfspacing
 \titleformat{\chapter}[hang]{\bf\huge}{\thechapter}{2pc}{}
 
@@ -219,7 +220,7 @@ ExpressionSeq ::= Expression | Expression , ExpressionSeq
 \vspace*{3pt}
 
 \begin{verbnobox}[\normalfont]
-Constant ::= number
+Constant ::= integer
              | ' char '
              | " string "
              | true
@@ -299,6 +300,176 @@ We have also used semi-colons to resolve conflicts. \\ \\
 \end{itemize}
 
 \tabto{0cm} {\Large \textbf{Title}}
+
+
+\newpage
+\centerline{\textbf{\Huge Simplified Grammar for type-checking}}
+\vspace*{3pt}
+\vspace*{20pt}
+\begin{Verbatim}[fontfamily=textsf]
+Program ::= TypeDecla Program
+            | FuncDecla Program
+            | VariableDecla Program
+            | FuncDecla CallMain
+            | VariableDecla CallMain
+\end{Verbatim}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+FuncDecla ::= func FuncType name (Parameters) Body
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+TypeDecla ::= type name = Typ
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Parameters ::= Typ identifier | Typ identifier , Parameters
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Body ::= { Instruction } | { def VariableDeclas in Instruction }
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+VariableDecla ::= Typ identifier | Typ ( TupleDecla )
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+TupleDecla ::= identifier | identifier , TupleDecla
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+VariableDeclas ::= VariableDecla 
+                    | VariableDeclas ; 
+                    | VariableDecla ; VariableDeclas
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Instruction ::= ; Instruction
+               |
+               | Bintruction 
+               | Binstruction ; Instruction
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Binstruction ::= Expression = Expression 
+                 | Expression = name ( ExpressionSeq )
+                 | name ( ExpressionSeq )
+                 | Expression = receive ( identifier )
+                 | send ( identifier , Expression )
+                 | if ( Expression ) { Instruction } else { Instruction }
+                 | while ( Expression ) { Instruction }
+                 | choose { Choices }
+                 | spawn name ( ExpressionSeq )
+                 | Expression = newChan()
+                 | return
+                 | return Expression
+                 | return name (ExpressionSeq)
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Choices ::= Prefix -> { Instruction } Choices | Prefix -> { Instruction }
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Prefix ::= | tau
+         | | send ( identifier , Expression )
+         | | Expression = receive ( identifier )
+         | | Expression = newChan()
+         | | spawn name ( ExpressionSeq )
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Expression ::= - Expression
+               | definedUnaryOp ( Expression )
+               | Expression BinaryOp Expression
+               | if ( Expression ) { Expression } else { Expression }
+               | ( ExpressionSeq )
+               | Value
+               | identifier
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+ExpressionSeq ::= Expression | Expression , ExpressionSeq
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Constant ::= integer
+             | ' char '
+             | " string "
+             | true
+             | false
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Value ::= Constant | { ValueSeq }
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+ValueSeq ::= Value | Value , ValueSeq
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Typ ::= int
+      | boolean
+      | string
+      | char
+      | channel Typ
+      | list [ Types ]
+      | ( Types )
+      | identifier
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Types ::= Typ | Typ , Types
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+FuncType ::= void | Typ
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+CallMain ::= start name ( ExpressionSeq )
+\end{verbnobox}
+\vspace*{3pt}
+
+
+\begin{center}
+\Axiom$\Gamma^\prime\fCenter\Delta,A,A$
+\LeftLabel{Weakening}\RightLabel{}
+\UnaryInf$\lnot A,\Gamma^\prime \fCenter \Delta, A$
+\LeftLabel{.}\RightLabel{\small $\lor$:right}
+\UnaryInf$\lnot A,\lnot A,\Gamma^\prime \fCenter \Delta$
+\LeftLabel{eigenvariable $x$}\RightLabel{$\forall$:right}
+\UnaryInf$\Gamma \fCenter$ $  \Delta$
+\DisplayProof
+\end{center}
+
+\begin{center}
+\Axiom$\fCenter\Gamma^\prime\Delta,A,A$
+\UnaryInf$ \fCenter\Gamma$
+\DisplayProof
+\end{center}
 
 \newpage
 \centerline{\textbf{\Huge Examples}}
