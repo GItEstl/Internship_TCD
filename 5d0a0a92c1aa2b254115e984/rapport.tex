@@ -205,6 +205,7 @@ Expression ::= - Expression
                | Expression / Expression
                | Expression && Expression
                | Expression == Expression
+               | Expression != Expression 
                | Expression < Expression
                | Expression > Expression
                | if ( Expression ) { Expression } else { Expression }
@@ -302,174 +303,174 @@ We have also used semi-colons to resolve conflicts. \\ \\
 \tabto{0cm} {\Large \textbf{Title}}
 
 
+
 \newpage
-\centerline{\textbf{\Huge Simplified Grammar for type-checking}}
+\centerline{\textbf{\Huge Type rules}}
 \vspace*{3pt}
 \vspace*{20pt}
-\begin{Verbatim}[fontfamily=textsf]
-Program ::= TypeDecla Program
-            | FuncDecla Program
-            | VariableDecla Program
-            | FuncDecla CallMain
-            | VariableDecla CallMain
-\end{Verbatim}
-\vspace*{3pt}
-
-\begin{verbnobox}[\normalfont]
-FuncDecla ::= func FuncType name (Parameters) Body
-\end{verbnobox}
-\vspace*{3pt}
-
-\begin{verbnobox}[\normalfont]
-TypeDecla ::= type name = Typ
-\end{verbnobox}
-\vspace*{3pt}
-
-\begin{verbnobox}[\normalfont]
-Parameters ::= Typ identifier | Typ identifier , Parameters
-\end{verbnobox}
-\vspace*{3pt}
-
-\begin{verbnobox}[\normalfont]
-Body ::= { Instruction } | { def VariableDeclas in Instruction }
-\end{verbnobox}
-\vspace*{3pt}
-
-\begin{verbnobox}[\normalfont]
-VariableDecla ::= Typ identifier | Typ ( TupleDecla )
-\end{verbnobox}
-\vspace*{3pt}
-
-\begin{verbnobox}[\normalfont]
-TupleDecla ::= identifier | identifier , TupleDecla
-\end{verbnobox}
-\vspace*{3pt}
-
-\begin{verbnobox}[\normalfont]
-VariableDeclas ::= VariableDecla 
-                    | VariableDeclas ; 
-                    | VariableDecla ; VariableDeclas
-\end{verbnobox}
-\vspace*{3pt}
-
-\begin{verbnobox}[\normalfont]
-Instruction ::= ; Instruction
-               |
-               | Bintruction 
-               | Binstruction ; Instruction
-\end{verbnobox}
-\vspace*{3pt}
-
-\begin{verbnobox}[\normalfont]
-Binstruction ::= Expression = Expression 
-                 | Expression = name ( ExpressionSeq )
-                 | name ( ExpressionSeq )
-                 | Expression = receive ( identifier )
-                 | send ( identifier , Expression )
-                 | if ( Expression ) { Instruction } else { Instruction }
-                 | while ( Expression ) { Instruction }
-                 | choose { Choices }
-                 | spawn name ( ExpressionSeq )
-                 | Expression = newChan()
-                 | return
-                 | return Expression
-                 | return name (ExpressionSeq)
-\end{verbnobox}
-\vspace*{3pt}
-
-\begin{verbnobox}[\normalfont]
-Choices ::= Prefix -> { Instruction } Choices | Prefix -> { Instruction }
-\end{verbnobox}
-\vspace*{3pt}
-
-\begin{verbnobox}[\normalfont]
-Prefix ::= | tau
-         | | send ( identifier , Expression )
-         | | Expression = receive ( identifier )
-         | | Expression = newChan()
-         | | spawn name ( ExpressionSeq )
-\end{verbnobox}
-\vspace*{3pt}
-
-\begin{verbnobox}[\normalfont]
-Expression ::= - Expression
-               | definedUnaryOp ( Expression )
-               | Expression BinaryOp Expression
-               | if ( Expression ) { Expression } else { Expression }
-               | ( ExpressionSeq )
-               | Value
-               | identifier
-\end{verbnobox}
-\vspace*{3pt}
-
-\begin{verbnobox}[\normalfont]
-ExpressionSeq ::= Expression | Expression , ExpressionSeq
-\end{verbnobox}
-\vspace*{3pt}
-
-\begin{verbnobox}[\normalfont]
-Constant ::= integer
-             | ' char '
-             | " string "
-             | true
-             | false
-\end{verbnobox}
-\vspace*{3pt}
-
-\begin{verbnobox}[\normalfont]
-Value ::= Constant | { ValueSeq }
-\end{verbnobox}
-\vspace*{3pt}
-
-\begin{verbnobox}[\normalfont]
-ValueSeq ::= Value | Value , ValueSeq
-\end{verbnobox}
-\vspace*{3pt}
-
-\begin{verbnobox}[\normalfont]
-Typ ::= int
-      | boolean
-      | string
-      | char
-      | channel Typ
-      | list [ Types ]
-      | ( Types )
-      | identifier
-\end{verbnobox}
-\vspace*{3pt}
-
-\begin{verbnobox}[\normalfont]
-Types ::= Typ | Typ , Types
-\end{verbnobox}
-\vspace*{3pt}
-
-\begin{verbnobox}[\normalfont]
-FuncType ::= void | Typ
-\end{verbnobox}
-\vspace*{3pt}
-
-\begin{verbnobox}[\normalfont]
-CallMain ::= start name ( ExpressionSeq )
-\end{verbnobox}
-\vspace*{3pt}
 
 
-\begin{center}
-\Axiom$\Gamma^\prime\fCenter\Delta,A,A$
-\LeftLabel{Weakening}\RightLabel{}
-\UnaryInf$\lnot A,\Gamma^\prime \fCenter \Delta, A$
-\LeftLabel{.}\RightLabel{\small $\lor$:right}
-\UnaryInf$\lnot A,\lnot A,\Gamma^\prime \fCenter \Delta$
-\LeftLabel{eigenvariable $x$}\RightLabel{$\forall$:right}
-\UnaryInf$\Gamma \fCenter$ $  \Delta$
-\DisplayProof
-\end{center}
+\tabto{0cm} {\large \textbf{Binary Operator}}
+\begin{prooftree}
+\AxiomC{$\Gamma_t ; \ \Gamma_v ; \vdash e_1: T_1 $}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_2 : T_2$}
+\AxiomC{$T_1 \times T_2 \in dom$ op}
+\AxiomC{$T \in codom$ op}
+\QuaternaryInfC{$\Gamma_t ; \ \Gamma_v ; \vdash e_1 \ op \ e_2 : T $}
+\end{prooftree}
 
-\begin{center}
-\Axiom$\fCenter\Gamma^\prime\Delta,A,A$
-\UnaryInf$ \fCenter\Gamma$
-\DisplayProof
-\end{center}
+\tabto{0cm} {\large \textbf{Unary Operator}}
+\begin{prooftree}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e : T $}
+\AxiomC{$T \in dom$ op}
+\AxiomC{$T' \in codom$ op}
+\TrinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash op \ e : T' $}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Negate Operator}}
+\begin{prooftree}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e : T $}
+\AxiomC{$T \in dom \ -$}
+\AxiomC{$T' \in codom \ -$}
+\TrinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash - \ e : T' $}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Condition}}
+\begin{prooftree}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_1 : bool $}
+\AxiomC{$\Gamma_t ; \ \ \Gamma_v \vdash e_2 : T $}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_3 : T $}
+\TrinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash if \ e_1 \ then \ e_2 \ else \ e_3 : T $}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Tuple}}
+\begin{prooftree}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_1 : T_1$}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_2 : T_2 $}
+\AxiomC{$\ldots$}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_n : T_n $}
+\QuaternaryInfC{$\Gamma_t ; \ \Gamma_v \vdash (e_1,e_2,\ldots,e_n) : T_1 \times T_2 \times \ldots \times T_n)$}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{List of Values}}
+\begin{prooftree}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_1 : T$}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_2 : T $}
+\AxiomC{$\ldots$}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_n : T $}
+\QuaternaryInfC{$\Gamma_t ; \ \Gamma_v \vdash [e_1,e_2,\ldots,e_n] : list [T]$}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Identifier}}
+\begin{prooftree}
+\AxiomC{$ x : T \in \Gamma_v$}
+\UnaryInfC{$\Gamma_t ; \ \Gamma_v \vdash x : T$}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Assignment}}
+\begin{prooftree}
+\AxiomC{$\Gamma_t ; \ \Gamma_v ; \vdash a : T_a $}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e : T_e$}
+\AxiomC{$ T_a = T_e $}
+\TrinaryInfC{$\Gamma_t ; \ \Gamma_v ; \vdash a = e : void $}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Function Call with return}}
+\begin{prooftree}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_1 : T_2 $}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_2 : T_1 \rightarrow T_2 $}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_3 : T_1 $}
+\TrinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash e_1 = e_2 (e_3) : T_2 $}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Function Call without return}}
+\begin{prooftree}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_1 : T_1 \rightarrow void$}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_2 : T_1 $}
+\BinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash e_1(e_2) : void $}
+\end{prooftree}
+
+\newpage
+
+\tabto{0cm} {\large \textbf{While}}
+\begin{prooftree}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_1 : bool$}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_2 : T $}
+\BinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash while(e_1) \ \{ e_2 \} : T $}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Return void}}
+\begin{prooftree}
+\AxiomC{$ $}
+\UnaryInfC{$\Gamma_t ; \ \Gamma_v \vdash return : void $}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Return Expression }}
+\begin{prooftree}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e : T$}
+\UnaryInfC{$\Gamma_t ; \ \Gamma_v \vdash return \ e : T $}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Send Instruction}}
+\begin{prooftree}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash T $}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash c : chan \ T $}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e : T $}
+\TrinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash send(c,e) : void $}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Receive Instruction}}
+\begin{prooftree}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash T $}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash c : chan \ T $}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash a : T $}
+\TrinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash a = receive(c) : void $}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Spawn Instruction}}
+\begin{prooftree}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_1 : T_1 \rightarrow void$}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_2 : T_1 $}
+\BinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash spawn \ e_1(e_2) : void $}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{NewChan Instruction}}
+\begin{prooftree}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash T $}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash a : chan \ T $}
+\BinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash a = newChan() : void $}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Choose Instruction}}
+\begin{prooftree}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash p_1 : void \ \ldots \ \Gamma_t ; \ \Gamma_v \vdash p_n : void $}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash i_1 : T \ \ldots \ \Gamma_t ; \ \Gamma_v \vdash i_n : T $}
+\BinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash Choose \{ \ \ | \ p_1 -> i_1 \ \ | \ \ldots \ | \ p_n -> i_n \ \ \} : T $}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Sequence of Instructions}}
+\begin{prooftree}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_1 : void$}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_2 : T $}
+\BinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash e_1 \ ; \ e_2 : T $}
+\end{prooftree}
+
+\newpage
+
+\tabto{0cm} {\large \textbf{Variable Declaration}}
+\begin{prooftree}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash T $}
+\UnaryInfC{$\Gamma_t ; \ \Gamma_v \vdash T \ x $}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Function Declaration}}
+\begin{prooftree}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash T $}
+\AxiomC{$\Gamma^\prime := \Gamma_t ; \ \Gamma_v ; \ x_1 : T_1 ; \ \ldots \ x_n : T_n  $}
+\AxiomC{$\Gamma^\prime \vdash \overrightarrow{declaVar} $}
+\AxiomC{$\Gamma^\prime ; \ \overrightarrow{declaVar} \vdash i : T $}
+\QuaternaryInfC{$\Gamma_t ; \ \Gamma_v \vdash func \ T \ name \ (T_1 \ x_1 , \ \ldots , \ T_n \ x_n) \ \{ \ def \ \overrightarrow{declaVar} \ in \ i \}$}
+\end{prooftree}
 
 \newpage
 \centerline{\textbf{\Huge Examples}}
