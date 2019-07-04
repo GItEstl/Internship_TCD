@@ -30,7 +30,7 @@ open Ast
 %token FunctionToken
 %token ReceiveToken, SendToken, NewToken, SpawnToken, TauToken
 %token ChooseToken, ChoiceToken
-%token HeadToken, TailToken, OddToken, EvenToken
+%token HeadToken, TailToken, OddToken, EvenToken, FstToken, SndToken
 %token StartToken, ReturnToken
 %token TypeToken
 %token EOF
@@ -125,7 +125,9 @@ expr :
  | HeadToken LeftParenthesisToken e = expr RightParenthesisToken                                             {UnaryNode (Head,e)}                                                                                                                     
  | TailToken LeftParenthesisToken e = expr RightParenthesisToken                                             {UnaryNode (Tail,e)}                                                                                                                    
  | OddToken LeftParenthesisToken e = expr RightParenthesisToken                                             {UnaryNode (Odd,e)}                                                                                                                      
- | EvenToken LeftParenthesisToken e = expr RightParenthesisToken                                             {UnaryNode (Even,e)} 
+ | EvenToken LeftParenthesisToken e = expr RightParenthesisToken                                             {UnaryNode (Even,e)}
+ | FstToken LeftParenthesisToken e = expr RightParenthesisToken                                             {UnaryNode (Fst,e)}                                                                                                                      
+ | SndToken LeftParenthesisToken e = expr RightParenthesisToken                                             {UnaryNode (Snd,e)}  
  | e1 = expr AddToken e2 = expr                                                                                                       {BinaryNode (e1,Add,e2)}
  | e1 = expr SubToken e2 = expr                                                                                                       {BinaryNode (e1,Substract,e2)}
  | e1 = expr OrToken e2 = expr                                                                                                        {BinaryNode (e1,Or,e2)}

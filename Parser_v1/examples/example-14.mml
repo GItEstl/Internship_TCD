@@ -1,27 +1,69 @@
-func void Nil(channel (typeN,typeC) k) {
+func void ThinkingPhilosophe(channel boolean fl, channel boolean fr) {
+    choose {
+        | tau -> {ThinkingPhilosophe(fl,fr)}
+        | send(fl,true) -> {spawn WaitingPhilosophe(fl,fr,fr)}
+        | send(fr,true) -> {spawn WaitingPhilosophe(fl,fr,fl)}
+    }
+}
+
+func void WaitingPhilosophe (channel boolean fl, channel boolean fr, channel boolean MissingFork){
+    choose {
+        | send(MissingFork,true) -> {spawn EatingPhilosophe(fl,fr)}
+    }
+}
+
+func void EatingPhilosophe (channel boolean fl, channel boolean fr) {
+    choose {
+        | tau -> {spawn EatingPhilosophe(fl,fr)}
+        | send(fl,true) -> {spawn ThinkingPhilosophe(fl,fr)}
+        | send(fr,true) -> {spawn ThinkingPhilosophe(fl,fr)}
+    }
+}
+
+func void Fork (channel boolean philol, channel boolean philor){
 def
-    channel string n;
-    channel c
+    boolean take
 in
-    (n,c) = receive(k);
-    send(n,"Nil")   
+    choose { 
+        | take = receive(philol) -> {spawn NotFreeFork(philol,philor,philol)}
+        | take = receive(philor) -> {spawn NotFreeFork(philol,philor,philor)}
+    }
 }
 
-func void Cons(channel (typeN,typeC) k, int v) {
+func void NotFreeFork (channel boolean philol, channel boolean philor, channel boolean philoWithFork) {
 def
-    channel l
+    boolean free
 in
-    l = newChan();
-    spawn Node(k,v,l);
-    spawn L(l);
+    choose {
+        | tau -> {spawn NotFreeFork(philol,philor,philoWithFork)}
+        | free = receive(philof) -> {spawn Fork(philol,philor)}
+    } 
 }
 
-func void Node(channel (typeN,typeC) k, channel v, channel l) {
-    (n,c) = receive(k);
-    send(c,(v,l))
+func void Table(int n){
+def
+    channel boolean fstPhiloLeftFork;
+    channel boolean leftFork;
+    channel boolean rightFork;
+    int c
+in
+    c = 0;
+    fstPhiloLeftFork = newChan();
+    leftFork = fstPhiloLeftFork;
+    rightFork = newChan();
+    while (c < n - 1) {
+        spawn ThinkingPhilosophe(leftFork,rightFork);
+        leftFork = newChan();
+        spawn Fork(rightFork,leftFork);
+        rightFork = newChan();
+    };
+    spawn ThinkingPhilosophe(leftFork,rightFork);
+    spawn Fork(rightFork,fstPhiloLeftFork)
 }
 
-start main("test")
+start Table(8)
+
+
 
 
 

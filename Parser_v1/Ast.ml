@@ -20,6 +20,8 @@ type unary =
   | Tail
   | Odd
   | Even
+  | Fst
+  | Snd
 ;;
 
 (* Basic type Type *)
@@ -169,6 +171,10 @@ match tree with
   "odd(" ^ (string_of_ast e) ^ ")"
     | (UnaryNode (Even,e)) ->
   "even(" ^ (string_of_ast e) ^ ")"
+    | (UnaryNode (Fst,e)) ->
+  "fst(" ^ (string_of_ast e) ^ ")"
+    | (UnaryNode (Snd,e)) ->
+  "snd(" ^ (string_of_ast e) ^ ")"
     | (BinaryNode (e1,Add,e2)) ->
   "(" ^ (string_of_ast e1) ^ " + " ^ (string_of_ast e2) ^ ")"
     | (BinaryNode (e1,Substract,e2)) ->

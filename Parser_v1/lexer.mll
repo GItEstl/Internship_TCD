@@ -65,6 +65,8 @@ rule token = parse
   | "tail"    {TailToken}
   | "odd"     {OddToken}
   | "even"    {EvenToken}
+  | "fst"     {FstToken}
+  | "snd"     {SndToken}
   | "tau"     {TauToken}
   | "start"   {StartToken}
   | "return"  {ReturnToken}

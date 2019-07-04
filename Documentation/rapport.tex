@@ -16,6 +16,8 @@
 \usepackage{setspace}
 \usepackage{tabto}
 \usepackage{bussproofs}
+\usepackage{caption}
+\usepackage{subcaption}
 \onehalfspacing
 \titleformat{\chapter}[hang]{\bf\huge}{\thechapter}{2pc}{}
 
@@ -272,7 +274,7 @@ CallMain ::= start name ( ExpressionSeq )
 \vspace*{10pt}
 \tabto{0cm} {\Large \textbf{Conflicts resolution}}
 \\ \\ 
-\tabto{1cm} In order to remove ambiguities in our grammar and so resolve shift/reduce conflicts we have added some rules. It is important to note that in our grammar the majority of our conflicts refer to binary operators.  \\ \\ \\
+\tabto{1cm} In order to remove ambiguities in our grammar and so resolve shift/reduce conflicts we have added some rules. It is important to note that in our grammar the majority of our conflicts refer to binary operators.  \\ \\
 By declaring precedence and associative rules for all tokens involved in the conflicts, this force derivations to be done in a particular way.
 \\ \\ 
 \tabto{2cm} \textbf{Associativity}
@@ -299,8 +301,6 @@ We have also used semi-colons to resolve conflicts. \\ \\
 \item For instructions: a semicolon sequence is translated by the parser as a sequence of empty instructions.
 \item For variable declarations: this is not possible, however it is possible to end the declarations with a semicolon without causing an error syntax but it makes no sense in our grammar. We have implemented this to avoid mistakes due to the use of other languages.
 \end{itemize}
-
-\tabto{0cm} {\Large \textbf{Title}}
 
 
 
@@ -476,13 +476,85 @@ We have also used semi-colons to resolve conflicts. \\ \\
 \centerline{\textbf{\Huge Examples}}
 \vspace*{3pt}
 \vspace*{20pt}
-Communicating and mobile systems : the $\pi$-calculus - Robin Milner : The mobile phones system
+\tabto{0cm} {\Large \textbf{Mobiles phones (example-10)}}
+\vspace*{3pt}
+\\
+This example is highly inspired by the "mobile phones system" example - page 82 - of the book: \\
+\textit{Communicating and mobile systems: the $\pi$-calculus} by Robin Milner 
 
 \begin{center}
 \includegraphics[scale = 0.5]{mobile-phone-system.jpg}
 \end{center}
-Add the Description of the example from the book p-82
+In our example, we made some modifications compared to the original example from the book. To allow the control to know when it needs to act we add an other channel between Control and Trans named transmit1. This channel transmit the message received by Trans from Car. This message is an integer which represents the position of the car. We arbitrarily decide at which position the links between the Trans and the car must be switched to the other trans : Idtrans. So, when the position is greater than the threshold the Control tells to Trans to lose the car and to IdTrans to gain the car.
 
-To allow the control to know when it needs to act we add an other channel between Control and Trans named transmit1. This channel transmit the message received by Trans since Car. This message is an integer which represents the position of the car. We arbitrarily decide the position when links between the Trans and the car must be switch to the other trans : Idtrans. So, when the position is greater than the threshold the Control tells to Trans to lose the car and to IdTrans to gain the car.
+\vspace*{15pt}
+\tabto{0cm} {\Large \textbf{Buffer of size n (example-11)}}
+\vspace*{3pt}
+\\
+In this example, we consider a buffer of n cells. First, in $\pi$-calculus the definition of a buffer cell by :
+$B(l,r) = l(x).C \langle x,l,r \rangle$ and $C(x,l,r) = \bar{r} \langle x \rangle .B \langle l,r \rangle$
 
+\begin{center}
+\includegraphics[scale = 0.25]{BufferCell.png}
+\end{center}
+So to create a buffer of size n, we make a chain of n buffer cells. This system is defined by linking :
+$B^{(n)} = \overbrace{B^{ \frown} \ldots ^{\frown} B}^{\text{n times}}$
+
+\begin{center}
+\includegraphics[scale = 0.4]{Buffern.png}
+\end{center}
+
+\newpage
+
+\tabto{0cm} {\Large \textbf{Chemical reaction (example-12)}}
+\vspace*{3pt}
+\\
+In this example we are trying to simulate the following chemical reaction : \\
+$K + Na + 2Cl = K^+ + Na^+ + 2Cl^-$ \\
+For each type of atoms, there are dedicated channels on which they liberate or capture an electron. The ionization and deionization process are associated with the receive and send instruction. An atom can capture an electron only if an another atom is ready to liberate one and vice-versa. In our example, the thermochemical laws are not respected because the reaction can occur in both ways at anytime.  
+
+\begin{figure}[!h]
+    \centering
+    \begin{subfigure}[b]{0.3\textwidth}
+        \includegraphics[width=\textwidth]{K.jpg}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.3\textwidth}
+        \includegraphics[width=\textwidth]{Na.jpg}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.3\textwidth}
+        \includegraphics[width=\textwidth]{Cl.jpg}
+    \end{subfigure}
+\end{figure}
+
+\tabto{0cm} {\Large \textbf{Condition with channels (example-13)}}
+\vspace*{3pt}
+\\
+In this example, we use a condition of type if then else based on channels. First, we created the true and false value thanks to channels. We can defined those values in $\pi$-calculus : \\
+$True(l) = l(t,f). \bar{t}$ \ and \ $False(l) = l(t,f). \bar{f}$
+\\ Then we can create a condition by using those values.
+The condition needs a channel l which corresponds to the location of a value true or false. It is defined as follow : \\
+$ Cond(P,Q)(l) = (new (t,f)) \bar{l} \langle t,f \rangle .(t.P + f.Q)$
+\\Depending on that the condition process will launch a different process. The processes P and Q are represented in our grammar by function which has to be spawned by the process condition. 
+\newpage
+
+\tabto{0cm} {\Large \textbf{Dining philosophers problem (example-14)}}
+\vspace*{3pt}
+\\
+In this example, we have chosen to represent the dining philosophers problem, a recurring concurrent problem.
+\begin{center}
+\includegraphics[scale = 0.5]{Dining.png}
+\end{center}
+
+N philosophers sit at a round table with meal plates. Forks are placed between each pair of adjacent philosophers.
+\\ Each philosopher must alternately think and eat. However, a philosopher can only eat the meal when they have both left and right forks. Each fork can be held by only one philosopher and so a philosopher can use the fork only if it is not being used by another philosopher. After an individual philosopher finishes eating, they need to put down both forks so that the forks become available to others. A philosopher can take the fork on their right or the one on their left as they become available, but cannot start eating before getting both forks.
+
+\tabto{0cm} {\Large \textbf{Whispering problem (example-15)}}
+\vspace*{3pt}
+\\
+In this example, we have represented a situation in a bar. In this one there is a barman, customers who don't know the secret and a customer who knows the secret (There is only one secret). The barman can install 2 people at a table.  One of the 2 people will speak first, the other will listen and then both will leave the table. So, several situations are possible: \\
+- the 2 people don't know the secret: they discuss and leave the table without knowing the secret \\
+- one of the 2 people knows the secret and the wise man speaks first: he reveals the secret to the second person who now knows it and can spread it to other customers \\
+- one of the 2 people knows the secret but the wise man doesn't speak first: the person who did not know the secret still does not know it when he leaves the table \\
+- the 2 people know the secret: the person who speaks first reveals the secret but as the other person already knows it, the situation does not change, they leave the table knowing the secret.
+The secret can be transmitted and spread throughout the bar.
 \end{document}
