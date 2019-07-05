@@ -303,6 +303,166 @@ We have also used semi-colons to resolve conflicts. \\ \\
 \end{itemize}
 
 
+\newpage
+\centerline{\textbf{\Huge Grammar : Backus-Naur form (BNF)}}
+\vspace*{20 pt}
+\vspace*{3pt}
+\begin{Verbatim}[fontfamily=textsf]
+Program ::= TypeDecla Program
+            | FuncDecla Program
+            | VariableDecla Program
+            | FuncDecla CallMain
+            | VariableDecla CallMain
+\end{Verbatim}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+FuncDecla ::= func FuncType name (Parameters) Body
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+TypeDecla ::= type name = Typ
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Parameters ::= Typ identifier | Typ identifier , Parameters
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Body ::= { Instruction } | { def VariableDeclas in Instruction }
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+VariableDecla ::= Typ identifier | Typ ( TupleDecla )
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+TupleDecla ::= identifier | identifier , TupleDecla
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+VariableDeclas ::= VariableDecla 
+                    | VariableDeclas ; 
+                    | VariableDecla ; VariableDeclas
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Instruction ::= ; Instruction
+               |
+               | Bintruction 
+               | Binstruction ; Instruction
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Binstruction ::= Expression = Expression 
+                 | Expression = name ( ExpressionSeq )
+                 | name ( ExpressionSeq )
+                 | Expression = receive ( identifier )
+                 | send ( identifier , Expression )
+                 | if ( Expression ) { Instruction } else { Instruction }
+                 | while ( Expression ) { Instruction }
+                 | choose { Choices }
+                 | spawn name ( ExpressionSeq )
+                 | Expression = newChan()
+                 | return
+                 | return Expression
+                 | return name (ExpressionSeq)
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Choices ::= Prefix -> { Instruction } Choices | Prefix -> { Instruction }
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Prefix ::= | tau
+         | | send ( identifier , Expression )
+         | | Expression = receive ( identifier )
+         | | Expression = newChan()
+         | | spawn name ( ExpressionSeq )
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{Verbatim}[fontfamily=textsf]
+BinaryOp ::= + | - | || | * | / | && | == | != | < | >
+\end{Verbatim}
+
+\vspace*{3pt}
+\begin{Verbatim}[fontfamily=textsf]
+definedUnaryOp ::= head | tail | odd | even | fst | snd
+\end{Verbatim}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Expression ::= - Expression
+               | definedUnaryOp ( Expression )
+               | Expression BinaryOp Expression
+               | if ( Expression ) { Expression } else { Expression }
+               | ( ExpressionSeq )
+               | Value
+               | identifier
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+ExpressionSeq ::= Expression | Expression , ExpressionSeq
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Constant ::= integer
+             | ' char '
+             | " string "
+             | true
+             | false
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Value ::= Constant | { ValueSeq }
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+ValueSeq ::= Value | Value , ValueSeq
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Typ ::= int
+      | boolean
+      | string
+      | char
+      | channel Typ
+      | list [ Types ]
+      | ( Types )
+      | identifier
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+Types ::= Typ | Typ , Types
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+FuncType ::= void | Typ
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+CallMain ::= start name ( ExpressionSeq )
+\end{verbnobox}
+\vspace*{3pt}
 
 \newpage
 \centerline{\textbf{\Huge Type Rules}}
