@@ -102,7 +102,7 @@ match tree with
     | (ParamsNode (t,n,Some(params))) -> 
   (string_of_ast t) ^ " " ^ n ^ ", " ^ (string_of_ast params)
     | (BodyNode (Some(v),i)) ->
-  "{\ndef \n" ^ (string_of_ast v) ^ "in \n" ^ (string_of_ast i) ^ "}\n"    
+  "{\ndef\n" ^ (string_of_ast v) ^ "in \n" ^ (string_of_ast i) ^ "}\n"    
     | (BodyNode (None,i)) ->
   "{\n" ^ (string_of_ast i) ^ "}\n"
     | (VariableDeclaNode (t,StringNode(n))) -> 

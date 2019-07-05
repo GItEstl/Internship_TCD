@@ -1,7 +1,6 @@
 open Ast 
-open Lexer
-open Parser
 open Lexing
+open Resolve
 
 let report_error filename lexbuf msg =
  let (b,e) = (lexeme_start_p lexbuf, lexeme_end_p lexbuf) in
@@ -14,7 +13,8 @@ let report_error filename lexbuf msg =
   let filebuf = Lexing.from_channel input in
   try
   let ast = Parser.main Lexer.token filebuf  in
-   print_string (string_of_ast ast)
+ (*  print_string (string_of_ast ast); *)
+  create_env ([],[]) ast
   with
   | Lexer.Error s ->
       report_error fichier filebuf "lexical error (unexpected character).";

@@ -1,5 +1,7 @@
 int globalVar
 
+type IntChan = channel int
+
 func int main (int x, int y) {
     globalVar = x;
     return y + x

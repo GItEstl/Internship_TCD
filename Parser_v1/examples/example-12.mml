@@ -1,3 +1,9 @@
+func int A(int i) {
+def
+    int c
+in
+}
+
 func void Na (channel int ion, channel int deion) {
     send(ion,1);
     spawn NaPlus(ion,deion)
