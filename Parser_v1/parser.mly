@@ -60,26 +60,26 @@ program :
  | v = variableDecla c = callMain                                                                                {ProgramNode (v,c)}
 
 funcDecla :
- | FunctionToken ft = funcType n = IdentToken LeftParenthesisToken params = parameters RightParenthesisToken b = body       {FunctionNode (ft,snd(n),params,b)}
+ | pos = FunctionToken ft = funcType n = IdentToken LeftParenthesisToken params = parameters RightParenthesisToken b = body       {FunctionNode (pos,ft,snd(n),params,b)}
 
  typeDecla :
- | TypeToken tname = IdentToken AssignToken t = typ                                                          {TypeDeclaNode (snd(tname),t)}
+ | pos = TypeToken tname = IdentToken AssignToken t = typ                                                          {TypeDeclaNode (pos,snd(tname),t)}
 
 parameters : 
- | t = typ n = IdentToken                                                                                   {ParamsNode (t,snd(n),None)} 
- | t = typ n = IdentToken ComaToken params = parameters                                                     {ParamsNode (t,snd(n),Some(params))} 
+ | t = typ n = IdentToken                                                                                   {ParamsNode (fst(n),t,snd(n),None)} 
+ | t = typ n = IdentToken ComaToken params = parameters                                                     {ParamsNode (fst(n),t,snd(n),Some(params))} 
 
 body :
- | LeftBracketToken i = instruction RightBracketToken                                                           {BodyNode (None,i)}
- | LeftBracketToken DefToken v = variableDeclas InToken i = instruction RightBracketToken                       {BodyNode (Some(v),i)}
+ | pos = LeftBracketToken i = instruction RightBracketToken                                                     {BodyNode (pos,None,i)}
+ | pos = LeftBracketToken DefToken v = variableDeclas InToken i = instruction RightBracketToken                 {BodyNode (pos,Some(v),i)}
 
 variableDecla :
- | t = typ n = IdentToken                                                                                   {VariableDeclaNode (t,StringNode(snd(n)))}
- | t = typ LeftParenthesisToken idents = tupleDecla RightParenthesisToken                                   {VariableDeclaNode (t,idents)}
+ | t = typ n = IdentToken                                                                                   {VariableDeclaNode (fst(n),t,StringNode(fst(n),snd(n)))}
+ | t = typ pos = LeftParenthesisToken idents = tupleDecla RightParenthesisToken                              {VariableDeclaNode (pos,t,idents)}
 
 tupleDecla : 
- | n = IdentToken                                                                                           {TupleDeclaNode (snd(n),None)} 
- | n = IdentToken ComaToken idents = tupleDecla                                                             {TupleDeclaNode (snd(n),Some(idents))} 
+ | n = IdentToken                                                                                           {TupleDeclaNode (fst(n),snd(n),None)} 
+ | n = IdentToken ComaToken idents = tupleDecla                                                             {TupleDeclaNode (fst(n),snd(n),Some(idents))} 
 
 variableDeclas :
  | v = variableDecla                                                                                         {VariableDeclasNode (v,None)}
@@ -93,67 +93,67 @@ instruction :
  | bi = binstruction SequenceToken i = instruction                                                         {InstrSeqNode (bi,Some(i))}
 
 binstruction :
- | a = expr AssignToken e = expr                                                                                  {BinaryNode (a,Assign,e)}
- | a = expr AssignToken f = IdentToken LeftParenthesisToken e = exprs RightParenthesisToken              {BinaryNode (a,Assign,CallNode (snd(f),e))} 
- | f = IdentToken LeftParenthesisToken e = exprs RightParenthesisToken                                              {CallNode (snd(f),e)}
- | a = expr AssignToken ReceiveToken LeftParenthesisToken n = IdentToken RightParenthesisToken                  {ReceiveNode (a,snd(n))}
- | SendToken LeftParenthesisToken n = IdentToken ComaToken e = expr RightParenthesisToken                            {SendNode (snd(n),e)}
- | IfToken LeftParenthesisToken cond = expr RightParenthesisToken 
+ | a = expr pos = AssignToken e = expr                                                                                  {BinaryNode (pos,a,Assign,e)}
+ | a = expr pos = AssignToken f = IdentToken LeftParenthesisToken e = exprs RightParenthesisToken              {BinaryNode (pos,a,Assign,CallNode (fst(f),snd(f),e))} 
+ | f = IdentToken LeftParenthesisToken e = exprs RightParenthesisToken                                              {CallNode (fst(f),snd(f),e)}
+ | a = expr pos = AssignToken ReceiveToken LeftParenthesisToken n = IdentToken RightParenthesisToken                  {ReceiveNode (pos,a,snd(n))}
+ | pos = SendToken LeftParenthesisToken n = IdentToken ComaToken e = expr RightParenthesisToken                            {SendNode (pos,snd(n),e)}
+ | pos = IfToken LeftParenthesisToken cond = expr RightParenthesisToken 
       LeftBracketToken i1 = instruction RightBracketToken 
-      ElseToken LeftBracketToken i2 = instruction RightBracketToken                                             {IfthenelseInstrNode (cond,i1,i2)}
- | WhileToken LeftParenthesisToken e = expr RightParenthesisToken LeftBracketToken i = instruction RightBracketToken          {WhileNode (e,i)}
- | ChooseToken LeftBracketToken c = choices RightBracketToken                                                     {ChooseNode (c)}
- | SpawnToken f = IdentToken LeftParenthesisToken e = exprs RightParenthesisToken                                         {SpawnNode (snd(f),e)}
- | a = expr AssignToken NewToken LeftParenthesisToken RightParenthesisToken                                         {NewNode (a)}
- | ReturnToken                                                                                                          {ReturnNode (None)}
- | ReturnToken e = expr                                                                                                 {ReturnNode (Some (e))}
- | ReturnToken f = IdentToken LeftParenthesisToken e = exprs RightParenthesisToken                                      {ReturnNode (Some (CallNode (snd(f),e)))}
+      ElseToken LeftBracketToken i2 = instruction RightBracketToken                                             {IfthenelseInstrNode (pos,cond,i1,i2)}
+ | pos = WhileToken LeftParenthesisToken e = expr RightParenthesisToken LeftBracketToken i = instruction RightBracketToken          {WhileNode (pos,e,i)}
+ | pos = ChooseToken LeftBracketToken c = choices RightBracketToken                                                     {ChooseNode (pos,c)}
+ | pos = SpawnToken f = IdentToken LeftParenthesisToken e = exprs RightParenthesisToken                                         {SpawnNode (pos,snd(f),e)}
+ | a = expr pos = AssignToken NewToken LeftParenthesisToken RightParenthesisToken                                         {NewNode (pos,a)}
+ | pos = ReturnToken                                                                                                          {ReturnNode (pos,None)}
+ | pos = ReturnToken e = expr                                                                                                 {ReturnNode (pos,Some (e))}
+ | pos = ReturnToken f = IdentToken LeftParenthesisToken e = exprs RightParenthesisToken                                      {ReturnNode (pos,Some (CallNode (fst(f),snd(f),e)))}
 
 choices : 
- | p = prefix ArrowToken LeftBracketToken i = instruction RightBracketToken cs = choices                                  {ChoicesNode(p,i,Some(cs))}
- | p = prefix ArrowToken LeftBracketToken i = instruction RightBracketToken                                            {ChoicesNode(p,i,None)}
+ | p = prefix pos = ArrowToken LeftBracketToken i = instruction RightBracketToken cs = choices                                  {ChoicesNode(pos,p,i,Some(cs))}
+ | p = prefix pos = ArrowToken LeftBracketToken i = instruction RightBracketToken                                            {ChoicesNode(pos,p,i,None)}
 
 prefix :
- | ChoiceToken TauToken                                                                                                                {PrefixNode(None,Tau,None,None)}
- | ChoiceToken SendToken LeftParenthesisToken n = IdentToken ComaToken e = expr RightParenthesisToken                                {PrefixNode(None,Send,Some(snd(n)),Some(e))}
- | ChoiceToken a = expr AssignToken ReceiveToken LeftParenthesisToken n = IdentToken RightParenthesisToken                         {PrefixNode(Some(a),Receive,Some(snd(n)),None)}
- | ChoiceToken a = expr AssignToken NewToken LeftParenthesisToken RightParenthesisToken                                             {PrefixNode(Some(a),New,None,None)}
- | ChoiceToken SpawnToken f = IdentToken LeftParenthesisToken e = exprs RightParenthesisToken                                  {PrefixNode(None,Spawn,Some(snd(f)),Some(e))}
+ | pos = ChoiceToken TauToken                                                                                                                {PrefixNode(pos,None,Tau,None,None)}
+ | pos = ChoiceToken SendToken LeftParenthesisToken n = IdentToken ComaToken e = expr RightParenthesisToken                                {PrefixNode(pos,None,Send,Some(snd(n)),Some(e))}
+ | pos = ChoiceToken a = expr AssignToken ReceiveToken LeftParenthesisToken n = IdentToken RightParenthesisToken                         {PrefixNode(pos,Some(a),Receive,Some(snd(n)),None)}
+ | pos = ChoiceToken a = expr AssignToken NewToken LeftParenthesisToken RightParenthesisToken                                             {PrefixNode(pos,Some(a),New,None,None)}
+ | pos = ChoiceToken SpawnToken f = IdentToken LeftParenthesisToken e = exprs RightParenthesisToken                                  {PrefixNode(pos,None,Spawn,Some(snd(f)),Some(e))}
  
 expr :
- | SubToken e = expr                                             {UnaryNode (Negate,e)}
- | HeadToken LeftParenthesisToken e = expr RightParenthesisToken                                             {UnaryNode (Head,e)}                                                                                                                     
- | TailToken LeftParenthesisToken e = expr RightParenthesisToken                                             {UnaryNode (Tail,e)}                                                                                                                    
- | OddToken LeftParenthesisToken e = expr RightParenthesisToken                                             {UnaryNode (Odd,e)}                                                                                                                      
- | EvenToken LeftParenthesisToken e = expr RightParenthesisToken                                             {UnaryNode (Even,e)}
- | FstToken LeftParenthesisToken e = expr RightParenthesisToken                                             {UnaryNode (Fst,e)}                                                                                                                      
- | SndToken LeftParenthesisToken e = expr RightParenthesisToken                                             {UnaryNode (Snd,e)}  
- | e1 = expr AddToken e2 = expr                                                                                                       {BinaryNode (e1,Add,e2)}
- | e1 = expr SubToken e2 = expr                                                                                                       {BinaryNode (e1,Substract,e2)}
- | e1 = expr OrToken e2 = expr                                                                                                        {BinaryNode (e1,Or,e2)}
- | e1 = expr MulToken e2 = expr                                                                                                       {BinaryNode (e1,Multiply,e2)}
- | e1 = expr DivToken e2 = expr                                                                                                       {BinaryNode (e1,Divide,e2)}
- | e1 = expr AndToken e2 = expr                                                                                                       {BinaryNode (e1,And,e2)}
- | e1 = expr EqualToken e2 = expr                                                                                                     {BinaryNode (e1,Equal,e2)}
- | e1 = expr DifferentToken e2 = expr                                                                                                 {BinaryNode (e1,Different,e2)}
- | e1 = expr LesserToken e2 = expr                                                                                                    {BinaryNode (e1,Lesser,e2)}
- | e1 = expr GreaterToken e2 = expr                                                                                                   {BinaryNode (e1,Greater,e2)}
- | IfToken LeftParenthesisToken cond = expr RightParenthesisToken 
-      LeftBracketToken e1 = expr RightBracketToken ElseToken LeftBracketToken e2 = expr RightBracketToken                         {IfthenelseExprNode (cond,e1,e2)}
- | LeftParenthesisToken e = exprs RightParenthesisToken                                                                           {ExprNode (e)}
+ | pos = SubToken e = expr                                                                                   {UnaryNode (pos,Negate,e)}
+ | pos = HeadToken LeftParenthesisToken e = expr RightParenthesisToken                                             {UnaryNode (pos,Head,e)}                                                                                                                     
+ | pos = TailToken LeftParenthesisToken e = expr RightParenthesisToken                                             {UnaryNode (pos,Tail,e)}                                                                                                                    
+ | pos = OddToken LeftParenthesisToken e = expr RightParenthesisToken                                             {UnaryNode (pos,Odd,e)}                                                                                                                      
+ | pos = EvenToken LeftParenthesisToken e = expr RightParenthesisToken                                             {UnaryNode (pos,Even,e)}
+ | pos = FstToken LeftParenthesisToken e = expr RightParenthesisToken                                             {UnaryNode (pos,Fst,e)}                                                                                                                      
+ | pos = SndToken LeftParenthesisToken e = expr RightParenthesisToken                                             {UnaryNode (pos,Snd,e)}  
+ | e1 = expr pos = AddToken e2 = expr                                                                                                       {BinaryNode (pos,e1,Add,e2)}
+ | e1 = expr pos = SubToken e2 = expr                                                                                                       {BinaryNode (pos,e1,Substract,e2)}
+ | e1 = expr pos = OrToken e2 = expr                                                                                                        {BinaryNode (pos,e1,Or,e2)}
+ | e1 = expr pos = MulToken e2 = expr                                                                                                       {BinaryNode (pos,e1,Multiply,e2)}
+ | e1 = expr pos = DivToken e2 = expr                                                                                                       {BinaryNode (pos,e1,Divide,e2)}
+ | e1 = expr pos = AndToken e2 = expr                                                                                                       {BinaryNode (pos,e1,And,e2)}
+ | e1 = expr pos = EqualToken e2 = expr                                                                                                     {BinaryNode (pos,e1,Equal,e2)}
+ | e1 = expr pos = DifferentToken e2 = expr                                                                                                 {BinaryNode (pos,e1,Different,e2)}
+ | e1 = expr pos = LesserToken e2 = expr                                                                                                    {BinaryNode (pos,e1,Lesser,e2)}
+ | e1 = expr pos = GreaterToken e2 = expr                                                                                                   {BinaryNode (pos,e1,Greater,e2)}
+ | pos = IfToken LeftParenthesisToken cond = expr RightParenthesisToken 
+      LeftBracketToken e1 = expr RightBracketToken ElseToken LeftBracketToken e2 = expr RightBracketToken                         {IfthenelseExprNode (pos,cond,e1,e2)}
+ | pos = LeftParenthesisToken e = exprs RightParenthesisToken                                                                           {ExprNode (pos,e)}
  | v = value                                                                                                                      {ValueNode (v)} 
- | n = IdentToken                                                                                                                 {AssignNode (snd(n))}
+ | n = IdentToken                                                                                                                 {AssignNode (fst(n),snd(n))}
 
 exprs :
  | e = expr                                                                                                                        {ExprsNode (e,None)}
  | e1 = expr ComaToken e2 = exprs                                                                                                  {ExprsNode (e1,Some(e2))}
 
 cst : 
- | c = NumberToken                                                                                                        {IntegerNode(snd(c))}
- | c = CharValueToken                                                                                                    {CharNode (snd(c))}
- | DoubleQuoteToken c = IdentToken DoubleQuoteToken                                                                       {StringNode (snd(c))}
- | TrueToken                                                                                                              {TrueNode}
- | FalseToken                                                                                                             {FalseNode}
+ | c = NumberToken                                                                                                        {IntegerNode(fst(c),snd(c))}
+ | c = CharValueToken                                                                                                    {CharNode (fst(c),snd(c))}
+ | DoubleQuoteToken c = IdentToken DoubleQuoteToken                                                                       {StringNode (fst(c),snd(c))}
+ | pos = TrueToken                                                                                                              {TrueNode (pos)}
+ | pos = FalseToken                                                                                                             {FalseNode (pos)}
 
 value :
  | c = cst                                                                                                              {ValueNode (c)}              
@@ -164,14 +164,14 @@ valueSeq :
  | v = value ComaToken vs = valueSeq                                                                                    {ValueSeqNode (v,Some(vs))}
 
 typ :
- | IntegerToken                                                                                                            {TypeNode (IntegerT)}
- | BoolToken                                                                                                              {TypeNode (BooleanT)}    
- | StringToken                                                                                                            {TypeNode (StringT)}
- | CharToken                                                                                                              {TypeNode (CharT)}
- | ChannelToken t = typ                                                                                                   {ChanTNode (t)}
- | ListToken LeftSqBracketToken t = typ RightSqBracketToken                                                               {ListTNode (t)}
- | LeftParenthesisToken tSeq = types RightParenthesisToken                                                                {TupleTNode (tSeq)}
- | t = IdentToken                                                                                                         {NamedTypeNode (snd(t))}        
+ | pos = IntegerToken                                                                                                            {TypeNode (pos,IntegerT)}
+ | pos = BoolToken                                                                                                              {TypeNode (pos,BooleanT)}    
+ | pos = StringToken                                                                                                            {TypeNode (pos,StringT)}
+ | pos = CharToken                                                                                                              {TypeNode (pos,CharT)}
+ | pos = ChannelToken t = typ                                                                                                   {ChanTNode (pos,t)}
+ | pos = ListToken LeftSqBracketToken t = typ RightSqBracketToken                                                               {ListTNode (pos,t)}
+ | pos = LeftParenthesisToken tSeq = types RightParenthesisToken                                                                {TupleTNode (pos,tSeq)}
+ | t = IdentToken                                                                                                         {NamedTypeNode (fst(t),snd(t))}        
 
 types :
  | t = typ                                                                                                            {TypeSeqNode (t,None)}
@@ -182,4 +182,4 @@ funcType :
  | t = typ                                                                                                            {FuncTNode (Some (t))}
 
 callMain :
- | StartToken f = IdentToken LeftParenthesisToken e = exprs RightParenthesisToken                                       {CallNode (snd(f),e)} 
+ | StartToken f = IdentToken LeftParenthesisToken e = exprs RightParenthesisToken                                       {CallNode (fst(f),snd(f),e)} 
