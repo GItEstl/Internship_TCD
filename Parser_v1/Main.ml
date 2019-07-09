@@ -25,39 +25,29 @@ let report_error filename lexbuf msg =
   with
   | Lexer.Error s ->
       report_error file filebuf "lexical error (unexpected character).";
-      exit 2
   | Parser.Error ->
       report_error file filebuf "syntax error.";
-      exit 2
   | Resolve.Multiple_declaration_type (pos,name) ->
     let c = pos.pos_cnum - pos.pos_bol + 1 in
     Printf.eprintf "File \"%s\", line %d, character %d: The type %s is declared twice\n" file pos.pos_lnum c name;
-    exit 2;
  | Resolve.Undeclared_type (pos,name) ->
     let c = pos.pos_cnum - pos.pos_bol + 1 in
     Printf.eprintf "File \"%s\", line %d, character %d: Incorrect declaration type: unbound value %s\n" file pos.pos_lnum c name;
-    exit 2
  | Resolve.Unauthorized_recursivity pos ->
     let c = pos.pos_cnum - pos.pos_bol + 1 in
     Printf.eprintf "File \"%s\", line %d, character %d: Incorrect declaration type: only channel type can be recursive\n" file pos.pos_lnum c;
-    exit 2
  | Resolve.Multiple_declaration_var (pos,name) ->
     let c = pos.pos_cnum - pos.pos_bol + 1 in
     Printf.eprintf "File \"%s\", line %d, character %d: The name %s is already used by another function/variable\n" file pos.pos_lnum c name;
-    exit 2;
  | Resolve.Multiple_declaration_param (pos,name) ->
     let c = pos.pos_cnum - pos.pos_bol + 1 in
     Printf.eprintf "File \"%s\", line %d, character %d: The name %s is used twice in the function paraneters\n" file pos.pos_lnum c name;
-    exit 2;
  | Resolve.Type_not_found (pos,name) ->
     let c = pos.pos_cnum - pos.pos_bol + 1 in
     Printf.eprintf "File \"%s\", line %d, character %d: Incorrect type: unbound value %s\n" file pos.pos_lnum c name;
-    exit 2;
  | Resolve.Function_not_found (pos,name) ->
     let c = pos.pos_cnum - pos.pos_bol + 1 in
     Printf.eprintf "File \"%s\", line %d, character %d: Incorrect function for start: unbound value %s\n" file pos.pos_lnum c name;
-    exit 2;
  | Resolve.Unknow_error_in_type_checking ->
-    Printf.eprintf "Fatal error in type checking";    
-    exit 2
+    Printf.eprintf "Fatal error in type checking";
       
