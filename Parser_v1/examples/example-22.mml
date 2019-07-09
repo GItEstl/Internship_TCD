@@ -1,0 +1,5 @@
+type testType = (int,testType)
+
+func void main (int x) {}
+
+start main(0)

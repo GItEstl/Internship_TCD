@@ -1,0 +1,12 @@
+int globalVar
+
+func int main (int x, boolean b) {
+    globalVar = x;
+    return x
+}
+
+func int main (int y) {
+    return y
+}
+
+start main(0)

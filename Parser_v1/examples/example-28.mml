@@ -1,0 +1,8 @@
+int globalVar
+
+func int main (int x, int x) {
+    globalVar = x;
+    return x + x
+}
+
+start main(0)

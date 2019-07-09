@@ -1,0 +1,10 @@
+int globalVar
+
+bool sameName
+
+func int sameName (int x, int y) {
+    globalVar = x;
+    return y + x
+}
+
+start sameName(0)
