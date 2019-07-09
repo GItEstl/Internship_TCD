@@ -19,8 +19,8 @@ let report_error filename lexbuf msg =
   let (envType,envVar) = (List.rev envType, List.rev envVar) in
   print_string ("Environment created \n");
   let nameListType = (well_formed_envType envType) in
-  let (_,nameListFunc) = (well_formed_envVar envVar nameListType) in
-  let _ = well_formed_start start nameListFunc in
+  let _ = (well_formed_envVar envVar nameListType) in
+  let a = well_formed_start start envVar in
   print_string ("Environment well-formed")
   with
   | Lexer.Error s ->
