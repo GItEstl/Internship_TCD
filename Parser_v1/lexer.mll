@@ -61,6 +61,7 @@ rule token = parse
   | "spawn"   {SpawnToken (Lexing.lexeme_start_p lexbuf)}
   | "choose"  {ChooseToken (Lexing.lexeme_start_p lexbuf)}
   | '|'       {ChoiceToken (Lexing.lexeme_start_p lexbuf)}
+  | "not"     {NotToken (Lexing.lexeme_start_p lexbuf)}
   | "head"    {HeadToken (Lexing.lexeme_start_p lexbuf)} 
   | "tail"    {TailToken (Lexing.lexeme_start_p lexbuf)}
   | "odd"     {OddToken (Lexing.lexeme_start_p lexbuf)}

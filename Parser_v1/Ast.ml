@@ -15,7 +15,8 @@ type binary =
 
 (* Unary operator Type *)
 type unary = 
-  | Negate
+  | NegateInt
+  | NegateBool
   | Head
   | Tail
   | Odd
@@ -161,8 +162,10 @@ match tree with
   (string_of_ast a) ^ " = newChan()"  
     | (PrefixNode(_,None,Spawn,Some(f),Some(e))) ->
   " | spawn " ^ f ^ "(" ^ (string_of_ast e) ^ ")"
-    | (UnaryNode (_,Negate,e)) ->
+    | (UnaryNode (_,NegateInt,e)) ->
   "(-" ^ (string_of_ast e) ^ ")"
+    | (UnaryNode (_,NegateBool,e)) ->
+  "(not" ^ (string_of_ast e) ^ ")"
     | (UnaryNode (_,Head,e)) ->
   "head(" ^ (string_of_ast e) ^ ")"
     | (UnaryNode (_,Tail,e)) ->

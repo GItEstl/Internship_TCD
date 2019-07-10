@@ -30,7 +30,7 @@ open Ast
 %token <Lexing.position> FunctionToken
 %token <Lexing.position> ReceiveToken, SendToken, NewToken, SpawnToken, TauToken
 %token <Lexing.position> ChooseToken, ChoiceToken
-%token <Lexing.position> HeadToken, TailToken, OddToken, EvenToken, FstToken, SndToken
+%token <Lexing.position> HeadToken, TailToken, OddToken, EvenToken, FstToken, SndToken, NotToken
 %token <Lexing.position> StartToken, ReturnToken
 %token <Lexing.position> TypeToken
 %token EOF
@@ -93,7 +93,7 @@ instruction :
  | bi = binstruction SequenceToken i = instruction                                                         {InstrSeqNode (bi,Some(i))}
 
 binstruction :
- | a = expr pos = AssignToken e = expr                                                                                  {BinaryNode (pos,a,Assign,e)}
+ | a = expr pos = AssignToken e = expr                                                                         {BinaryNode (pos,a,Assign,e)}
  | a = expr pos = AssignToken f = IdentToken LeftParenthesisToken e = exprs RightParenthesisToken              {BinaryNode (pos,a,Assign,CallNode (fst(f),snd(f),e))} 
  | f = IdentToken LeftParenthesisToken e = exprs RightParenthesisToken                                              {CallNode (fst(f),snd(f),e)}
  | a = expr pos = AssignToken ReceiveToken LeftParenthesisToken n = IdentToken RightParenthesisToken                  {ReceiveNode (pos,a,snd(n))}
@@ -121,7 +121,8 @@ prefix :
  | pos = ChoiceToken SpawnToken f = IdentToken LeftParenthesisToken e = exprs RightParenthesisToken                                  {PrefixNode(pos,None,Spawn,Some(snd(f)),Some(e))}
  
 expr :
- | pos = SubToken e = expr                                                                                   {UnaryNode (pos,Negate,e)}
+ | pos = SubToken e = expr                                                                                   {UnaryNode (pos,NegateInt,e)}
+ | pos = NotToken e = expr                                                                                   {UnaryNode (pos,NegateBool,e)}
  | pos = HeadToken LeftParenthesisToken e = expr RightParenthesisToken                                             {UnaryNode (pos,Head,e)}                                                                                                                     
  | pos = TailToken LeftParenthesisToken e = expr RightParenthesisToken                                             {UnaryNode (pos,Tail,e)}                                                                                                                    
  | pos = OddToken LeftParenthesisToken e = expr RightParenthesisToken                                             {UnaryNode (pos,Odd,e)}                                                                                                                      
