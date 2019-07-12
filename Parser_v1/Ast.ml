@@ -54,8 +54,8 @@ type ast =
   | FunctionNode of Lexing.position * ast * string * ast * ast
   | ParamsNode of Lexing.position * ast * string * ast option
   | VariableDeclasNode of ast * ast option
-  | VariableDeclaNode of Lexing.position *  ast * ast
-  | TupleDeclaNode of Lexing.position * string * ast option
+  | VariableDeclaNode of Lexing.position *  ast * string
+ (* | TupleDeclaNode of Lexing.position * string * ast option *)
   | BodyNode of Lexing.position * ast option * ast
   | WhileNode of Lexing.position * ast * ast
   | ReceiveNode of Lexing.position * ast * string
@@ -106,14 +106,14 @@ match tree with
   "{\ndef\n" ^ (string_of_ast v) ^ "in \n" ^ (string_of_ast i) ^ "}\n"    
     | (BodyNode (_,None,i)) ->
   "{\n" ^ (string_of_ast i) ^ "}\n"
-    | (VariableDeclaNode (_,t,StringNode(_,n))) -> 
+    | (VariableDeclaNode (_,t,n)) -> 
   (string_of_ast t) ^ " " ^ n
-    | (VariableDeclaNode (_,t,idents)) -> 
+  (*  | (VariableDeclaNode (_,t,idents)) -> 
   (string_of_ast t) ^ " (" ^ (string_of_ast idents) ^ ")"
     | (TupleDeclaNode (_,n,None)) ->
   n
     | (TupleDeclaNode (_,n,Some(idents))) ->
-  n ^ ", " ^ (string_of_ast idents)
+  n ^ ", " ^ (string_of_ast idents)  *)
     | (VariableDeclasNode (v,None)) -> 
   (string_of_ast v) ^ "\n"
     | (VariableDeclasNode (v,Some(vs))) -> 

@@ -1,6 +1,6 @@
 func void barmanNewTable (channel channel string bar, channel string table) {
     send(bar,table);
-    spawn Barman(bar,table)
+    spawn barmanFillTable(bar,table)
 }
 
 func void barmanFillTable (channel channel string bar, channel string table) {

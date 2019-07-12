@@ -25,45 +25,49 @@ in
     gain2 = newChan();
     lose2 = newChan();
     transmit2 = newChan();
-    spawn car((talk1,switch1));
-    spawn trans((talk1,switch1,gain1,lose1));
-    spawn idTrans((gain2,lose2));
-    spawn control((talk1,switch1,gain1,lose1,transmit1,talk2,switch2,gain2,lose2,transmit2))
+    spawn car(talk1,switch1,0);
+    spawn trans(talk1,switch1,gain1,lose1,transmit1);
+    spawn idTrans(gain2,lose2);
+    spawn control(talk1,switch1,gain1,lose1,transmit1,talk2,switch2,gain2,lose2,transmit2)
 }
 
 func void car (IntChan talk, Switch switch, int pos) {
 def
-    (IntChan,Switch) (t,s);
+    IntChan t;
+    Switch s;
     int newPos
 in
     newPos = move(pos);
     choose {
-        | (t,s) = receive (switch) -> {spawn car((t,s,newPos))} 
-        | send (talk,newPos) -> {spawn car((talk,switch,newPos))} 
+        | (t,s) = receive (switch) -> {spawn car(t,s,newPos)} 
+        | send (talk,newPos) -> {spawn car(talk,switch,newPos)} 
     }
 }
 
 func void trans (IntChan talk, Switch switch, GainLose gain, GainLose lose, IntChan transmit) {
 def
     int pos;
-    (IntChan,Switch) (t,s)
+    IntChan t;
+    Switch s
 in
     choose {
         | pos = receive (talk) -> {send(transmit,pos);
-                                   spawn trans((talk,switch,gain,lose,transmit))
+                                   spawn trans(talk,switch,gain,lose,transmit)
                                   }
-        | (t,s) = receive (lose) -> {send (swtich, (t,s));
-                                    spawn idTrans((gain,lose))
+        | (t,s) = receive (lose) -> {send (switch, (t,s));
+                                    spawn idTrans(gain,lose)
                                     }
     }
 }
 
 func void idTrans (GainLose gain, GainLose lose) {
 def
-    (IntChan, Switch, IntChan) (ta,s,tr)
+    IntChan ta;
+    Switch s;
+    IntChan tr
 in
     (ta,s,tr) = receive (gain);
-    spawn trans((t,s,gain,lose,tr))
+    spawn trans(ta,s,gain,lose,tr)
 }
 
 func void control (IntChan talk1, Switch switch1, GainLose gain1, GainLose lose1, IntChan  transmit1,

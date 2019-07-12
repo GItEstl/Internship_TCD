@@ -6,7 +6,7 @@ in
     ch1 = newChan();
     ch2 = newChan();
     spawn sys1(a+100,ch1,ch2);
-    spawn sys2(a+100,ch1,ch2)
+    spawn sys3(a+100,ch1,ch2)
 }
 
 func void sys1 (int i, channel int ch1, channel boolean ch2) {
@@ -38,6 +38,13 @@ in
     } else {
         return "Error"
     }
+}
+
+func void sys3 (int i, channel int ch1, channel boolean ch2) {
+def
+    string s
+in 
+    s = sys2 (i,ch1,ch2)
 }
 
 start test (0)

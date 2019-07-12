@@ -17,7 +17,7 @@ let rec create_env (envType,envVar,start) tree =
       create_env (create_env (envType,envVar,start) p1) p2
         | FunctionNode (pos,ft,name,params,_) ->
       (envType,(pos,ft,name,Some(params))::envVar,start)
-        | VariableDeclaNode (pos,t,StringNode(_,name)) -> 
+        | VariableDeclaNode (pos,t,name) -> 
       (envType,(pos,t,name,None)::envVar,start)      
         | TypeDeclaNode (pos,name,t) ->
       ((pos,name,t)::envType,envVar,start)
@@ -99,9 +99,10 @@ let well_formed_var decla nameListType =
     | (_,ft,_,Some(params)) -> let _ = (well_formed_params params nameListType []) in (well_formed_func_type ft nameListType)
 
 let well_formed_envVar envVar nameListType =
-    let _ = uniqueVar envVar [] nameListType in
+    let names = uniqueVar envVar [] nameListType in
     try 
-      List.for_all (fun d -> well_formed_var d nameListType) envVar
+      let _ = List.for_all (fun d -> well_formed_var d nameListType) envVar in
+      names
     with
       | Unbound_value (pos,n) -> raise (Type_not_found (pos,n))
       

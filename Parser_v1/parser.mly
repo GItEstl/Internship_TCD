@@ -35,6 +35,7 @@ open Ast
 %token <Lexing.position> TypeToken
 %token EOF
 
+%left NotToken
 %left OrToken
 %left AndToken
 %left DifferentToken, EqualToken
@@ -74,12 +75,12 @@ body :
  | pos = LeftBracketToken DefToken v = variableDeclas InToken i = instruction RightBracketToken                 {BodyNode (pos,Some(v),i)}
 
 variableDecla :
- | t = typ n = IdentToken                                                                                   {VariableDeclaNode (fst(n),t,StringNode(fst(n),snd(n)))}
- | t = typ pos = LeftParenthesisToken idents = tupleDecla RightParenthesisToken                              {VariableDeclaNode (pos,t,idents)}
+ | t = typ n = IdentToken                                                                                   {VariableDeclaNode (fst(n),t,snd(n))}
+(* | t = typ pos = LeftParenthesisToken idents = tupleDecla RightParenthesisToken                              {VariableDeclaNode (pos,t,idents)}
 
 tupleDecla : 
  | n = IdentToken                                                                                           {TupleDeclaNode (fst(n),snd(n),None)} 
- | n = IdentToken ComaToken idents = tupleDecla                                                             {TupleDeclaNode (fst(n),snd(n),Some(idents))} 
+ | n = IdentToken ComaToken idents = tupleDecla                                                             {TupleDeclaNode (fst(n),snd(n),Some(idents))} *)
 
 variableDeclas :
  | v = variableDecla                                                                                         {VariableDeclasNode (v,None)}

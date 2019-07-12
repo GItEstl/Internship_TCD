@@ -24,7 +24,7 @@ func void cond (channel (StringChan,StringChan) l) {
 def
     StringChan t;
     StringChan f;
-    String v
+    string v
 in
     t = newChan();
     f = newChan();
@@ -35,13 +35,9 @@ in
     } 
 }
 
-func string test1(string s) {
-    return s
-}
+func void test1(string s) {}
 
-func string test2(string s) {
-    return s
-}
+func void test2(string s) {}
 
 func void main(string s) {
 def

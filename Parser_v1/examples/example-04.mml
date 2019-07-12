@@ -7,7 +7,7 @@ in
     c = newChan();
     choose {
         | i = receive(c) -> {i = i + 1}
-        | send(i,c) -> {i = 0}
+        | send(c,i) -> {i = 0}
         | spawn main(2) -> {i = a - 1}
         | tau -> {i = i +1}
     };;;

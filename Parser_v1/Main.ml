@@ -1,6 +1,7 @@
 open Ast 
 open Lexing
 open Resolve
+open TypeChecking
 
 let report_error filename lexbuf msg =
  let (b,e) = (lexeme_start_p lexbuf, lexeme_end_p lexbuf) in
@@ -21,7 +22,9 @@ let report_error filename lexbuf msg =
   let nameListType = (well_formed_envType envType) in
   let _ = (well_formed_envVar envVar nameListType) in
   let a = well_formed_start start envVar in
-  print_string ("Environment well-formed")
+  print_string ("Environment well-formed \n");
+  let _ = type_check_prg envVar envType nameListType ast in
+  print_string ("Program type-checked")
   with
   | Lexer.Error s ->
       report_error file filebuf "lexical error (unexpected character).";

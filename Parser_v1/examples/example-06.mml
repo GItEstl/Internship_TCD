@@ -2,7 +2,7 @@ func int increment10 (int num, int c) {
     if (c == 10) {
         return num
     } else {
-        return incrememt(num+1,c+1)
+        return increment10(num+1,c+1)
     }
 } 
 

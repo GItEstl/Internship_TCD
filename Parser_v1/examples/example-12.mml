@@ -1,15 +1,12 @@
-func int A(int i) {
-def
-    int c
-in
-}
-
 func void Na (channel int ion, channel int deion) {
     send(ion,1);
     spawn NaPlus(ion,deion)
 }
 
 func void NaPlus (channel int ion, channel int deion) {
+def
+    int e
+in
     e = receive(deion);
     spawn Na(ion,deion)
 }
@@ -20,6 +17,9 @@ func void K (channel int ion, channel int deion) {
 }
 
 func void KPlus (channel int ion, channel int deion) {
+def
+    int e
+in
     e = receive(deion);
     spawn K(ion,deion)
 }
@@ -34,7 +34,7 @@ in
     }
 }
 
-func void Cl (channel int ion1, channel int deion1, channel int ion2, channel int deion2) {
+func void ClMinus (channel int ion1, channel int deion1, channel int ion2, channel int deion2) {
 def 
     int e
 in
