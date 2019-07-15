@@ -1,6 +1,6 @@
 func void ThinkingPhilosophe(channel boolean fl, channel boolean fr) {
     choose {
-        | tau -> {ThinkingPhilosophe(fl,fr)}
+        | tau -> {spawn ThinkingPhilosophe(fl,fr)}
         | send(fl,true) -> {spawn WaitingPhilosophe(fl,fr,fr)}
         | send(fr,true) -> {spawn WaitingPhilosophe(fl,fr,fl)}
     }
@@ -47,7 +47,7 @@ def
     channel boolean rightFork;
     int c
 in
-    c = 0;
+    c = fstPhiloLeftFork;
     fstPhiloLeftFork = newChan();
     leftFork = fstPhiloLeftFork;
     rightFork = newChan();
@@ -56,6 +56,7 @@ in
         leftFork = newChan();
         spawn Fork(rightFork,leftFork);
         rightFork = newChan();
+        c = c + 1
     };
     spawn ThinkingPhilosophe(leftFork,rightFork);
     spawn Fork(rightFork,fstPhiloLeftFork)

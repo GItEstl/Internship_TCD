@@ -53,4 +53,9 @@ let report_error filename lexbuf msg =
     Printf.eprintf "File \"%s\", line %d, character %d: Incorrect function for start: unbound value %s\n" file pos.pos_lnum c name;
  | Resolve.Unknow_error_in_type_checking ->
     Printf.eprintf "Fatal error in type checking";
+ | TypeChecking.Wrong_type (pos,tfound,texpec) ->
+    let c = pos.pos_cnum - pos.pos_bol + 1 in
+    let f = string_of_type tfound in
+    let e = string_of_type texpec in
+    Printf.eprintf "File \"%s\", line %d, character %d: Wrong type: The type %s was found but a type %s was expected\n" file pos.pos_lnum c f e;
       

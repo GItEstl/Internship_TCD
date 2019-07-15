@@ -11,6 +11,17 @@ exception Type_not_found of Lexing.position * string
 exception Function_not_found of Lexing.position * string
 exception Start_not_found
 
+let rec find_rec typeNode name =
+  match typeNode with
+    | NamedTypeNode(_,n) -> String.equal n name
+    | TypeNode (_) -> false
+    | ChanTNode (_,st) -> find_rec st name
+    | ListTNode (_,st) -> find_rec st name
+    | TupleTNode (_,tSeq) -> find_rec tSeq name         
+    | TypeSeqNode (st,None) -> find_rec st name 
+    | TypeSeqNode (st1, Some(st2)) -> if (find_rec st1 name) then true else find_rec st2 name
+    | _ -> raise Unknow_error_in_type_checking
+
 let rec create_env (envType,envVar,start) tree =
     match tree with
         | ProgramNode (p1,p2) -> 
@@ -20,7 +31,7 @@ let rec create_env (envType,envVar,start) tree =
         | VariableDeclaNode (pos,t,name) -> 
       (envType,(pos,t,name,None)::envVar,start)      
         | TypeDeclaNode (pos,name,t) ->
-      ((pos,name,t)::envType,envVar,start)
+      ((pos,name,t,find_rec t name)::envType,envVar,start)
         | CallNode (pos,name,expr) ->
       (envType,envVar,Some((pos,name,expr))) 
         | _ -> 
@@ -29,7 +40,7 @@ let rec create_env (envType,envVar,start) tree =
 let rec uniqueType envType nameList = 
   match envType with
     | [] -> nameList
-    | (pos,name,_)::q -> if (List.mem name nameList) 
+    | (pos,name,_,_)::q -> if (List.mem name nameList) 
                          then raise (Multiple_declaration_type (pos,name))                   
                          else (uniqueType q (name::nameList))
 
@@ -49,18 +60,14 @@ let rec well_formed_type_aux t nameList  =
                                      else raise Unknow_error_in_type_checking
    | _ -> raise Unknow_error_in_type_checking
 
-let well_formed_type_decla (pos,name,t) nameList =
-  match t with 
-    | ChanTNode(_,t) -> 
-      (try
-        (well_formed_type_aux t nameList)
-      with
-        | Unbound_value (pos,n) -> raise (Undeclared_type (pos,n))) 
-    | _ -> 
-      (try
-        well_formed_type_aux t (List.filter (fun e -> not (String.equal e name)) nameList)
-      with
-        | Unbound_value (posn,n) -> if (String.equal n name) then raise (Unauthorized_recursivity pos) else raise (Undeclared_type (posn,n)))
+let well_formed_type_decla (pos,name,t,tRec) nameList =
+  try (
+    match t with 
+      | ChanTNode(_,t) -> (well_formed_type_aux t nameList)
+      | _ -> if (tRec) then raise (Unauthorized_recursivity pos)
+             else well_formed_type_aux t (List.filter (fun e -> not (String.equal e name)) nameList))
+  with
+    | Unbound_value (posn,n) -> raise (Undeclared_type (posn,n))
 
 let well_formed_envType envType =
     let nameList = uniqueType envType [] in

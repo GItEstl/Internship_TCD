@@ -2,7 +2,7 @@ type StringChan = channel string
 
 func void True(channel (StringChan,StringChan) l) {
 def
-    StringChan t;
+    channel string t;
     StringChan f
 
 in 

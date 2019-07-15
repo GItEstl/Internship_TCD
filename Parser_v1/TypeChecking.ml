@@ -20,9 +20,11 @@ type instrType =
   | OK
   | OKt of typeType
 
+exception Different_types_in_list
+exception Impossible_unify_instr of typeType * typeType
+
 exception Wrong_type of Lexing.position * typeType * typeType
 exception Inconsistent_types of Lexing.position * typeType * typeType
-exception Different_types_in_list
 exception Unknown_variable of Lexing.position * string
 exception Unknown_function of Lexing.position * string
 exception Not_type_of_the_params of Lexing.position * typeType * typeType * string
@@ -31,38 +33,55 @@ exception Assignement_of_void of Lexing.position * string
 exception No_assignement_of_the_return of Lexing.position * typeType * string
 exception Wrong_type_chan_receive of Lexing.position * typeType * typeType
 exception Wrong_type_chan_send of Lexing.position * typeType * typeType
-exception Impossible_unify_instr of typeType * typeType
 exception Different_type_of_return_if of Lexing.position * typeType * typeType
 exception Return_not_match_with_decla of Lexing.position * typeType * typeType * string
 exception Different_type_of_return_func of Lexing.position * string
+exception Illegal_type_argument of Lexing.position
 exception Unknown_error_type_checking of string
-exception Unknown_error_type_checking_ of ast
-exception Unknown_error_type_checking__ of typeType list  
 
-let rec type_of_tree_unfolded tree =
+let rec string_of_type t =
+  match t with
+    | IntegerType -> "integer"
+    | BooleanType -> "boolean"
+    | StringType -> "string"
+    | CharType -> "char"
+    | VoidType -> "void"
+    | ChannelType(st) -> "channel " ^ (string_of_type st)
+    | ChannelGenType -> "channel"
+    | ListType(st) -> "list" ^ (string_of_type st)
+    | ListGenType -> "list"
+    | TupleType(st) -> "(" ^ (let rec aux l = match l with 
+                                      | [] -> ""
+                                      | t::q -> (string_of_type t) ^ ", " ^ (aux q)
+                        in aux st) ^ ")"  
+    | TupleGenType -> "tuple"
+    | NamedType(s) -> s 
+    | ErrorType -> "ERROR"
+
+let rec type_of_tree_aux tree envType =
   match tree with
     | TypeNode (_,IntegerT) -> IntegerType
     | TypeNode (_,BooleanT) -> BooleanType
     | TypeNode (_,StringT) -> StringType
     | TypeNode (_,CharT) -> CharType
-    | ChanTNode (_,st) -> ChannelType (type_of_tree_unfolded st) 
-    | ListTNode (_,st) -> ListType (type_of_tree_unfolded st)
-    | TupleTNode (_,TypeSeqNode(st,None)) -> type_of_tree_unfolded st
+    | ChanTNode (_,st) -> ChannelType (type_of_tree_aux st envType) 
+    | ListTNode (_,st) -> ListType (type_of_tree_aux st envType)
+    | TupleTNode (_,TypeSeqNode(st,None)) -> type_of_tree_aux st envType
     | TupleTNode (_,tSeq) -> TupleType (
       let rec aux t l = match t with
-        | TypeSeqNode (st,None) -> List.rev ((type_of_tree_unfolded st)::l) 
-        | TypeSeqNode (st1, Some(st2)) -> aux st2 ((type_of_tree_unfolded st1)::l)
+        | TypeSeqNode (st,None) -> List.rev ((type_of_tree_aux st envType)::l) 
+        | TypeSeqNode (st1, Some(st2)) -> aux st2 ((type_of_tree_aux st1 envType)::l)
         | _ -> raise (Unknown_error_type_checking "type_of_tree")
       in aux tSeq [])
-    | NamedTypeNode (_,name) -> NamedType (name)
+    | NamedTypeNode (_,st) -> let _,_,t,tRec = (List.find (fun (_,name,_,_) -> String.equal name st) envType) in if (tRec) then NamedType(st) else (type_of_tree_aux t envType)
     | FuncTNode (None) -> VoidType
-    | FuncTNode (Some(t)) -> type_of_tree_unfolded t        
+    | FuncTNode (Some(t)) -> type_of_tree_aux t envType        
     | _ -> raise (Unknown_error_type_checking "type_of_tree")
 
-let type_of_tree tree envType =
-  match tree with
-    | NamedTypeNode (_,st) -> let _,_,t = (List.find (fun (_,name,_) -> String.equal name st) envType) in type_of_tree_unfolded t        
-    | _ -> type_of_tree_unfolded tree
+let type_of_tree tree envType = 
+  match tree with 
+    | NamedTypeNode(_,st) -> let _,_,t,_ = (List.find (fun (_,name,_,_) -> String.equal name st) envType) in (type_of_tree_aux t envType)
+    | _ -> type_of_tree_aux tree envType
 
 let type_of_var namevar envVar envType pos =
   try 
@@ -88,19 +107,23 @@ let rec compare envType type1 type2 =
     | (ChannelType(st),ChannelGenType) -> (true,ChannelType(st))
     | (ListType(st1),ListType(st2)) -> if (fst(compare envType st1 st2)) then (true,ListType(st2)) else (false,ErrorType)
     | (ListType(st),ListGenType) -> (true,ListType(st))
-    | (TupleType(st1),TupleType(st2)) -> (try if (List.for_all2 (fun a b -> fst(compare envType a b)) st1 st2) then (true,TupleType(st2)) else (false,ErrorType) with | Invalid_argument _ -> raise (Unknown_error_type_checking__ st1))
+    | (TupleType(st1),TupleType(st2)) -> if (List.for_all2 (fun a b -> fst(compare envType a b)) st1 st2) then (true,TupleType(st2)) else (false,ErrorType)
     | (TupleType(st),TupleGenType) -> (true,TupleType(st))
     | (NamedType(n1),NamedType(n2)) -> if (String.equal n1 n2) then (true,NamedType(n2)) else (false,ErrorType)
+    | (NamedType(st),t) | (t,NamedType(st)) -> let _,_,tnode,_ = (List.find (fun (_,name,_,_) -> String.equal name st) envType) in compare envType (type_of_tree tnode envType) t
     | (VoidType,VoidType) -> (true,VoidType)
-    | (NamedType(st),t) | (t,NamedType(st)) -> let _,_,tnode = (List.find (fun (_,name,_) -> String.equal name st) envType) in compare envType (type_of_tree tnode envType) t
     | _ -> (false,ErrorType)
 
 let unify_instr ti1 ti2 envType = 
   match (ti2,ti1) with
     | (OK,t) -> t
     | (t,OK) -> t
-    | (OKt(t1),OKt(t2)) -> let b,t = compare envType t1 t2 in
+    | (OKt(t1),OKt(t2)) ->
+    try
+      let b,t = compare envType t1 t2 in
       if (b) then OKt(t) else raise (Impossible_unify_instr (t1,t2))
+    with 
+      | Invalid_argument _ -> raise (Impossible_unify_instr (t1,t2))
 
 (* Expression *)
 
@@ -114,63 +137,74 @@ let rec type_of_expr expr envVar envType =
     | ExprsNode (e1,Some(e2)) -> ruleTupleExpr (ExprsNode (e1,Some(e2))) envVar envType
     | ValueNode(ValueNode (v)) -> ruleValue v envType
     | AssignNode (pos,a) -> ruleAssignable a envVar envType pos
-    | _ -> raise (Unknown_error_type_checking_ expr)
+    | _ -> raise (Unknown_error_type_checking "type_of_expr")
 
 and
 
 ruleUnary op expr envVar envType pos = 
-  let texpr = (type_of_expr expr envVar envType) in
-  (match op with
-  | (NegateInt | Odd | Even)->
-    let be,_ = compare envType texpr IntegerType in
-    (if (be) then IntegerType else raise (Wrong_type (pos,texpr,IntegerType)))
-  | NegateBool ->
-    let be,_ = compare envType texpr BooleanType in
-    (if (be) then IntegerType else raise (Wrong_type (pos,texpr,IntegerType)))
-  | Head ->
-    let _,te = compare envType texpr ListGenType in
-    (match te with
-      | ListType(st) -> st
+  try
+    let texpr = (type_of_expr expr envVar envType) in
+    (match op with
+    | (NegateInt | Odd | Even)->
+      let be,_ = compare envType texpr IntegerType in
+      (if (be) then IntegerType else raise (Wrong_type (pos,texpr,IntegerType)))
+    | NegateBool ->
+      let be,_ = compare envType texpr BooleanType in
+      (if (be) then IntegerType else raise (Wrong_type (pos,texpr,IntegerType)))
+    | Head ->
+      let _,te = compare envType texpr ListGenType in
+      (match te with
+        | ListType(st) -> st
+        | _ -> raise (Wrong_type (pos,texpr,ListGenType))) 
+    | Tail ->
+      let _,te = compare envType texpr ListGenType in
+      (match te with
+      | ListType(_) -> te
       | _ -> raise (Wrong_type (pos,texpr,ListGenType))) 
-  | Tail ->
-    let _,te = compare envType texpr ListGenType in
-    (match te with
-    | ListType(_) -> te
-    | _ -> raise (Wrong_type (pos,texpr,ListGenType))) 
-  | Fst ->
-    let _,te = compare envType texpr TupleGenType in
-    (match te with
-    | TupleType(st) -> List.hd st
-    | _ -> raise (Wrong_type (pos,texpr,TupleGenType))) 
-  | Snd ->
-    let _,te = compare envType texpr TupleGenType in
-    (match te with
-    | TupleType(st) -> List.nth st 1
-    | _ -> raise (Wrong_type (pos,texpr,TupleGenType))) 
-  )
-  
+    | Fst ->
+      let _,te = compare envType texpr TupleGenType in
+      (match te with
+      | TupleType(st) -> List.hd st
+      | _ -> raise (Wrong_type (pos,texpr,TupleGenType))) 
+    | Snd ->
+      let _,te = compare envType texpr TupleGenType in
+      (match te with
+      | TupleType(st) -> List.nth st 1
+      | _ -> raise (Wrong_type (pos,texpr,TupleGenType))) 
+    )
+  with
+    | Invalid_argument _ -> raise (Illegal_type_argument pos)
 and 
 
-ruleBinary op left right envVar envType  pos =
-  let tleft = (type_of_expr left envVar envType) in
-  let tright = (type_of_expr right envVar envType) in
-    (match op with
-    | (Equal | Different | Lesser | Greater) ->
-      let (bl,tl) = compare envType tleft IntegerType in
-      let (br,tr) = compare envType tright IntegerType in
-        (if (bl) then (if (br) then BooleanType else raise (Wrong_type (pos,tr,IntegerType))) 
-        else raise (Wrong_type (pos,tl,IntegerType)))
-    | (Add | Substract | Multiply | Divide) ->
-      let (bl,tl) = compare envType tleft IntegerType in
-      let (br,tr) = compare envType tright IntegerType in
-        (if (bl) then (if (br) then IntegerType else raise (Wrong_type (pos,tr,IntegerType))) 
-        else raise (Wrong_type (pos,tl,IntegerType)))
-    | (Or | And) ->
-      let (bl,tl) = compare envType tleft BooleanType in
-      let (br,tr) = compare envType tright BooleanType in
-        (if (bl) then (if (br) then BooleanType else raise (Wrong_type (pos,tr,IntegerType))) 
-        else raise (Wrong_type (pos,tl,IntegerType)))
-    | _ -> raise (Unknown_error_type_checking "ruleBinary"))
+ruleBinary op left right envVar envType pos =
+  try
+    let tleft = (type_of_expr left envVar envType) in
+    let tright = (type_of_expr right envVar envType) in
+      (match op with
+      | (Equal | Different) -> 
+        let (b,t) = compare envType tleft tright in
+          (match t with 
+            | IntegerType | BooleanType | CharType | StringType -> BooleanType
+            | ErrorType -> raise (Wrong_type (pos,tright,tleft))
+            | _ -> raise (Illegal_type_argument pos))
+      | (Lesser | Greater) ->
+        let (bl,tl) = compare envType tleft IntegerType in
+        let (br,tr) = compare envType tright IntegerType in
+          (if (bl) then (if (br) then BooleanType else raise (Wrong_type (pos,tr,IntegerType))) 
+          else raise (Wrong_type (pos,tl,IntegerType)))
+      | (Add | Substract | Multiply | Divide) ->
+        let (bl,tl) = compare envType tleft IntegerType in
+        let (br,tr) = compare envType tright IntegerType in
+          (if (bl) then (if (br) then IntegerType else raise (Wrong_type (pos,tr,IntegerType))) 
+          else raise (Wrong_type (pos,tl,IntegerType)))
+      | (Or | And) ->
+        let (bl,tl) = compare envType tleft BooleanType in
+        let (br,tr) = compare envType tright BooleanType in
+          (if (bl) then (if (br) then BooleanType else raise (Wrong_type (pos,tr,IntegerType))) 
+          else raise (Wrong_type (pos,tl,IntegerType)))
+      | _ -> raise (Unknown_error_type_checking "ruleBinary"))
+  with 
+    | Invalid_argument _ -> raise (Illegal_type_argument pos)
 
 and
 
@@ -215,7 +249,7 @@ ruleValue v envType =
               if (bv) then (aux v2 vs2) else raise (Different_types_in_list)
             | _ -> raise (Unknown_error_type_checking ("ruleValue1")))
         in aux v vs) 
-    | _ -> raise (Unknown_error_type_checking_ v)
+    | _ -> raise (Unknown_error_type_checking "ruleValue")
 
 and
 
@@ -271,8 +305,11 @@ and
 ruleAssignInstr assign expr envVar envType pos =
   let tassign = (type_of_expr assign envVar envType) in
   let texpr = (type_of_expr expr envVar envType) in
-  let be,_ = compare envType tassign texpr in
-  if (be) then OK else raise (Wrong_type (pos,texpr,tassign))
+  try
+    let be,_ = compare envType tassign texpr in
+    if (be) then OK else raise (Wrong_type (pos,texpr,tassign))
+  with 
+    | Invalid_argument _ -> raise (Wrong_type (pos,texpr,tassign))
 
 and
 
@@ -280,13 +317,19 @@ ruleCallFuncWithReturn a namef e envVar envType pos posf =
   let tf,pnode = type_of_func namef envVar envType posf in
   if (tf != VoidType) then
     let ta = type_of_expr a envVar envType in
-    let br,_ = compare envType ta tf in
-    if (br) then
-      let tp = type_of_params pnode envType in
-      let te = type_of_expr e envVar envType in
-      let b,_ = compare envType tp te in
-        if (b) then OK else raise (Not_type_of_the_params (pos,te,tp,namef)) 
-    else raise (Not_type_of_the_return (pos,ta,tf,namef))
+    try
+      let br,_ = compare envType ta tf in
+      if (br) then
+        let tp = type_of_params pnode envType in
+        let te = type_of_expr e envVar envType in
+        (try
+          let b,_ = compare envType tp te in
+          if (b) then OK else raise (Not_type_of_the_params (pos,te,tp,namef)) 
+        with 
+          | Invalid_argument _ -> raise (Not_type_of_the_params (pos,te,tp,namef)))
+      else raise (Not_type_of_the_return (pos,ta,tf,namef))
+    with
+      | Invalid_argument _ -> raise (Not_type_of_the_return (pos,ta,tf,namef))
   else raise (Assignement_of_void (pos,namef))
 
 and
@@ -297,8 +340,11 @@ ruleCallFuncVoid namef e envVar envType pos =
     if (br) then
       let tp = type_of_params pnode envType in
       let te = type_of_expr e envVar envType in
-      let b,_ = compare envType tp te in
-      if (b) then OK else raise (Not_type_of_the_params (pos,te,tp,namef)) 
+      try
+        let b,_ = compare envType tp te in
+        if (b) then OK else raise (Not_type_of_the_params (pos,te,tp,namef))
+      with
+        | Invalid_argument _ -> raise (No_assignement_of_the_return (pos,tf,namef))
     else raise (No_assignement_of_the_return (pos,tf,namef))
 
 and
@@ -306,20 +352,26 @@ and
 ruleReceive a namechan envVar envType pos = 
   let ta = type_of_expr a envVar envType in
   let tchan = type_of_var namechan envVar envType pos in
-  match tchan with
-    | ChannelType(st) -> let b,_ = compare envType ta st in 
+  (match tchan with
+    | ChannelType(st) -> (try 
+                          let b,_ = compare envType (ChannelType(ta)) tchan in 
                           if (b) then OK else raise (Wrong_type_chan_receive (pos,ta,st))
-    | _ -> raise (Wrong_type (pos,tchan,ChannelGenType))
+                        with
+                          | Invalid_argument _ -> raise (Wrong_type_chan_receive (pos,ta,st))) 
+    | _ -> raise (Wrong_type (pos,tchan,ChannelGenType)))
 
 and
 
 ruleSend namechan e envVar envType pos = 
   let te = type_of_expr e envVar envType in
   let tchan = type_of_var namechan envVar envType pos in
-  match tchan with
-    | ChannelType(st) -> let b,_ = compare envType te st in 
+  (match tchan with
+    | ChannelType(st) -> (try 
+                          let b,_ = compare envType (ChannelType(te)) tchan in 
                           if (b) then OK else raise (Wrong_type_chan_send (pos,te,st))
-    | _ -> raise (Wrong_type (pos,tchan,ChannelGenType))
+                        with
+                          | Invalid_argument _ -> raise (Wrong_type_chan_send (pos,te,st))) 
+    | _ -> raise (Wrong_type (pos,tchan,ChannelGenType)))
 
 and
 
@@ -327,22 +379,25 @@ ruleIfThenElseInstr cond_expr then_instr else_instr envVar envType pos =
   let tcond_expr = (type_of_expr cond_expr envVar envType) in
   let tthen_instr = (ruleInstr then_instr envVar envType) in
   let telse_instr = (ruleInstr else_instr envVar envType) in
-  let be,te = compare envType tcond_expr BooleanType in
-    if (be) then 
-      try
-        unify_instr tthen_instr telse_instr envType
-      with
-        | Impossible_unify_instr (t1,t2) -> raise (Different_type_of_return_if (pos,t1,t2))
+  try
+    let be,te = compare envType tcond_expr BooleanType in
+    if (be) then unify_instr tthen_instr telse_instr envType
     else raise (Wrong_type (pos,te,BooleanType))
+  with
+    | Impossible_unify_instr (t1,t2) -> raise (Different_type_of_return_if (pos,t1,t2))
+    | Invalid_argument _ -> raise (Illegal_type_argument pos)
 
 and
 
 ruleWhile cond_expr i envVar envType pos =
   let tcond = (type_of_expr cond_expr envVar envType) in
   let ti = (ruleInstr i envVar envType) in
-  let be,te = compare envType tcond BooleanType in 
-    if (be) then ti
-    else raise (Wrong_type (pos,te,BooleanType))
+  try
+    let be,te = compare envType tcond BooleanType in 
+      if (be) then ti
+      else raise (Wrong_type (pos,te,BooleanType))
+  with
+    | Invalid_argument _ -> raise (Illegal_type_argument pos)
 
 and
 
@@ -373,8 +428,11 @@ and
 
 ruleNew a envVar envType pos = 
   let ta = type_of_expr a envVar envType in
-  let bc,_ = compare envType ta ChannelGenType in
-  if (bc) then OK else raise (Wrong_type (pos,ta,ChannelGenType))
+  try
+    let bc,_ = compare envType ta ChannelGenType in
+    if (bc) then OK else raise (Wrong_type (pos,ta,ChannelGenType))
+  with
+    | Invalid_argument _ -> raise (Wrong_type (pos,ta,ChannelGenType))
 
 and
 
@@ -390,8 +448,11 @@ ruleReturnFunc namef e envVar envType pos =
   let tf,pnode = type_of_func namef envVar envType pos in
   let tp = type_of_params pnode envType in
   let te = type_of_expr e envVar envType in
-  let b,_ = compare envType tp te in
-    if (b) then OKt(tf) else raise (Not_type_of_the_params (pos,te,tp,namef)) 
+  try
+    let b,_ = compare envType tp te in
+    if (b) then OKt(tf) else raise (Not_type_of_the_params (pos,te,tp,namef))
+  with
+    | Invalid_argument _ -> raise (Not_type_of_the_params (pos,te,tp,namef))
 
 (* Functions *)
 
@@ -433,8 +494,16 @@ let ruleFunction f envVar envType nameListType =
           | _ -> raise (Unknown_error_type_checking ("ruleFunction"))) in
         let ft = type_of_tree ftnode envType in
         (match ti with
-          | OK -> if (fst(compare envType ft VoidType)) then true else raise (Return_not_match_with_decla (pos,VoidType,ft,namef))
-          | OKt(rt) -> if (fst(compare envType ft rt)) then true else raise (Return_not_match_with_decla (pos,rt,ft,namef)))
+          | OK -> (try
+                    if (fst(compare envType ft VoidType)) then true 
+                    else raise (Return_not_match_with_decla (pos,VoidType,ft,namef))
+                  with
+                    | Invalid_argument _ -> raise (Return_not_match_with_decla (pos,VoidType,ft,namef)))
+          | OKt(rt) -> (try
+                         if (fst(compare envType ft rt)) then true 
+                         else raise (Return_not_match_with_decla (pos,rt,ft,namef))
+                       with
+                         | Invalid_argument _ -> raise (Return_not_match_with_decla (pos,rt,ft,namef))))
     | _ -> raise (Unknown_error_type_checking ("ruleFunction")))
 
 (* Program *)

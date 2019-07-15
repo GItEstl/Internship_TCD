@@ -1,18 +1,19 @@
 type IntChan = channel int
 type Switch = channel (IntChan,Switch)
-type GainLose = channel (IntChan,Switch) 
+type Gain = channel (IntChan,Switch,IntChan) 
+type Lose = channel (IntChan,Switch)
 
 func void system (int pos) {
 def
     IntChan talk1;
     Switch switch1;
-    GainLose gain1;
-    GainLose lose1;
+    Gain gain1;
+    Lose lose1;
     IntChan transmit1;
     IntChan talk2;
     Switch switch2;
-    GainLose gain2;
-    GainLose lose2;
+    Gain gain2;
+    Lose lose2;
     IntChan transmit2
 in
     talk1 = newChan();
@@ -44,7 +45,7 @@ in
     }
 }
 
-func void trans (IntChan talk, Switch switch, GainLose gain, GainLose lose, IntChan transmit) {
+func void trans (IntChan talk, Switch switch, Gain gain, Lose lose, IntChan transmit) {
 def
     int pos;
     IntChan t;
@@ -60,7 +61,7 @@ in
     }
 }
 
-func void idTrans (GainLose gain, GainLose lose) {
+func void idTrans (Gain gain, Lose lose) {
 def
     IntChan ta;
     Switch s;
@@ -70,19 +71,19 @@ in
     spawn trans(ta,s,gain,lose,tr)
 }
 
-func void control (IntChan talk1, Switch switch1, GainLose gain1, GainLose lose1, IntChan  transmit1,
-              IntChan  talk2, Switch switch2, GainLose gain2, GainLose lose2, IntChan  transmit2) {
+func void control (IntChan talk1, Switch switch1, Gain gain1, Lose lose1, IntChan  transmit1,
+              IntChan  talk2, Switch switch2, Gain gain2, Lose lose2, IntChan  transmit2) {
 def
     int pos
 in
     while (true) {
         choose {
             | pos = receive (transmit1) -> {if (pos > 100) {send (lose1, (talk2,switch2));
-                                                            send (gain2, (talk2,switch2))
+                                                            send (gain2, (talk2,switch2,transmit2))
                                                            } else {}
                                             }
             | pos = receive (transmit2) -> {if (pos < 100) {send (lose2, (talk1,switch1));
-                                                            send (gain1, (talk1,switch1))
+                                                            send (gain1, (talk1,switch1,transmit1))
                                                            } else {}
                                             }
         }

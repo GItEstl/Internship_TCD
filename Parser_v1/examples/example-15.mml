@@ -33,7 +33,7 @@ in
     }
 }
 
-func void WaitingNaiveMan (channel channel string bar) {
+func void waitingNaiveMan (channel channel string bar) {
 def
     channel string table
 in
@@ -53,7 +53,7 @@ in
                                     } else {
                                         spawn waitingWiseMan(bar,answer)
                                     }}
-        | send(table,notTheSecret) -> {spawn waitingNaiveMan(bar,secret)}
+        | send(table,notTheSecret) -> {spawn waitingNaiveMan(bar)}
     }
 }
 
@@ -69,7 +69,7 @@ in
     spawn waitingWiseMan(bar,secret);
     c = 0;
     while (c < nbNaiveMan) {
-        spawn WaitingNaiveMan(bar);
+        spawn waitingNaiveMan(bar);
         c = c + 1
     }
 }
