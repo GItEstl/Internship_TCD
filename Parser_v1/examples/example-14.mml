@@ -36,7 +36,7 @@ def
 in
     choose {
         | tau -> {spawn NotFreeFork(philol,philor,philoWithFork)}
-        | free = receive(philof) -> {spawn Fork(philol,philor)}
+        | free = receive(philoWithFork) -> {spawn Fork(philol,philor)}
     } 
 }
 
