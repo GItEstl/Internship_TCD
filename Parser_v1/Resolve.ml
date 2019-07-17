@@ -11,6 +11,14 @@ exception Type_not_found of Lexing.position * string
 exception Function_not_found of Lexing.position * string
 exception Start_not_found
 
+(* find_rec: ast -> string -> bool
+Function telling if a type is recursive or not
+Parameters:
+  - typeNode : abstract syntax tree representing the type
+  - name : type name
+Return: boolean meaning if the type is recursive or not
+*)
+
 let rec find_rec typeNode name =
   match typeNode with
     | NamedTypeNode(_,n) -> String.equal n name
@@ -21,6 +29,20 @@ let rec find_rec typeNode name =
     | TypeSeqNode (st,None) -> find_rec st name 
     | TypeSeqNode (st1, Some(st2)) -> if (find_rec st1 name) then true else find_rec st2 name
     | _ -> raise Unknow_error_in_type_checking
+
+
+(* create_env: (position * string * ast * bool) list * (position * ast * string * ast option) list * 
+  (position * string * ast) option -> ast -> 
+  (position * string * ast * bool) list * (position * ast * string * ast option) list *
+  (position * string * ast) option
+Function creating the type and variable environments thanks to the ast of the program
+Parameters:
+  - envType: list of the type declarations already found
+  - envVar: list of the the variable/function declarations already found
+  - start: the ast representing the start function if already found
+  - tree: ast to analyze
+Return: Type and variable environments
+*)
 
 let rec create_env (envType,envVar,start) tree =
     match tree with
@@ -37,6 +59,14 @@ let rec create_env (envType,envVar,start) tree =
         | _ -> 
       (envType,envVar,start)
 
+
+(* uniqueType : (position * string * ast * bool) list -> string list -> string list
+Function checking that all type declared are unique 
+Parameters:
+  - envType: list of the type declarations
+  - nameList: list of names of already declared types
+Return: the names of the declared types
+*)
 let rec uniqueType envType nameList = 
   match envType with
     | [] -> nameList
