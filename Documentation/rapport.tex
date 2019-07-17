@@ -304,7 +304,7 @@ We have also used semi-colons to resolve conflicts. \\ \\
 
 
 \newpage
-\centerline{\textbf{\Huge Grammar : Backus-Naur form (BNF)}}
+\centerline{\textbf{\Huge Abstract Grammar : Backus-Naur form (BNF)}}
 \vspace*{20 pt}
 \vspace*{3pt}
 \begin{Verbatim}[fontfamily=textsf]
@@ -474,25 +474,22 @@ CallMain ::= start name ( ExpressionSeq )
 \begin{prooftree}
 \AxiomC{$\Gamma_t ; \ \Gamma_v ; \vdash e_1: T_1 $}
 \AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_2 : T_2$}
-\AxiomC{$T_1 \times T_2 \in dom$ op}
-\AxiomC{$T \in codom$ op}
-\QuaternaryInfC{$\Gamma_t ; \ \Gamma_v ; \vdash e_1 \ op \ e_2 : T $}
+\AxiomC{$op \ : T_1 \times T_2 \rightarrow T$ }
+\TrinaryInfC{$\Gamma_t ; \ \Gamma_v ; \vdash e_1 \ op \ e_2 : T $}
 \end{prooftree}
 
 \tabto{0cm} {\large \textbf{Unary Operator}}
 \begin{prooftree}
 \AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e : T $}
-\AxiomC{$T \in dom$ op}
-\AxiomC{$T' \in codom$ op}
-\TrinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash op \ e : T' $}
+\AxiomC{$op \ : T \rightarrow T'$ }
+\BinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash op \ e : T' $}
 \end{prooftree}
 
 \tabto{0cm} {\large \textbf{Negate Operator}}
 \begin{prooftree}
 \AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e : T $}
-\AxiomC{$T \in dom \ -$}
-\AxiomC{$T' \in codom \ -$}
-\TrinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash - \ e : T' $}
+\AxiomC{$(-) : N \rightarrow N$}
+\BinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash - \ e : T' $}
 \end{prooftree}
 
 \tabto{0cm} {\large \textbf{Condition}}
@@ -509,7 +506,7 @@ CallMain ::= start name ( ExpressionSeq )
 \AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_2 : T_2 $}
 \AxiomC{$\ldots$}
 \AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_n : T_n $}
-\QuaternaryInfC{$\Gamma_t ; \ \Gamma_v \vdash (e_1,e_2,\ldots,e_n) : T_1 \times T_2 \times \ldots \times T_n)$}
+\QuaternaryInfC{$\Gamma_t ; \ \Gamma_v \vdash (e_1,e_2,\ldots,e_n) : (T_1 \times T_2 \times \ldots \times T_n)$}
 \end{prooftree}
 
 \tabto{0cm} {\large \textbf{List of Values}}
@@ -532,22 +529,22 @@ CallMain ::= start name ( ExpressionSeq )
 \AxiomC{$\Gamma_t ; \ \Gamma_v ; \vdash a : T_a $}
 \AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e : T_e$}
 \AxiomC{$ T_a = T_e $}
-\TrinaryInfC{$\Gamma_t ; \ \Gamma_v ; \vdash a = e : void $}
+\TrinaryInfC{$\Gamma_t ; \ \Gamma_v ; \vdash a = e \ OK_T $}
 \end{prooftree}
 
 \tabto{0cm} {\large \textbf{Function Call with return}}
 \begin{prooftree}
-\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_1 : T_2 $}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash a : T_2 $}
 \AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_2 : T_1 \rightarrow T_2 $}
 \AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_3 : T_1 $}
-\TrinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash e_1 = e_2 (e_3) : T_2 $}
+\TrinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash a = e_2 (e_3) \ OK_T $}
 \end{prooftree}
 
 \tabto{0cm} {\large \textbf{Function Call without return}}
 \begin{prooftree}
 \AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_1 : T_1 \rightarrow void$}
 \AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_2 : T_1 $}
-\BinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash e_1(e_2) : void $}
+\BinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash e_1(e_2) \ OK_T $}
 \end{prooftree}
 
 \newpage
@@ -555,20 +552,20 @@ CallMain ::= start name ( ExpressionSeq )
 \tabto{0cm} {\large \textbf{While}}
 \begin{prooftree}
 \AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_1 : bool$}
-\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_2 : T $}
-\BinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash while(e_1) \ \{ e_2 \} : T $}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_2 : void $}
+\BinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash while(e_1) \ \{ e_2 \} : void $}
 \end{prooftree}
 
 \tabto{0cm} {\large \textbf{Return void}}
 \begin{prooftree}
 \AxiomC{$ $}
-\UnaryInfC{$\Gamma_t ; \ \Gamma_v \vdash return : void $}
+\UnaryInfC{$\Gamma_t ; \ \Gamma_v \vdash return \ OK_{void} $}
 \end{prooftree}
 
 \tabto{0cm} {\large \textbf{Return Expression }}
 \begin{prooftree}
 \AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e : T$}
-\UnaryInfC{$\Gamma_t ; \ \Gamma_v \vdash return \ e : T $}
+\UnaryInfC{$\Gamma_t ; \ \Gamma_v \vdash return \ e \ OK_T $}
 \end{prooftree}
 
 \tabto{0cm} {\large \textbf{Send Instruction}}
@@ -617,13 +614,22 @@ CallMain ::= start name ( ExpressionSeq )
 
 \newpage
 
-\tabto{0cm} {\large \textbf{Variable Declaration}}
+\tabto{0cm} {\large \textbf{Function Declaration}}
+\begin{prooftree}
+\AxiomC{$wf_{\Gamma_t}(T)$}
+\AxiomC{$wf_{\Gamma_t} (\overrightarrow{T})$}
+\AxiomC{$unique(\overrightarrow{y})$}
+\AxiomC{$\Gamma_t ; \ \Gamma_v; \ \overrightarrow{x \ \ T} ; \ \overrightarrow{y \ \ T^\prime} \vdash i : OK_T $}
+\QuaternaryInfC{$\Gamma_t ; \ \Gamma_v \vdash^d func \ T \ a \  \overrightarrow{x \ \ T} \ \{ \ def \  \overrightarrow{y \ \ T^\prime} \ in \ i \} \ OK_{fd}$}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Variable Declaration SUPP}}
 \begin{prooftree}
 \AxiomC{$\Gamma_t ; \ \Gamma_v \vdash T $}
 \UnaryInfC{$\Gamma_t ; \ \Gamma_v \vdash T \ x $}
 \end{prooftree}
 
-\tabto{0cm} {\large \textbf{Function Declaration}}
+\tabto{0cm} {\large \textbf{Function Declaration OLD}}
 \begin{prooftree}
 \AxiomC{$\Gamma_t ; \ \Gamma_v \vdash T $}
 \AxiomC{$\Gamma^\prime := \Gamma_t ; \ \Gamma_v ; \ x_1 : T_1 ; \ \ldots \ x_n : T_n  $}
@@ -631,6 +637,165 @@ CallMain ::= start name ( ExpressionSeq )
 \AxiomC{$\Gamma^\prime ; \ \overrightarrow{declaVar} \vdash i : T $}
 \QuaternaryInfC{$\Gamma_t ; \ \Gamma_v \vdash func \ T \ name \ (T_1 \ x_1 , \ \ldots , \ T_n \ x_n) \ \{ \ def \ \overrightarrow{declaVar} \ in \ i \}$}
 \end{prooftree}
+
+\newpage
+\centerline{\textbf{\Huge Semantic Rules}}
+\vspace*{3pt}
+\vspace*{20pt}
+
+
+\tabto{0cm} {\large \textbf{Binary Operator}}
+\begin{prooftree}
+\AxiomC{$s_1 \vdash e_1 \Downarrow  v_1,s_2 $}
+\AxiomC{$s_2 \vdash e_2 \Downarrow  v_2,s_3$}
+\BinaryInfC{$s_1 \vdash e_1 \ op \ e_2 \Downarrow v_1 \ op \ v_2, s_3 $}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Unary Operator}}
+\begin{prooftree}
+\AxiomC{$s_1 \vdash e \Downarrow  v,s_2 $}
+\UnaryInfC{$s_1 \vdash op \ e \Downarrow v, s_2 $}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Condition Expression}}
+\begin{prooftree}
+\AxiomC{$s_1 \vdash e_1 \Downarrow true, s_2$}
+\AxiomC{$s_2 \vdash e_2 \Downarrow v, s_3$}
+\BinaryInfC{$s_1 \vdash if \ e_1 \ then \ e_2 \ else \ e_3  \Downarrow v, s_3 $}
+\end{prooftree}
+\vspace*{1pt}
+\begin{prooftree}
+\AxiomC{$s_1 \vdash e_1 \Downarrow false, s_2$}
+\AxiomC{$s_2 \vdash e_3 \Downarrow v, s_3$}
+\BinaryInfC{$s_1 \vdash if \ e_1 \ then \ e_2 \ else \ e_3  \Downarrow v, s_3 $}
+\end{prooftree}
+
+
+\tabto{0cm} {\large \textbf{Tuple}}
+\begin{prooftree}
+\AxiomC{$s_1 \vdash e_1 \Downarrow v_1,s_2$}
+\AxiomC{$s_2 \vdash e_2 \Downarrow v_2,s_3$}
+\AxiomC{$\ldots$}
+\AxiomC{$s_n \vdash E_n \Downarrow v_n,s_{n+1}$}
+\QuaternaryInfC{$s_1 \vdash (e_1,e_2,\ldots,e_n) \Downarrow (v_1, v_2, \ldots, v_n),s_{n+1}$}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Value}}
+\begin{prooftree}
+\AxiomC{ }
+\UnaryInfC{$s \vdash v \Downarrow v,s$}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Identifier}}
+\begin{prooftree}
+\AxiomC{ }
+\UnaryInfC{$s \vdash n \Downarrow lookup \ n \ in \ s,s$}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Assignment}}
+\begin{prooftree}
+\AxiomC{$s_1 \vdash e \Downarrow v,s_2$}
+\UnaryInfC{$s_1 \vdash a = e \Downarrow s_2[n \mapsto v] $}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Condition Instruction}}
+\begin{prooftree}
+\AxiomC{$s_1 \vdash e_1 \Downarrow true, s_2$}
+\AxiomC{$s_2 \vdash i_1 \Downarrow s_3$}
+\BinaryInfC{$s_1 \vdash if \ e_1 \ then \ i_1 \ else \ i_2  \Downarrow s_3 $}
+\end{prooftree}
+\vspace*{1pt}
+\begin{prooftree}
+\AxiomC{$s_1 \vdash e_1 \Downarrow true, s_2$}
+\AxiomC{$s_2 \vdash i_1 \Downarrow v, s_3$}
+\BinaryInfC{$s_1 \vdash if \ e_1 \ then \ i_1 \ else \ i_2  \Downarrow v, s_3 $}
+\end{prooftree}
+\vspace*{1pt}
+\begin{prooftree}
+\AxiomC{$s_1 \vdash e_1 \Downarrow false, s_2$}
+\AxiomC{$s_2 \vdash i_2 \Downarrow s_3$}
+\BinaryInfC{$s_1 \vdash if \ e_1 \ then \ i_1 \ else \ i_2  \Downarrow s_3 $}
+\end{prooftree}
+\vspace*{1pt}
+\begin{prooftree}
+\AxiomC{$s_1 \vdash e_1 \Downarrow false, s_2$}
+\AxiomC{$s_2 \vdash i_2 \Downarrow v, s_3$}
+\BinaryInfC{$s_1 \vdash if \ e_1 \ then \ i_1 \ else \ i_2  \Downarrow v, s_3 $}
+\end{prooftree}
+
+
+\tabto{0cm} {\large \textbf{Function Call with return}}
+\begin{prooftree}
+\AxiomC{$s_1 \vdash f \Downarrow (\lambda x.i),s_2 $}
+\AxiomC{$s_2 \vdash e \Downarrow v_1,s_3 $}
+\AxiomC{$s_3 \vdash i[x \mapsto v_1] \Downarrow v_2,s_4$}
+\TrinaryInfC{$s_1 \vdash a = f (e) \Downarrow s_4[a \mapsto v_2]$}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Function Call without return}}
+\begin{prooftree}
+\AxiomC{$s_1 \vdash f \Downarrow (\lambda x.i),s_2 $}
+\AxiomC{$s_2 \vdash e \Downarrow v_1,s_3 $}
+\AxiomC{$s_3 \vdash i[x \mapsto v_1] \Downarrow s_4$}
+\TrinaryInfC{$s_1 \vdash f (e) \Downarrow s_4$}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{While Instruction}}
+\begin{prooftree}
+\AxiomC{$s_1 \vdash e \Downarrow true, s_2$}
+\AxiomC{$s_2 \vdash i \Downarrow s_3$}
+\BinaryInfC{$s_1 \vdash while(e) \ \{i\} \Downarrow  while(e) \ \{i\},s_3 $}
+\end{prooftree}
+\vspace*{1pt}
+\begin{prooftree}
+\AxiomC{$s_1 \vdash e \Downarrow false, s_2$}
+\UnaryInfC{$s_1 \vdash while(e) \ \{i\} \Downarrow s_2 $}
+\end{prooftree}
+\vspace*{1pt}
+\begin{prooftree}
+\AxiomC{$s_1 \vdash e \Downarrow true, s_2$}
+\AxiomC{$s_2 \vdash i \Downarrow v,s_3$}
+\BinaryInfC{$s_1 \vdash while(e) \ \{i\} \Downarrow  v,s_3 $}
+\end{prooftree}
+
+
+\tabto{0cm} {\large \textbf{Return void}}
+\begin{prooftree}
+\AxiomC{$ $}
+\UnaryInfC{$s \vdash return \Downarrow s $}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Return Expression }}
+\begin{prooftree}
+\AxiomC{$s_1 \vdash e \Downarrow v,s_2 $}
+\UnaryInfC{$s_1 \vdash return \ e \Downarrow v,s_2 $}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Sequence of Instructions}}
+\begin{prooftree}
+\AxiomC{$s_1 \vdash i_1 \Downarrow s_2$}
+\AxiomC{$s_2 \vdash i_2 \Downarrow s_3 $}
+\BinaryInfC{$s_1 \vdash i_1 \ ; \ i_2 \Downarrow s_3 $}
+\end{prooftree}
+\vspace*{1pt}
+\begin{prooftree}
+\AxiomC{$s_1 \vdash i_1 \Downarrow s_2$}
+\AxiomC{$s_2 \vdash i_2 \Downarrow v,s_3 $}
+\BinaryInfC{$s_1 \vdash i_1 \ ; \ i_2 \Downarrow v,s_3 $}
+\end{prooftree}
+\vspace*{1pt}
+\begin{prooftree}
+\AxiomC{$s_1 \vdash i_1 \Downarrow v,s_2$}
+\UnaryInfC{$s_1 \vdash i_1 \ ; \ i_2 \Downarrow v,s_2 $}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Variable Declaration}}
+\begin{prooftree}
+\AxiomC{$n \in dom(s)$}
+\UnaryInfC{$s \vdash type \ x \Downarrow s::[n \mapsto v_{type}]$}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Function Declaration}}
 
 \newpage
 \centerline{\textbf{\Huge Examples}}

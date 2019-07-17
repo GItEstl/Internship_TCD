@@ -57,5 +57,60 @@ let report_error filename lexbuf msg =
     let c = pos.pos_cnum - pos.pos_bol + 1 in
     let f = string_of_type tfound in
     let e = string_of_type texpec in
-    Printf.eprintf "File \"%s\", line %d, character %d: Wrong type: The type %s was found but a type %s was expected\n" file pos.pos_lnum c f e;
-      
+    Printf.eprintf "File \"%s\", line %d, character %d: Wrong type: The type %s was found but the type %s was expected\n" file pos.pos_lnum c f e;
+ | TypeChecking.Inconsistent_types(pos,t1found,t2found) ->
+    let c = pos.pos_cnum - pos.pos_bol + 1 in
+    let t_then = string_of_type t1found in
+    let t_else = string_of_type t2found in
+    Printf.eprintf "File \"%s\", line %d, character %d: Inconsistent types: The return type %s and %s were found in the then and else branch\n" file pos.pos_lnum c t_then t_else;
+ | TypeChecking.Unknown_variable(pos,name) ->
+    let c = pos.pos_cnum - pos.pos_bol + 1 in
+    Printf.eprintf "File \"%s\", line %d, character %d: Unknown variable: unbound value %s\n" file pos.pos_lnum c name;
+ | TypeChecking.Unknown_function(pos,namef) ->
+    let c = pos.pos_cnum - pos.pos_bol + 1 in
+    Printf.eprintf "File \"%s\", line %d, character %d: Unknown function: unbound value %s\n" file pos.pos_lnum c namef;
+ | TypeChecking.Not_type_of_the_params(pos,te,tp,namef) ->
+    let c = pos.pos_cnum - pos.pos_bol + 1 in
+    let t_expr = string_of_type te in
+    let t_decla = string_of_type tp in
+    Printf.eprintf "File \"%s\", line %d, character %d: Wrong type of argument in the function %s: the type %s was found but the type %s was expected\n" file pos.pos_lnum c namef t_expr t_decla;
+ | TypeChecking.Not_type_of_the_return(pos,ta,tf,namef) ->
+    let c = pos.pos_cnum - pos.pos_bol + 1 in
+    let t_assign = string_of_type ta in
+    let t_func = string_of_type tf in
+    Printf.eprintf "File \"%s\", line %d, character %d: Incorrect assignment of the function return: the function %s returns the type %s but the type %s was found\n" file pos.pos_lnum c namef t_func t_assign;
+ | TypeChecking.Assignement_of_void(pos,namef) ->
+    let c = pos.pos_cnum - pos.pos_bol + 1 in
+    Printf.eprintf "File \"%s\", line %d, character %d: Incorrect assignment: the function %s does not have a return\n" file pos.pos_lnum c namef;
+ | TypeChecking.No_assignement_of_the_return(pos,tf,namef) ->
+    let c = pos.pos_cnum - pos.pos_bol + 1 in
+    let t_func = string_of_type tf in
+    Printf.eprintf "File \"%s\", line %d, character %d: The function %s has the type %s, it must be assign to a variable\n" file pos.pos_lnum c namef t_func;
+ | TypeChecking.Wrong_type_chan_receive (pos,ta,st) ->
+    let c = pos.pos_cnum - pos.pos_bol + 1 in
+    let t_assign= string_of_type ta in
+    let t_chan = string_of_type st in
+    Printf.eprintf "File \"%s\", line %d, character %d: Incorrect assignment of the channel reception: the elements passed along the channel have the type %s but the type %s was found\n" file pos.pos_lnum c t_assign t_chan;
+| TypeChecking.Wrong_type_chan_send (pos,te,st) ->
+    let c = pos.pos_cnum - pos.pos_bol + 1 in
+    let t_elt = string_of_type te in
+    let t_chan = string_of_type st in
+    Printf.eprintf "File \"%s\", line %d, character %d: Wrong type of element send: the elements passed along the channel have the type %s but the type %s was found\n" file pos.pos_lnum c t_elt t_chan;
+| TypeChecking.Different_type_of_return_if (pos,t1,t2) ->
+    let c = pos.pos_cnum - pos.pos_bol + 1 in
+    let t_then = string_of_type t1 in
+    let t_else = string_of_type t2 in
+    Printf.eprintf "File \"%s\", line %d, character %d: Inconsistent types: The return type %s and %s were found in the then and else branch\n" file pos.pos_lnum c t_then t_else;
+| TypeChecking.Return_not_match_with_decla (pos,rt,ft,namef) ->
+    let c = pos.pos_cnum - pos.pos_bol + 1 in
+    let t_return = string_of_type rt in
+    let t_func = string_of_type ft in
+    Printf.eprintf "File \"%s\", line %d, character %d: Wrong type of function return: The function %s returns the type %s but the type %s was found\n" file pos.pos_lnum c namef t_return t_func;
+| TypeChecking.Different_type_of_return_func (pos,namef) ->
+    let c = pos.pos_cnum - pos.pos_bol + 1 in 
+    Printf.eprintf "File \"%s\", line %d, character %d: Multiple return types found in the function %s\n" file pos.pos_lnum c namef;
+| TypeChecking.Illegal_type_argument(pos) ->
+    let c = pos.pos_cnum - pos.pos_bol + 1 in
+    Printf.eprintf "File \"%s\", line %d, character %d: Illegal type argument\n" file pos.pos_lnum c
+| TypeChecking.Unknown_error_type_checking(m) ->
+    Printf.eprintf "File \"%s\": Unknown error during type checking: please check the function %s in the file TypeChecking.ml\n" file m;
