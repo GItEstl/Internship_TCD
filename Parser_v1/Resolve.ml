@@ -1,5 +1,10 @@
 open Ast
 
+(* For all the function using as parameters envVar & envType:
+    - TenvType: (position * string * ast * bool) list 
+    - TenvVar: (position * ast * string * ast option) list
+*)
+
 exception Multiple_declaration_type of Lexing.position * string
 exception Unknow_error_in_type_checking
 exception Unbound_value of Lexing.position * string
@@ -14,8 +19,8 @@ exception Start_not_found
 (* find_rec: ast -> string -> bool
 Function telling if a type is recursive or not
 Parameters:
-  - typeNode : abstract syntax tree representing the type
-  - name : type name
+  - typeNode: abstract syntax tree representing the type
+  - name: type name
 Return: boolean meaning if the type is recursive or not
 *)
 
@@ -31,9 +36,9 @@ let rec find_rec typeNode name =
     | _ -> raise Unknow_error_in_type_checking
 
 
-(* create_env: (position * string * ast * bool) list * (position * ast * string * ast option) list * 
+(* create_env: TenvType * TenvVar * 
   (position * string * ast) option -> ast -> 
-  (position * string * ast * bool) list * (position * ast * string * ast option) list *
+  TenvType * TenvVar *
   (position * string * ast) option
 Function creating the type and variable environments thanks to the ast of the program
 Parameters:
@@ -60,19 +65,29 @@ let rec create_env (envType,envVar,start) tree =
       (envType,envVar,start)
 
 
-(* uniqueType : (position * string * ast * bool) list -> string list -> string list
+(* uniqueType: TenvType -> string list -> string list
 Function checking that all type declared are unique 
 Parameters:
   - envType: list of the type declarations
   - nameList: list of names of already declared types
 Return: the names of the declared types
 *)
+
 let rec uniqueType envType nameList = 
   match envType with
     | [] -> nameList
     | (pos,name,_,_)::q -> if (List.mem name nameList) 
                          then raise (Multiple_declaration_type (pos,name))                   
                          else (uniqueType q (name::nameList))
+
+
+(* well_formed_type_aux: ast -> string list -> bool
+Function checking that the type declared is well-formed 
+Parameters:
+  - t: abstract syntax tree representing the type
+  - nameList: list of names of already declared types
+Return: true if the type is well-formed, false if not
+*)
 
 let rec well_formed_type_aux t nameList  =
   match t with
@@ -90,6 +105,17 @@ let rec well_formed_type_aux t nameList  =
                                      else raise Unknow_error_in_type_checking
    | _ -> raise Unknow_error_in_type_checking
 
+
+(* well_formed_type_decla: position * string * ast * bool -> string list -> bool
+Function checking that the declared type is recursive only if it is a channel type and if so check if it is well-formed
+Parameters:
+  - pos: the position in the file of the type declaration
+  - name: the name of the type declared
+  - t: abstract syntax tree representing the type
+  - nameList: list of names of already declared types
+Return: true if the type is completely well-formed (well-formed and recursive in the right cases), false if not
+*)
+
 let well_formed_type_decla (pos,name,t,tRec) nameList =
   try (
     match t with 
@@ -99,10 +125,28 @@ let well_formed_type_decla (pos,name,t,tRec) nameList =
   with
     | Unbound_value (posn,n) -> raise (Undeclared_type (posn,n))
 
+
+(* well_formed_envType: TenvType -> string list
+Function checking that all declared types are unique and completely well-formed
+Parameters:
+  - envType: list of the type declarations
+Return: the names of the declared types
+*)
+
 let well_formed_envType envType =
     let nameList = uniqueType envType [] in
     let _ = List.for_all (fun d -> well_formed_type_decla d nameList) envType in
     nameList
+
+
+(* uniqueVar: TenvVar -> string list -> string list -> string list
+Function checking that all variable/function declared are unique 
+Parameters:
+  - envVar: list of the variable/function declarations
+  - nameListVar: list of names of already declared variables/functions
+  - nameListType: list of names of all the declared types
+Return: the names of the declared variables/functions
+*)
 
 let rec uniqueVar envVar nameListVar nameListType = 
   match envVar with
@@ -114,11 +158,31 @@ let rec uniqueVar envVar nameListVar nameListType =
                          then raise (Multiple_declaration_var (pos,name))                   
                          else uniqueVar q (name::nameListVar) nameListType
 
+
+(* well_formed_func_type: ast -> string list -> bool
+Function checking that the type of the function declared is well-formed 
+Parameters:
+  - t: abstract syntax tree representing the function type
+  - nameList: list of names of all the declared types
+Return: true if the function type is well-formed, false if not
+*)
+
 let well_formed_func_type t nameList = 
   match t with
     | FuncTNode (None) -> true
     | FuncTNode (Some(st)) -> well_formed_type_aux st nameList 
     | _ -> raise Unknow_error_in_type_checking
+
+
+(* well_formed_params: ast -> string list -> string list -> string list
+Function checking that all the type of the function parameters are well-formed 
+and that all the names are not used twice in the function paraneters
+Parameters:
+  - params: abstract syntax tree representing the parameters of the function
+  - nameListType: list of names of all the declared types
+  - nameListVar: list of names of already declared parameters
+Return: the names of all the function parameters
+*)
 
 let rec well_formed_params params nameListType nameListVar =
   match params with 
@@ -130,10 +194,31 @@ let rec well_formed_params params nameListType nameListVar =
                   else let _ = (well_formed_type_aux t nameListType) in well_formed_params p nameListType (name::nameListVar)
     | _ -> raise Unknow_error_in_type_checking 
 
+
+(* well_formed_var: (position * ast * string * ast option) -> string list -> bool
+Function checking that :
+  - for a variable: the type of the variable declared is well-formed
+  - for a function: the type of the function declared is well-formed and 
+and that all the function paraneters are completely well-formed
+Parameters:
+  - decla: abstract syntax tree representing a variable or a function
+  - nameListType: list of names of all the declared types
+Return: true if the variable/function is well-formed, false if not
+*)
+
 let well_formed_var decla nameListType =
   match decla with
     | (_,t,_,None) -> well_formed_type_aux t nameListType 
     | (_,ft,_,Some(params)) -> let _ = (well_formed_params params nameListType []) in (well_formed_func_type ft nameListType)
+
+
+(* well_formed_envVar: TenvVar -> string list -> string list
+Function checking that all the variables/functions declared at top-level are unique and well-formed
+Parameters:
+  - envVar: list of the the variable/function declarations
+  - nameListType: list of names of all the declared types
+Return: the names of all the the variables/functions declared at top-level
+*)
 
 let well_formed_envVar envVar nameListType =
     let names = uniqueVar envVar [] nameListType in
@@ -143,6 +228,15 @@ let well_formed_envVar envVar nameListType =
     with
       | Unbound_value (pos,n) -> raise (Type_not_found (pos,n))
       
+
+(* well_formed_start: (position * string * ast) option -> TenvVar -> (position * ast * string * ast option)
+Function checking that the function used in the start function is already declared
+Parameters:
+  - decla: tuple representing the start function
+  - envVar: list of the the variable/function declarations
+Return: the tuple representing the start function
+*)
+
 let well_formed_start decla envVar =
   match decla with 
     | Some((pos,name,_)) -> (try 
