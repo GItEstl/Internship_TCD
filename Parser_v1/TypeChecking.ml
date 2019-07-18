@@ -42,6 +42,7 @@ exception Return_not_match_with_decla of Lexing.position * typeType * typeType *
 exception Different_type_of_return_func of Lexing.position * string
 exception Illegal_type_argument of Lexing.position
 exception Unknown_error_type_checking of string
+exception Unknown_error_type_checking_ of ast
 
 (* string_of_type: typeType -> string
 Function converting a typeType into a string
@@ -59,7 +60,7 @@ let rec string_of_type t =
     | VoidType -> "void"
     | ChannelType(st) -> "channel " ^ (string_of_type st)
     | ChannelGenType -> "channel"
-    | ListType(st) -> "list" ^ (string_of_type st)
+    | ListType(st) -> "list " ^ (string_of_type st)
     | ListGenType -> "list"
     | TupleType(st) -> "(" ^ (let rec aux l = match l with 
                                       | [] -> ""
@@ -334,19 +335,19 @@ ruleValue v envType =
     | StringNode (_,_) -> StringType
     | TrueNode(_) -> BooleanType
     | FalseNode(_) -> BooleanType
-    | ValueSeqNode (v,None) -> ListType (ruleValue v envType)
-    | ValueSeqNode (v,Some(vs)) -> ListType (
+    | ValueSeqNode (ValueNode(v),None) -> ListType (ruleValue v envType)
+    | ValueSeqNode (ValueNode(v),Some(vs)) -> ListType (
         let rec aux v1 vs1 =
           (match vs1 with
-            | ValueSeqNode (v2,None) -> 
+            | ValueSeqNode (ValueNode(v2),None) -> 
               let bv, tv = compare envType (ruleValue v1 envType) (ruleValue v2 envType) in
                 if (bv) then tv else raise (Different_types_in_list)
-            | ValueSeqNode (v2,Some(vs2)) -> 
+            | ValueSeqNode (ValueNode(v2),Some(vs2)) -> 
               let bv,_ = compare envType (ruleValue v1 envType) (ruleValue v2 envType) in
               if (bv) then (aux v2 vs2) else raise (Different_types_in_list)
-            | _ -> raise (Unknown_error_type_checking ("ruleValue1")))
+            | _ -> raise (Unknown_error_type_checking ("ruleValue")))
         in aux v vs) 
-    | _ -> raise (Unknown_error_type_checking "ruleValue")
+    | _ -> raise (Unknown_error_type_checking_ v)
 
 and
 
