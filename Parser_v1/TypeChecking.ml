@@ -219,7 +219,7 @@ let rec type_of_expr expr envVar envType =
     | ExprsNode (e,None) -> type_of_expr e envVar envType
     | ExprsNode (e1,Some(e2)) -> ruleTupleExpr (ExprsNode (e1,Some(e2))) envVar envType
     | ValueNode(ValueNode (v)) -> ruleValue v envType
-    | AssignNode (pos,a) -> ruleAssignable a envVar envType pos
+    | AssignNode (pos,a) -> ruleIdentifier a envVar envType pos
     | _ -> raise (Unknown_error_type_checking "type_of_expr")
 
 and
@@ -354,7 +354,7 @@ and
 
 (* Rule for assignable *)
 
-ruleAssignable a envVar envType pos = type_of_var a envVar envType pos
+ruleIdentifier a envVar envType pos = type_of_var a envVar envType pos
 
 (* Rule for instructions *)
 
