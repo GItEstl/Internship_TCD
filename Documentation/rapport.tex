@@ -306,7 +306,7 @@ We have also used semi-colons to resolve conflicts. \\ \\
 \centerline{\textbf{\Huge Type Grammar}}
 \vspace*{3pt}
 \vspace*{20pt}
-We have created types that simplify our grammar and so allow us to perform a more efficient check type. \\ We have separated the types for expressions and instructions.
+We have created types that simplify our grammar and so allow us to perform a more efficient check type. We have separated the types for expressions and instructions.
 
 \tabto{0cm} {\Large \textbf{Simplified type for Expressions}}
 
@@ -323,10 +323,26 @@ We have created types that simplify our grammar and so allow us to perform a mor
 
 \tabto{0cm}The possible types for an instruction of this language are described by the following syntax:
 \\ \\
-\centerline{$OK \ | \ OK_t(\tau)$} \\ \\
+\centerline{$OK \ | \ OK_t(\tau)$}
 
-Définir les 2 environnements : type et var !
+\tabto{0cm} {\Large \textbf{Environments}}
 
+\tabto{0cm} Before checking the types of the expressions and instructions, we create 2 environments:
+\begin{itemize}
+\item The type environment: composed of the different declared types (named types)
+\item The variable environment composed of all defined global variables and defined functions
+\end{itemize}
+So, the environments only concern what is declared at the top level.\\
+
+In order to create these 2 environments, it is necessary to verify that each declared element is well formed before adding it to its corresponding environment.\\ \\
+Concerning the type environment, being well-formed means: 
+The name used is unique in the environment, the other types used to declare this type are well-formed types = other named types defined above or a basic type defined in our language (int, string, char...) and the declared type is recursive only if it is a channel type\\ \\ \\
+Concerning the variable environment, first it is  necessary to distinguish functions and variables.
+\begin{itemize}
+    \item  For variables, being well-formed means: The name used is unique in the environment and the variables's type is a well formed type
+    \item For functions, being well-formed means: The name used is unique in the environment, the function return's type is a well formed type, and the parameters are well-formed (all parameters type are well formed and each parameter has an unique name)
+\end{itemize}
+Finally, we have to check that the function used in the start function is declared.
 
 \newpage
 \centerline{\textbf{\Huge Type Rules}}
@@ -521,26 +537,15 @@ Définir les 2 environnements : type et var !
 
 \tabto{0cm} {\large \textbf{Function Declaration}}
 \begin{prooftree}
-\AxiomC{$wf_{\Gamma_t}(\tau)$}
-\AxiomC{$wf_{\Gamma_t} (\overrightarrow{\tau})$}
-\AxiomC{$unique(\overrightarrow{y})$}
-\AxiomC{$\Gamma_t ; \ \Gamma_v; \ \overrightarrow{x \ \ \tau} ; \ \overrightarrow{y \ \ \tau^\prime} \vdash i : OK_t(\tau) $}
-\QuaternaryInfC{$\Gamma_t ; \ \Gamma_v \vdash^d func \ \tau \ n  (\overrightarrow{x \ \ \tau}) \ \{def \  \overrightarrow{y \ \ \tau^\prime} \ in \ i \} \ : OK $}
+\AxiomC{$wf(\Gamma_{extended} = \{\Gamma_t ; \ \Gamma_v; \ \overrightarrow{\tau \ \ x} ; \ \overrightarrow{\tau^\prime \ \ y})$}
+\AxiomC{$\Gamma_{extended} \vdash i : OK_t(\tau_f) $}
+\BinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash func \ \tau_f \ n  (\overrightarrow{\tau \ \ x}) \ \{def \  \overrightarrow{\tau^\prime \ \ y} \ in \ i \} \ : OK_t(\tau_f) $}
 \end{prooftree}
-
-\tabto{0cm} {\large \textbf{Variable Declaration WF}}
+\vspace*{1pt}
 \begin{prooftree}
-\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash T $}
-\UnaryInfC{$\Gamma_t ; \ \Gamma_v \vdash T \ x $}
-\end{prooftree}
-
-\tabto{0cm} {\large \textbf{Function Declaration OLD}}
-\begin{prooftree}
-\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash T $}
-\AxiomC{$\Gamma^\prime := \Gamma_t ; \ \Gamma_v ; \ x_1 : T_1 ; \ \ldots \ x_n : T_n  $}
-\AxiomC{$\Gamma^\prime \vdash \overrightarrow{declaVar} $}
-\AxiomC{$\Gamma^\prime ; \ \overrightarrow{declaVar} \vdash i : T $}
-\QuaternaryInfC{$\Gamma_t ; \ \Gamma_v \vdash func \ T \ name \ (T_1 \ x_1 , \ \ldots , \ T_n \ x_n) \ \{ \ def \ \overrightarrow{declaVar} \ in \ i \}$}
+\AxiomC{$wf(\Gamma_{extended} = \{\Gamma_t ; \ \Gamma_v; \ \overrightarrow{\tau \ \ x} ; \ \overrightarrow{\tau^\prime \ \ y}\})$}
+\AxiomC{$\Gamma_{extended} \vdash i : OK $}
+\BinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash func \ void \ n  (\overrightarrow{\tau \ \ x}) \ \{def \  \overrightarrow{\tau^\prime \ \ y}\} \ in \ i \} \ : OK $}
 \end{prooftree}
 
 \newpage
@@ -668,6 +673,12 @@ Définir les 2 environnements : type et var !
 \begin{prooftree}
 \AxiomC{$ $}
 \UnaryInfC{$s \vdash return \Downarrow s $}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Return Function }}
+\begin{prooftree}
+\AxiomC{$s_1 \vdash e \Downarrow v,s_2 $}
+\UnaryInfC{$s_1 \vdash return \ e \Downarrow v,s_2 $}
 \end{prooftree}
 
 \tabto{0cm} {\large \textbf{Return Expression }}
