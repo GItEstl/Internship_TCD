@@ -9,12 +9,12 @@ You can use the following commands :
 
 
 How to use this project ?
-First you have to build the folder, execute the following command in the Parser_v1 folder :
+First you have to build the folder, execute the following command in the src folder :
         dune utop
 When the folder is successfully build you have to import the library corresponding to the programming language :
         open MyML;;
 You will now be able to compile any examples by executing the following command :
         Main.main "<path of the file you want to compile>";;
 For example :
-        Main.main "examples/example-00.mml";;        
+        Main.main "examples/examples/example-00.mml";;        
 
