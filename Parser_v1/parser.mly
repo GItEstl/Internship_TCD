@@ -76,11 +76,6 @@ body :
 
 variableDecla :
  | t = typ n = IdentToken                                                                                   {VariableDeclaNode (fst(n),t,snd(n))}
-(* | t = typ pos = LeftParenthesisToken idents = tupleDecla RightParenthesisToken                              {VariableDeclaNode (pos,t,idents)}
-
-tupleDecla : 
- | n = IdentToken                                                                                           {TupleDeclaNode (fst(n),snd(n),None)} 
- | n = IdentToken ComaToken idents = tupleDecla                                                             {TupleDeclaNode (fst(n),snd(n),Some(idents))} *)
 
 variableDeclas :
  | v = variableDecla                                                                                         {VariableDeclasNode (v,None)}

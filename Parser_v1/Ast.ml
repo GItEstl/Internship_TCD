@@ -108,12 +108,6 @@ match tree with
   "{\n" ^ (string_of_ast i) ^ "}\n"
     | (VariableDeclaNode (_,t,n)) -> 
   (string_of_ast t) ^ " " ^ n
-  (*  | (VariableDeclaNode (_,t,idents)) -> 
-  (string_of_ast t) ^ " (" ^ (string_of_ast idents) ^ ")"
-    | (TupleDeclaNode (_,n,None)) ->
-  n
-    | (TupleDeclaNode (_,n,Some(idents))) ->
-  n ^ ", " ^ (string_of_ast idents)  *)
     | (VariableDeclasNode (v,None)) -> 
   (string_of_ast v) ^ "\n"
     | (VariableDeclasNode (v,Some(vs))) -> 

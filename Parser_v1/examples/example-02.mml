@@ -6,4 +6,4 @@ func boolean main (int i) {
     }
 }
 
-start main(0)
+start main(1)

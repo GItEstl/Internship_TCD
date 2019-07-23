@@ -2,6 +2,7 @@ open Ast
 open Lexing
 open Resolve
 open TypeChecking
+open ReferenceInterpretor
 
 let report_error filename lexbuf msg =
  let (b,e) = (lexeme_start_p lexbuf, lexeme_end_p lexbuf) in
@@ -24,7 +25,10 @@ let report_error filename lexbuf msg =
   let a = well_formed_start start envVar in
   print_string ("Environment well-formed \n");
   let _ = type_check_prg envVar envType nameListType ast in
-  print_string ("Program type-checked")
+  print_string ("Program type-checked \n");
+  let result = execution_prg ast start envType in
+  print_string ("Program executed \n");
+  print_string("Result: " ^ result ^ "\n")
   with
   | Lexer.Error s ->
       report_error file filebuf "lexical error (unexpected character).";
@@ -111,6 +115,6 @@ let report_error filename lexbuf msg =
     Printf.eprintf "File \"%s\", line %d, character %d: Multiple return types found in the function %s\n" file pos.pos_lnum c namef;
 | TypeChecking.Illegal_type_argument(pos) ->
     let c = pos.pos_cnum - pos.pos_bol + 1 in
-    Printf.eprintf "File \"%s\", line %d, character %d: Illegal type argument\n" file pos.pos_lnum c
+    Printf.eprintf "File \"%s\", line %d, character %d: Illegal type argument\n" file pos.pos_lnum c;
 | TypeChecking.Unknown_error_type_checking(m) ->
     Printf.eprintf "File \"%s\": Unknown error during type checking: please check the function %s in the file TypeChecking.ml\n" file m;
