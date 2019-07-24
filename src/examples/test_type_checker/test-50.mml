@@ -1,7 +1,7 @@
-// Without error : declaration of a function with a return of interger list and return of this type
+// Type error : declaration of a function with a void return and return of an integer
 
-func list[int] test60 (string s) {
-	return [1,2,3,4]
+func void test50 (string s) {
+	return 2
 }
 
-start test60("")
+start test50("")

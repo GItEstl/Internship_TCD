@@ -1,10 +1,12 @@
-// Type error: declaration of a couple (int,bool) and assignment of couple (int,int)
+// Type error: get of an inexistant element of a tuple
 
-func void test50 (string s) {
+func void test40 (string s) {
 def
-	(int,boolean) t
+    (boolean, boolean) tuple;
+    boolean b
 in
-	t = (1,1)
+    tuple = (true, false);
+    b = get(2, tuple)
 }
 
-start test50("")
+start test40("") 

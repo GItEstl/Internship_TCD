@@ -1,11 +1,5 @@
-// Without error : declaration of a function with a integer return and return an expression of this type
+// Type error : declaration of a function with an int return and no return instruction in the function
 
-func int test62 (string s) {
-def
-	int i 
-in
-	i = 1;
-	return (i+3)*3 
-}
+func int test52 (string s) {}
 
-start test62("")
+start test52("")

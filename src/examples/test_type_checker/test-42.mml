@@ -1,12 +1,11 @@
-// Type error: declaration of a couple (int,bool) and assignment of a couple (int,int)
+// Without error : declaration of a tuple (int,char,bool) and use of the third value for the condition in a conditional instruction
 
-func void test52 (string s) {
+func void test42 (string s) {
 def
-	(int,boolean) tib;
-	(int,int) tii
+	(int,char,boolean) t;
 in
-	tib = (1,true);
-	tii = tib
+	t = (1,'t',true);
+	if (get(2,t)) {} else {}
 }
 
-start test52("")
+start test42("")

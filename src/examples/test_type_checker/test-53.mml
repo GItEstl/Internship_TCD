@@ -1,13 +1,7 @@
-// Without error : declaration of a function with a integer return and return an expression of this type
+// Type error : declaration of a function with a int return and return of a boolean
 
-func int test63 (string s) {
-def
-	int i;
-	int j
-in
-	i = 1;
-	j = 78;
-	return (i+3)*3-j 
+func int test53 (string s) {
+	return true
 }
 
-start test63("")
+start test53("")

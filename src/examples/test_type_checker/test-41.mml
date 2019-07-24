@@ -1,12 +1,12 @@
-// Type error: declaration of a couple (int,bool) and assignment of the first value to a variable
+// Without error: declaration of a couple (int,int) and correct assignment of a couple (int,int)
 
-func void test51 (string s) {
+func void test41 (string s) {
 def
-	(int,boolean) t;
-	int i
+	(int,int) tib;
+	(int,int) tii
 in
-	t = (1,true);
-	i = fst(t)
+	tib = (1,3);
+	tii = tib
 }
 
-start test51("")
+start test41("")

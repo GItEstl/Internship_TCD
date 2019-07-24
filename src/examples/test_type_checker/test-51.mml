@@ -1,7 +1,8 @@
-// Without error : declaration of a function with a return of a (int,bool,char) tuple and return of this type
+// Type error : multiple returns type in the same function
 
-func (int,bool,char) test61 (string s) {
-	return (1,true,'a')
+func int test51 (string s) {
+	return 2;
+	return true
 }
 
-start test61("")
+start test51("")

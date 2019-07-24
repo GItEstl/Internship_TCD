@@ -1,7 +1,11 @@
-// Type error : declaration of a function with a void return and return of an integer
+// Without error : declaration of a couple (int,bool) and use of the second value for the condition in a conditional instruction
 
-func void test57 (string s) {
-	return 2
+func void test47 (string s) {
+def
+	(int,boolean) t;
+in
+	t = (1,true);
+	if (snd(t)) {} else {}
 }
 
-start test57("")
+start test47("")

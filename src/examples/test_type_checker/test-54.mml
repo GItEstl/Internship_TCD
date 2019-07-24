@@ -1,17 +1,7 @@
-// Without error : declaration of a function with a (int,bool,bool) return and return an expression of this type
+// Without error : declaration of a function with a return of interger list and return of this type
 
-func int test64 (string s) {
-def
-	int i;
-	int j;
-	boolean b;
-	boolean c;
-in
-	i = 1;
-	j = 78;
-	b = true;
-	c = false;
-	return ((i+3)*3-j,c,if (b) then b else c) 
+func list[int] test54 (string s) {
+	return [1,2,3,4]
 }
 
-start test64("")
+start test54("")

@@ -1,7 +1,12 @@
-// Without error : return of integer value
+// Type error: declaration of a couple (int,bool) and assignment of a couple (int,int)
 
-func int test56 (string s) {
-	return 2
+func void test46 (string s) {
+def
+	(int,boolean) tib;
+	(int,int) tii
+in
+	tib = (1,true);
+	tii = tib
 }
 
-start test56("")
+start test46("")

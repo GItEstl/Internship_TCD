@@ -1,0 +1,15 @@
+func boolean main (int i) {
+def
+    (string,int,boolean) tuple;
+    int n;
+    string s;
+    boolean b
+in
+    tuple = ("John",20,true);
+    s = get(0,tuple);
+    n = get(1,tuple);
+    b = get(2,tuple);
+    return b
+}
+
+start main(1)

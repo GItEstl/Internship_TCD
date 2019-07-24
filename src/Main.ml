@@ -56,7 +56,7 @@ let report_error filename lexbuf msg =
     let c = pos.pos_cnum - pos.pos_bol + 1 in
     Printf.eprintf "File \"%s\", line %d, character %d: Incorrect function for start: unbound value %s\n" file pos.pos_lnum c name;
  | Resolve.Unknow_error_in_type_checking ->
-    Printf.eprintf "Fatal error in type checking";
+    Printf.eprintf "Fatal error in type checking. Good luck";
  | TypeChecking.Wrong_type (pos,tfound,texpec) ->
     let c = pos.pos_cnum - pos.pos_bol + 1 in
     let f = string_of_type tfound in
@@ -109,12 +109,14 @@ let report_error filename lexbuf msg =
     let c = pos.pos_cnum - pos.pos_bol + 1 in
     let t_return = string_of_type rt in
     let t_func = string_of_type ft in
-    Printf.eprintf "File \"%s\", line %d, character %d: Wrong type of function return: The function %s returns the type %s but the type %s was found\n" file pos.pos_lnum c namef t_return t_func;
+    Printf.eprintf "File \"%s\", line %d, character %d: Wrong type of function return: The function %s returns the type %s but the type %s was found\n" file pos.pos_lnum c namef t_func t_return;
 | TypeChecking.Different_type_of_return_func (pos,namef) ->
     let c = pos.pos_cnum - pos.pos_bol + 1 in 
     Printf.eprintf "File \"%s\", line %d, character %d: Multiple return types found in the function %s\n" file pos.pos_lnum c namef;
 | TypeChecking.Illegal_type_argument(pos) ->
     let c = pos.pos_cnum - pos.pos_bol + 1 in
     Printf.eprintf "File \"%s\", line %d, character %d: Illegal type argument\n" file pos.pos_lnum c;
+| TypeChecking.Different_types_in_list ->
+   Printf.eprintf "File \"%s\": A list containing different types has been found, a list can contain only elements of one type\n" file;
 | TypeChecking.Unknown_error_type_checking(m) ->
     Printf.eprintf "File \"%s\": Unknown error during type checking: please check the function %s in the file TypeChecking.ml\n" file m;

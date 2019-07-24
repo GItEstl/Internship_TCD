@@ -1,0 +1,11 @@
+// Without error : declaration of a list of booleans and return of the head of the list 
+
+func boolean test61 (string s) {
+def
+	list[boolean] l
+in
+	l = [true,true,false,false,true,false];
+	return head(l)
+}
+
+start test61("")

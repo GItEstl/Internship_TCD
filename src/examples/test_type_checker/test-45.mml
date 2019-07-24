@@ -1,7 +1,12 @@
-// Without error : return of void
+// Type error: declaration of a couple (int,bool) and assignment of the first value to a variable
 
-func void test55 (string s) {
-return;
+func void test45 (string s) {
+def
+	(int,boolean) t;
+	int i
+in
+	t = (1,true);
+	i = fst(t)
 }
 
-start test55("")
+start test45("")

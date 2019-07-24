@@ -354,7 +354,7 @@ ruleValue v envType =
             | ValueSeqNode (ValueNode(v2),None) -> 
               let bv, tv = compare envType (ruleValue v1 envType) (ruleValue v2 envType) in
                 if (bv) then tv else raise (Different_types_in_list)
-            | ValueSeqNode (ValueNode(v2),Some(vs2)) -> 
+            | ValueSeqNode (ValueNode(v2),Some(vs2)) ->
               let bv,_ = compare envType (ruleValue v1 envType) (ruleValue v2 envType) in
               if (bv) then (aux v2 vs2) else raise (Different_types_in_list)
             | _ -> raise (Unknown_error_type_checking ("ruleValue")))

@@ -1,5 +1,11 @@
-// Type error : declaration of a function with an int return and no return instruction in the function
+// Without error : declaration of a couple (int,bool) and use of the second value for the condition of a while instruction
 
-func int test58 (string s) {}
+func void test48 (string s) {
+def
+	(int,boolean) t;
+in
+	t = (1,false);
+	while (snd(t)) {}
+}
 
-start test58("")
+start test48("")

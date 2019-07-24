@@ -24,8 +24,8 @@ let string_of_val v =
         | BooleanVal(b) -> string_of_bool b
         | StringVal(s) -> s
         | CharVal(c) -> c
-        | ListVal(l) -> "[" ^ (List.fold_left (fun s e -> (aux e) ^ " " ^ s) "" l) ^ "]"
-        | TupleVal(t) -> "(" ^ (List.fold_left (fun s e -> (aux e) ^ ", " ^ s) "" t) ^ ")"
+        | ListVal(l) -> "[" ^ (List.fold_left (fun s e ->  s ^ " " ^ (aux e)) (aux (List.nth l 0)) (List.tl l)) ^ "]"
+        | TupleVal(t) -> "(" ^ (List.fold_left (fun s e ->  s ^ ", " ^ (aux e)) (aux (List.nth t 0)) (List.tl t)) ^ ")"
         | _ -> "ERROR"
       in aux vs 
 

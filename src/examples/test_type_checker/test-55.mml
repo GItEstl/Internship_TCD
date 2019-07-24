@@ -1,10 +1,7 @@
-// Without error : declaration of a list of booleans and assignment of a list of integers 
+// Without error : declaration of a function with a return of a (int,bool,char) tuple and return of this type
 
-func void test65 (string s) {
-def
-	list[boolean]
-in
-	l = [1,2,3]
+func (int,boolean,char) test55 (string s) {
+	return (1,true,'a')
 }
 
-start test65("")
+start test55("")

@@ -1,7 +1,7 @@
-// Type error : declaration of a function with a int return and return of a boolean
+// Without error : return of void
 
-func int test59 (string s) {
-	return true
+func void test49 (string s) {
+    return;
 }
 
-start test59("")
+start test49("")
