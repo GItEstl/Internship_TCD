@@ -1,0 +1,10 @@
+// Without error: Correct assignment of an integer tuple with integer values
+
+func void test33 (string s) {
+def
+    (int,int,int) tuple
+in
+    tuple = (1,2,3)
+}
+
+start test33("") 

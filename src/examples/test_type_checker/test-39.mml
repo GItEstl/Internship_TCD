@@ -1,0 +1,14 @@
+// Without error: correct assignment of 2 tuples thanks to elements of another tuple
+
+func void test39 (string s) {
+def
+    (boolean, boolean, string, string) tuple;
+    (boolean, string) tuple2;
+    (boolean, string) tuple3
+in
+    tuple = (true, false, "ok", "not_ok");
+    tuple2 = (fst(tuple),get(2,tuple));
+    tuple3 = (snd(tuple),get(3,tuple));
+}
+
+start test39("") 

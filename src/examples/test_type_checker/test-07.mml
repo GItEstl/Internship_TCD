@@ -1,0 +1,12 @@
+// Type error: assignment of the value of a boolean variable to an integer variable
+
+func void test07 (string s) {
+def 
+    int i;
+    boolean a
+in
+    a = true;
+    i = a
+}
+
+start test07("") 

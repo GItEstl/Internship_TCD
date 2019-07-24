@@ -1,0 +1,7 @@
+// Type error: use of a string variable in a condition
+
+func void test32 (string s) {
+    while (s) {}
+}
+
+start test32("") 

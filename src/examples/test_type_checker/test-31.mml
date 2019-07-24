@@ -1,0 +1,10 @@
+// Type error: use of an integer variable in a condition
+
+func void test31 (string s) {
+def 
+    int i;
+in
+    while (i) {}
+}
+
+start test31("") 

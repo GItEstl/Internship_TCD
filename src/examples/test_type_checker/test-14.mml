@@ -1,0 +1,11 @@
+// Without error: use of a variable in a condition
+
+func void test14 (string s) {
+def 
+    int i;
+in
+    i = 1;
+    if (i == 1) {} else {}
+}
+
+start test14("") 

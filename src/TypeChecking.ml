@@ -41,6 +41,7 @@ exception Different_type_of_return_if of Lexing.position * typeType * typeType
 exception Return_not_match_with_decla of Lexing.position * typeType * typeType * string
 exception Different_type_of_return_func of Lexing.position * string
 exception Illegal_type_argument of Lexing.position
+exception Get_tuple_too_short of Lexing.position
 exception Unknown_error_type_checking of string
 exception Unknown_error_type_checking_ of ast
 
@@ -291,9 +292,20 @@ ruleBinary op left right envVar envType pos =
         let (br,tr) = compare envType tright BooleanType in
           (if (bl) then (if (br) then BooleanType else raise (Wrong_type (pos,tr,IntegerType))) 
           else raise (Wrong_type (pos,tl,IntegerType)))
+      | Get -> 
+        let (b1,t1) = compare envType tleft IntegerType in
+        let (b2,t2) = compare envType tright TupleGenType in
+          (if (b1) then (
+            if (b2) then
+              match (left,t2) with
+                | ValueNode(ValueNode(IntegerNode(_,i))),TupleType(t) -> List.nth t i 
+                | _ -> raise (Unknown_error_type_checking "ruleBinary2") 
+            else raise (Wrong_type (pos,t2,TupleGenType))) 
+          else raise (Wrong_type (pos,t1,IntegerType)))
       | _ -> raise (Unknown_error_type_checking "ruleBinary"))
   with 
     | Invalid_argument _ -> raise (Illegal_type_argument pos)
+    | Failure _ -> raise (Get_tuple_too_short pos)
 
 and
 
@@ -518,9 +530,9 @@ ruleIfThenElseInstr cond_expr then_instr else_instr envVar envType pos =
   let tthen_instr = (ruleInstr then_instr envVar envType) in
   let telse_instr = (ruleInstr else_instr envVar envType) in
   try
-    let be,te = compare envType tcond_expr BooleanType in
+    let be,_ = compare envType tcond_expr BooleanType in
     if (be) then unify_instr tthen_instr telse_instr envType
-    else raise (Wrong_type (pos,te,BooleanType))
+    else raise (Wrong_type (pos,tcond_expr,BooleanType))
   with
     | Impossible_unify_instr (t1,t2) -> raise (Different_type_of_return_if (pos,t1,t2))
     | Invalid_argument _ -> raise (Illegal_type_argument pos)
@@ -534,9 +546,9 @@ ruleWhile cond_expr i envVar envType pos =
   let tcond = (type_of_expr cond_expr envVar envType) in
   let ti = (ruleInstr i envVar envType) in
   try
-    let be,te = compare envType tcond BooleanType in 
+    let be,_ = compare envType tcond BooleanType in 
       if (be) then ti
-      else raise (Wrong_type (pos,te,BooleanType))
+      else raise (Wrong_type (pos,tcond,BooleanType))
   with
     | Invalid_argument _ -> raise (Illegal_type_argument pos)
 

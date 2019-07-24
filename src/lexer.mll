@@ -13,12 +13,16 @@ let alphabet = lowercase | uppercase
 let alphanum = alphabet | digit | '_'
 let id = alphanum alphanum*
 let char = '\'' alphanum '\''
+let comments =
+  (* Comments end of line *)
+  "//" [^'\n']*
 
 rule token = parse
   | '\n'  (* ignore newlines but count them *)
       { new_line lexbuf; token lexbuf }
   | [' ' '\t'] (* ignore whitespaces and tabs *)
       { token lexbuf }
+  | comments	{ (token lexbuf) }
   | '('       {LeftParenthesisToken (Lexing.lexeme_start_p lexbuf)}
   | ')'       {RightParenthesisToken (Lexing.lexeme_start_p lexbuf)}
   | '{'       {LeftBracketToken (Lexing.lexeme_start_p lexbuf)}
@@ -68,6 +72,7 @@ rule token = parse
   | "even"    {EvenToken (Lexing.lexeme_start_p lexbuf)}
   | "fst"     {FstToken (Lexing.lexeme_start_p lexbuf)} 
   | "snd"     {SndToken (Lexing.lexeme_start_p lexbuf)}
+  | "get"     {GetToken (Lexing.lexeme_start_p lexbuf)}
   | "tau"     {TauToken (Lexing.lexeme_start_p lexbuf)}
   | "start"   {StartToken (Lexing.lexeme_start_p lexbuf)}
   | "return"  {ReturnToken (Lexing.lexeme_start_p lexbuf)}

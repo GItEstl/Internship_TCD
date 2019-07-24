@@ -1,0 +1,13 @@
+// Without error: use of a boolean variable in a condition
+
+func void test30 (string s) {
+def 
+    boolean b;
+in
+    b = false;
+    while (b) {
+        b = true
+    }
+}
+
+start test30("") 

@@ -1,0 +1,19 @@
+// Without error: declaration thrice of the same variable (same name and type): one global, two locals in 2 differents fonctions
+
+char i
+
+func void test12 (string s) {
+def 
+    char i
+in
+
+}
+
+func void test12b (string s) {
+def 
+    char i
+in
+
+}
+
+start test12("")

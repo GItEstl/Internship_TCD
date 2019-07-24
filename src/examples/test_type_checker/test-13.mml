@@ -1,0 +1,19 @@
+// Without error: declaration thrice of the same variable (same name but not the same type): one global, two locals in 2 differents fonctions
+
+int i
+
+func void test13 (string s) {
+def 
+    boolean i
+in
+
+}
+
+func void test13b (string s) {
+def 
+    string i
+in
+
+}
+
+start test13("")

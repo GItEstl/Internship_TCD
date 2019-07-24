@@ -6,7 +6,6 @@ def
     string s;
     channel list[int] chan;
     list[int] l;
-    (string,int,boolean) tuple
 in
     i = (2 + 2 * 3) / 4 - 1;
     b = true || (false && true) && true;

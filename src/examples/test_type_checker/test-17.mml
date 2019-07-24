@@ -1,0 +1,13 @@
+// Without error: use of a variable after a sub-block
+
+func void test17 (string s) {
+def 
+    int i;
+    int j
+in
+    i = 1;
+    if (true) {} else {};
+    j = i
+}
+
+start test17("") 

@@ -1,0 +1,7 @@
+// Well-formedness error: assignment of an integer value to an undeclared variable
+
+func void test01 (string s) {
+    i = 1
+}
+
+start test01("") 

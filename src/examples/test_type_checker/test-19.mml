@@ -1,0 +1,10 @@
+// Without error: use of a boolean variable in a condition
+
+func void test19 (string s) {
+def 
+    boolean b;
+in
+    if (b) {} else {};
+}
+
+start test19("") 

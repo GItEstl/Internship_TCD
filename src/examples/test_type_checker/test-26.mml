@@ -1,0 +1,10 @@
+// Without error: use of a variable in a condition
+
+func void test26 (string s) {
+def 
+    int i;
+in
+    while (i == 1) {}
+}
+
+start test26("") 

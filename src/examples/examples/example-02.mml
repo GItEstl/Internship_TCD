@@ -1,4 +1,13 @@
 func boolean main (int i) {
+def
+    (string,int,boolean) tuple;
+    int n;
+    string s
+in
+    tuple = ("John",20,true);
+    s = get(0,tuple);
+    n = get(1,tuple);
+    
     if (i + 1 == 1) {
         return true
     } else {

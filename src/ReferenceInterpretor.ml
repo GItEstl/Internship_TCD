@@ -103,10 +103,11 @@ ruleBinary op lexpr rexpr state =
         | Different -> BooleanVal(not (String.equal sl sr))
         | _ -> raise (Unknown_error_reference_interpretor "ruleBinary3")
       )
+    | (IntegerVal(i),TupleVal(t)) -> List.nth t i 
     | _ -> raise (Unknown_error_reference_interpretor "ruleBinary")
   )
 
-and
+and 
 
 ruleIfThenElseExpr cond_expr then_expr else_expr state =
   let vcond = value_of_expr cond_expr state in
@@ -316,16 +317,17 @@ let execution_prg prg start env =
     match tree with
         | ProgramNode (p1,p2) -> aux p1; aux p2
         | FunctionNode (_,_,n,p,b) -> Hashtbl.add state n (ref (FuncVal(p,b)))
+        | VariableDeclaNode(_,t,n) -> Hashtbl.add state n (ref (def_value t))
         | _ -> ()
     in aux prg;
     match start with
       | Some(_,name,expr) ->
-        match (!(Hashtbl.find state name)) with 
+        (match (!(Hashtbl.find state name)) with 
         | FuncVal(p,b) ->
           let ve = value_of_expr expr state in
           let localstate = create_local_state p b state ve in
           (match b with 
           | BodyNode (_,_,instr) -> string_of_val (ruleInstr instr localstate)
           | _ -> raise (Unknown_error_reference_interpretor "execution_prg3"))
-        | _ -> raise (Unknown_error_reference_interpretor "execution_prg2") 
+        | _ -> raise (Unknown_error_reference_interpretor "execution_prg2")) 
       | _ -> raise (Unknown_error_reference_interpretor "execution_prg")

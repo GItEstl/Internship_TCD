@@ -1,0 +1,15 @@
+// Without error: use of a variable in and after a sub-block
+
+func void test28 (string s) {
+def 
+    int i;
+    int j
+in
+    i = 4;
+    while (i != 1) {
+        i = i - 1
+    };
+    j = i 
+}
+
+start test28("") 

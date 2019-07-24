@@ -1,0 +1,10 @@
+// Type error: declaration of an integer variable and assignment of a binary expression with inconsistents types
+
+func void test05 (string s) {
+def 
+    int i
+in
+    i = 1 && true
+}
+
+start test05("") 

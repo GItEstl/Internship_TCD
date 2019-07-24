@@ -1,0 +1,14 @@
+// Without error: Correct assignment of an char tuple with char values and retrieval of the second element thanks to 2 ways
+
+func void test35 (string s) {
+def
+    (char,char) tuple;
+    char c;
+    char c2
+in
+    tuple = ('t','s');
+    c = snd(tuple);
+    c2 = get(1,tuple); // the second element is at the index 1
+}
+
+start test35("") 

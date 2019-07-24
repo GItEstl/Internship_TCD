@@ -11,6 +11,7 @@ type binary =
   | Lesser 
   | Greater
   | Assign
+  | Get
 ;;
 
 (* Unary operator Type *)
@@ -55,7 +56,6 @@ type ast =
   | ParamsNode of Lexing.position * ast * string * ast option
   | VariableDeclasNode of ast * ast option
   | VariableDeclaNode of Lexing.position *  ast * string
- (* | TupleDeclaNode of Lexing.position * string * ast option *)
   | BodyNode of Lexing.position * ast option * ast
   | WhileNode of Lexing.position * ast * ast
   | ReceiveNode of Lexing.position * ast * string

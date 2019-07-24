@@ -30,7 +30,7 @@ open Ast
 %token <Lexing.position> FunctionToken
 %token <Lexing.position> ReceiveToken, SendToken, NewToken, SpawnToken, TauToken
 %token <Lexing.position> ChooseToken, ChoiceToken
-%token <Lexing.position> HeadToken, TailToken, OddToken, EvenToken, FstToken, SndToken, NotToken
+%token <Lexing.position> HeadToken, TailToken, OddToken, EvenToken, FstToken, SndToken, NotToken, GetToken
 %token <Lexing.position> StartToken, ReturnToken
 %token <Lexing.position> TypeToken
 %token EOF
@@ -135,6 +135,7 @@ expr :
  | e1 = expr pos = DifferentToken e2 = expr                                                                                                 {BinaryNode (pos,e1,Different,e2)}
  | e1 = expr pos = LesserToken e2 = expr                                                                                                    {BinaryNode (pos,e1,Lesser,e2)}
  | e1 = expr pos = GreaterToken e2 = expr                                                                                                   {BinaryNode (pos,e1,Greater,e2)}
+ | pos = GetToken LeftParenthesisToken e1 = expr ComaToken e2 = expr RightParenthesisToken                                                  {BinaryNode (pos,e1,Get,e2)} 
  | pos = IfToken LeftParenthesisToken cond = expr RightParenthesisToken 
       LeftBracketToken e1 = expr RightBracketToken ElseToken LeftBracketToken e2 = expr RightBracketToken                         {IfthenelseExprNode (pos,cond,e1,e2)}
  | pos = LeftParenthesisToken e = exprs RightParenthesisToken                                                                           {ExprNode (pos,e)}
@@ -148,6 +149,7 @@ exprs :
 cst : 
  | c = NumberToken                                                                                                        {IntegerNode(fst(c),snd(c))}
  | c = CharValueToken                                                                                                    {CharNode (fst(c),snd(c))}
+ | pos = DoubleQuoteToken DoubleQuoteToken                                                                                    {StringNode (pos,"")}
  | DoubleQuoteToken c = IdentToken DoubleQuoteToken                                                                       {StringNode (fst(c),snd(c))}
  | pos = TrueToken                                                                                                              {TrueNode (pos)}
  | pos = FalseToken                                                                                                             {FalseNode (pos)}

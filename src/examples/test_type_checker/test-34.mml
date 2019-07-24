@@ -1,0 +1,14 @@
+// Without error: Correct assignment of an string tuple with string values and retrieval of the first element thanks to 2 ways
+
+func void test34 (string s) {
+def
+    (string,string,string,string) tuple;
+    string s;
+    string s2;
+in
+    tuple = ("t1","t2","t3","t4");
+    s = fst(tuple);
+    s2 = get(0,tuple); // the first element is at the index 0
+}
+
+start test34("") 

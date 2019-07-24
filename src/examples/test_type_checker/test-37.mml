@@ -1,0 +1,14 @@
+// Type error: Incorrect assignment of a tuple, the second element assigned is a boolean value while a string was expected
+
+func void test37 (string s) {
+def
+    (char, string, int, boolean) tuple;
+    char c;
+    string s;
+    int i;
+    boolean b
+in
+    tuple = ('t',true,14,false);
+}
+
+start test37("") 

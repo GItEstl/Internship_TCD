@@ -1,0 +1,10 @@
+// Well-formedmess error: declaration of an integer variable and assignment of a binary expression with an undeclared variable
+
+func void test06 (string s) {
+def 
+    int i
+in
+    i = 1 + j
+}
+
+start test06("") 

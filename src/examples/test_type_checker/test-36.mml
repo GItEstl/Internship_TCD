@@ -1,0 +1,18 @@
+// Without error: Correct assignment of a tuple with correct type values and retrieval of each element
+
+func void test36 (string s) {
+def
+    (char, string, int, boolean) tuple;
+    char c;
+    string s;
+    int i;
+    boolean b
+in
+    tuple = ('t',"test",14,false);
+    c = fst(tuple);
+    s = snd(tuple);
+    i = get(2,tuple);
+    b = get(3,tuple)
+}
+
+start test36("") 

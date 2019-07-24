@@ -1,0 +1,11 @@
+// Type error: declaration twice of the same local variable
+
+func void test08 (string s) {
+def 
+    int i;
+    int i
+in
+
+}
+
+start test08("") 

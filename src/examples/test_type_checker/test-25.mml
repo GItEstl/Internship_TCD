@@ -1,0 +1,11 @@
+// Type error: assignment of a char to a string variable after a sub-block
+
+func void test25 (string s) {
+def 
+    string i;
+in
+    if (true) {} else {};
+    i = 't'
+}
+
+start test25("") 

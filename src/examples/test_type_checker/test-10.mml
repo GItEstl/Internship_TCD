@@ -1,0 +1,12 @@
+// Without error: declaration twice of the same variable (same name and type): one global, one local
+
+int i
+
+func void test10 (string s) {
+def 
+    int i
+in
+
+}
+
+start test10("")

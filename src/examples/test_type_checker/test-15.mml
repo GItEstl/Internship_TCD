@@ -1,0 +1,14 @@
+// Without error: use of a variable in a sub-block
+
+func void test15 (string s) {
+def 
+    int i;
+    int j
+in
+    i = 1;
+    if (i == 1) {
+        j = i
+    } else {}
+}
+
+start test15("") 
