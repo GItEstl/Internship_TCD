@@ -1,0 +1,12 @@
+// Type error: declaration of a couple (int,bool) and assignment of a couple (int,int)
+
+func void test52 (string s) {
+def
+	(int,boolean) tib;
+	(int,int) tii
+in
+	tib = (1,true);
+	tii = tib
+}
+
+start test52("")

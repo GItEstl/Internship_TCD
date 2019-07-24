@@ -1,0 +1,7 @@
+// Without error : declaration of a function with a return of interger list and return of this type
+
+func list[int] test60 (string s) {
+	return [1,2,3,4]
+}
+
+start test60("")

@@ -1,0 +1,10 @@
+// Without error : declaration of a list of booleans and assignment of a list of mix types 
+
+func void test66 (string s) {
+def
+	list[boolean]
+in
+	l = [true,2,false]
+}
+
+start test66("")

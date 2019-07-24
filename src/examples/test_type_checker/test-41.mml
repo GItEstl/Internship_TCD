@@ -1,0 +1,12 @@
+// Type error: declaration of a couple (int,bool) and assignment of the first value to a variable
+
+func void test51 (string s) {
+def
+	(int,boolean) t;
+	int i
+in
+	t = (1,true);
+	i = fst(t)
+}
+
+start test51("")

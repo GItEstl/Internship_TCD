@@ -1,0 +1,7 @@
+// Type error : declaration of a function with a void return and return of an integer
+
+func void test57 (string s) {
+	return 2
+}
+
+start test57("")

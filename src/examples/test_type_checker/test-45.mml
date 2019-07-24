@@ -1,0 +1,7 @@
+// Without error : return of void
+
+func void test55 (string s) {
+return;
+}
+
+start test55("")

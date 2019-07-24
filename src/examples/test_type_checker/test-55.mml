@@ -1,0 +1,10 @@
+// Without error : declaration of a list of booleans and assignment of a list of integers 
+
+func void test65 (string s) {
+def
+	list[boolean]
+in
+	l = [1,2,3]
+}
+
+start test65("")

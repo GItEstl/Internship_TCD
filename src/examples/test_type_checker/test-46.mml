@@ -1,0 +1,7 @@
+// Without error : return of integer value
+
+func int test56 (string s) {
+	return 2
+}
+
+start test56("")

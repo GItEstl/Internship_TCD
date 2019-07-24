@@ -1,0 +1,5 @@
+// Type error : declaration of a function with an int return and no return instruction in the function
+
+func int test58 (string s) {}
+
+start test58("")
