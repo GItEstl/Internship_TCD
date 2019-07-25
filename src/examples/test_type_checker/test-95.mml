@@ -1,0 +1,14 @@
+// Type error : incorrect use of the lesser operator (variables compared are not two integers)
+
+func void test95 (string s) {
+def
+	int i1;
+	char c2;
+	boolean b
+in
+	i1 = 2;
+	c2 = 'c';
+	b = (i1 < c2)
+}
+
+start test95("")

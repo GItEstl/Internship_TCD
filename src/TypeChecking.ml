@@ -63,10 +63,10 @@ let rec string_of_type t =
     | ChannelGenType -> "channel"
     | ListType(st) -> "list " ^ (string_of_type st)
     | ListGenType -> "list"
-    | TupleType(st) -> "(" ^ (let rec aux l = match l with 
+    | TupleType(st) -> "(" ^ (List.fold_left (fun s e ->  s ^ ", " ^ (string_of_type e)) (string_of_type (List.nth st 0)) (List.tl st)) ^ ")"(*"(" ^ (let rec aux l = match l with 
                                       | [] -> ""
                                       | t::q -> (string_of_type t) ^ ", " ^ (aux q)
-                        in aux st) ^ ")"  
+                        in aux st) ^ ")"  *)
     | TupleGenType -> "tuple"
     | NamedType(s) -> s 
     | ErrorType -> "ERROR"
@@ -170,11 +170,11 @@ let rec compare envType type1 type2 =
     | (StringType,StringType) -> (true,StringType)
     | (CharType,CharType) -> (true,CharType)
     | (ChannelType(st1),ChannelType(st2)) -> if (fst(compare envType st1 st2)) then (true,ChannelType(st2)) else (false,ErrorType)
-    | (ChannelType(st),ChannelGenType) -> (true,ChannelType(st))
+    | (ChannelType(st),ChannelGenType) | (ChannelGenType,ChannelType(st)) -> (true,ChannelType(st))
     | (ListType(st1),ListType(st2)) -> if (fst(compare envType st1 st2)) then (true,ListType(st2)) else (false,ErrorType)
-    | (ListType(st),ListGenType) -> (true,ListType(st))
+    | (ListType(st),ListGenType) | (ListGenType,ListType(st)) -> (true,ListType(st))
     | (TupleType(st1),TupleType(st2)) -> if (List.for_all2 (fun a b -> fst(compare envType a b)) st1 st2) then (true,TupleType(st2)) else (false,ErrorType)
-    | (TupleType(st),TupleGenType) -> (true,TupleType(st))
+    | (TupleType(st),TupleGenType) | (TupleGenType,TupleType(st)) -> (true,TupleType(st))
     | (NamedType(n1),NamedType(n2)) -> if (String.equal n1 n2) then (true,NamedType(n2)) else (false,ErrorType)
     | (NamedType(st),t) | (t,NamedType(st)) -> let _,_,tnode,_ = (List.find (fun (_,name,_,_) -> String.equal name st) envType) in compare envType (type_of_tree tnode envType) t
     | (VoidType,VoidType) -> (true,VoidType)
@@ -232,12 +232,15 @@ ruleUnary op expr envVar envType pos =
   try
     let texpr = (type_of_expr expr envVar envType) in
     (match op with
-    | (NegateInt | Odd | Even)->
+    | NegateInt->
       let be,_ = compare envType texpr IntegerType in
       (if (be) then IntegerType else raise (Wrong_type (pos,texpr,IntegerType)))
+    | (Odd | Even)->
+      let be,_ = compare envType texpr IntegerType in
+      (if (be) then BooleanType else raise (Wrong_type (pos,texpr,IntegerType)))
     | NegateBool ->
       let be,_ = compare envType texpr BooleanType in
-      (if (be) then IntegerType else raise (Wrong_type (pos,texpr,IntegerType)))
+      (if (be) then BooleanType else raise (Wrong_type (pos,texpr,BooleanType)))
     | Head ->
       let _,te = compare envType texpr ListGenType in
       (match te with
@@ -278,20 +281,20 @@ ruleBinary op left right envVar envType pos =
             | ErrorType -> raise (Wrong_type (pos,tright,tleft))
             | _ -> raise (Illegal_type_argument pos))
       | (Lesser | Greater) ->
-        let (bl,tl) = compare envType tleft IntegerType in
-        let (br,tr) = compare envType tright IntegerType in
-          (if (bl) then (if (br) then BooleanType else raise (Wrong_type (pos,tr,IntegerType))) 
-          else raise (Wrong_type (pos,tl,IntegerType)))
+        let (bl,_) = compare envType tleft IntegerType in
+        let (br,_) = compare envType tright IntegerType in
+          (if (bl) then (if (br) then BooleanType else raise (Wrong_type (pos,tright,IntegerType))) 
+          else raise (Wrong_type (pos,tleft,IntegerType)))
       | (Add | Substract | Multiply | Divide) ->
-        let (bl,tl) = compare envType tleft IntegerType in
-        let (br,tr) = compare envType tright IntegerType in
-          (if (bl) then (if (br) then IntegerType else raise (Wrong_type (pos,tr,IntegerType))) 
-          else raise (Wrong_type (pos,tl,IntegerType)))
+        let (bl,_) = compare envType tleft IntegerType in
+        let (br,_) = compare envType tright IntegerType in
+          (if (bl) then (if (br) then IntegerType else raise (Wrong_type (pos,tright,IntegerType))) 
+          else raise (Wrong_type (pos,tleft,IntegerType)))
       | (Or | And) ->
-        let (bl,tl) = compare envType tleft BooleanType in
-        let (br,tr) = compare envType tright BooleanType in
-          (if (bl) then (if (br) then BooleanType else raise (Wrong_type (pos,tr,IntegerType))) 
-          else raise (Wrong_type (pos,tl,IntegerType)))
+        let (bl,_) = compare envType tleft BooleanType in
+        let (br,_) = compare envType tright BooleanType in
+          (if (bl) then (if (br) then BooleanType else raise (Wrong_type (pos,tright,BooleanType))) 
+          else raise (Wrong_type (pos,tleft,BooleanType)))
       | Get -> 
         let (b1,t1) = compare envType tleft IntegerType in
         let (b2,t2) = compare envType tright TupleGenType in
@@ -347,6 +350,7 @@ ruleValue v envType =
     | StringNode (_,_) -> StringType
     | TrueNode(_) -> BooleanType
     | FalseNode(_) -> BooleanType
+    | EmptyList -> ListGenType
     | ValueSeqNode (ValueNode(v),None) -> ListType (ruleValue v envType)
     | ValueSeqNode (ValueNode(v),Some(vs)) -> ListType (
         let rec aux v1 vs1 =
@@ -604,7 +608,7 @@ and
 
 (* Rule for a void return *)
 
-ruleReturnVoid = OK
+ruleReturnVoid = OKt(VoidType)
 
 and
 
@@ -737,6 +741,15 @@ let type_check_prg envVar envType nameListType prg =
     match tree with
         | ProgramNode (p1,p2) -> aux (aux l p1) p2
         | FunctionNode (_,_,_,_,_) -> (tree::l)
+        | CallNode(pos,namef,expr) ->   
+          (let tf,pnode = type_of_func namef envVar envType pos in
+          let tp = type_of_params pnode envType in
+          let te = type_of_expr expr envVar envType in
+          try
+            let b,_ = compare envType tp te in
+            if (b) then l else raise (Not_type_of_the_params (pos,te,tp,namef))
+          with
+            | Invalid_argument _ -> raise (Not_type_of_the_params (pos,te,tp,namef)))
         | _ -> l 
     in aux [] prg) in 
   List.for_all (fun f -> ruleFunction f envVar envType nameListType) all_func

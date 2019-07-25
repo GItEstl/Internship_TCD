@@ -1,0 +1,9 @@
+// Without error: declaration of a global variable and assignment to this variable
+
+int globalVar
+
+func void test136 (string s) {
+    globalVar = 3;
+}
+
+start test136("")

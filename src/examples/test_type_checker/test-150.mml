@@ -1,0 +1,11 @@
+// Type error: example of shadowing (local variable and a parameter with the same name)
+
+func int test150 (int i) {
+def
+    boolean i
+in 
+    i = 1;
+    return i 
+}
+
+start test150(1)

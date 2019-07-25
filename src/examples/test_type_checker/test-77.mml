@@ -1,0 +1,12 @@
+// Type error : incorrect assignment of the not operation result
+
+func void test77 (string s) {
+def
+	string s;
+	boolean b
+in
+	b = false;
+	s = not b
+}
+
+start test77("")

@@ -1,0 +1,14 @@
+// Type error : incorrect use of the divide operator (variables divided are not two integers)
+
+func void test115 (string s) {
+def
+	int i1;
+	int i;
+	string s1;
+in
+	i1 = 2;
+	s1 = "test";
+	i = i1 / s1
+}
+
+start test115("")

@@ -1,4 +1,4 @@
-// Type error : declaration of a list of booleans and assignment of a list of integers 
+// Type error : declaration of a boolean list and assignment of a list of integers 
 
 func void test59 (string s) {
 def

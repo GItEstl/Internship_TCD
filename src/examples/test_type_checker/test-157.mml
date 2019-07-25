@@ -1,0 +1,17 @@
+// Type error: expression as a parameter of the function with the wrong type 
+
+func void addint (int i, int j) {
+def 
+    int x
+in
+    x = i + j
+}
+
+func void test157 (string s) {
+def
+     int x 
+in
+    x = addint(1,2)
+}
+
+start test157("")

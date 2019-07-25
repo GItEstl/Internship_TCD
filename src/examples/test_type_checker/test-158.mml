@@ -1,0 +1,15 @@
+// Without error: Use of global variable in different functions
+
+int var
+
+func void addint (int i, int j) {
+    var = i + j
+}
+
+func int test158 (string s) {
+    addint(3,4);
+    return var
+
+}
+
+start test158("")

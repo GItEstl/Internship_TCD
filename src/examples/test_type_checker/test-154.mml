@@ -1,0 +1,14 @@
+// Type error: expression as a parameter of the function with the wrong type 
+
+func int addint (int i, int j) {
+    return i + j
+}
+
+func void test154 (string s) {
+def
+     int x 
+in
+    x = addint(true)
+}
+
+start test154("")

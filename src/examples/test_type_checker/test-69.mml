@@ -1,0 +1,13 @@
+// Without error : declaration of an integer and correct use of the odd operator
+
+func boolean test69 (string s) {
+def
+	int i;
+	boolean b
+in
+	i = 1;
+	b = odd(i);
+	return b
+}
+
+start test69("")

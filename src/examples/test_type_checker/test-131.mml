@@ -1,0 +1,8 @@
+// Without error : while instruction with a return and a return outside of the same type
+
+func int test131 (string s) {
+	while (false) {return 1};
+	return 2
+}
+
+start test131("")

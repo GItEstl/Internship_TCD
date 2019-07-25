@@ -1,0 +1,12 @@
+// Type error : declaration of a string tuple and incorrect use of the operator head
+
+func void test65 (string s) {
+def
+	(string, string) tuple;
+	string hd
+in
+	tuple = ("t1","t2");
+	hd = head(tuple)
+}
+
+start test65("")

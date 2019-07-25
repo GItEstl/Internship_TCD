@@ -1,0 +1,11 @@
+// Run time error : declaration of a boolean list and return of the tail of an empty list 
+
+func list[boolean] test63 (string s) {
+def
+	list[boolean] l
+in
+	l = [];
+	return tail(l)
+}
+
+start test63("")

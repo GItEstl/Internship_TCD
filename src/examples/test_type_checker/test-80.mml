@@ -1,0 +1,15 @@
+// Without error : correct use of the equal operator with booleans
+
+func boolean test80 (string s) {
+def
+	boolean b1;
+	boolean b2;
+	boolean b
+in
+	b1 = true;
+	b2 = true;
+	b = (b1 == b2);
+	return b
+}
+
+start test80("")

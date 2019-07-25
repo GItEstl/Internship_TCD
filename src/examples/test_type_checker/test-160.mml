@@ -1,0 +1,12 @@
+// Without error: fibonacci
+
+func int fibonacci (int total, int valprec,int n) {
+    if (n == 0) {
+        return total
+    } else {    
+        return fibonacci (total+valprec,total,n-1)
+    }
+
+}
+
+start fibonacci(0,1,8)

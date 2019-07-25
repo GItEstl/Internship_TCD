@@ -1,0 +1,15 @@
+// Without error : correct use of the equal operator with chars
+
+func boolean test84 (string s) {
+def
+	string s1;
+	string s2;
+	boolean b
+in
+	s1 = "test";
+	s2 = "test";
+	b = (s1 == s2);
+	return b
+}
+
+start test84("")

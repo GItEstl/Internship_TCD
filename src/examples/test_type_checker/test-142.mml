@@ -1,0 +1,7 @@
+// Well-formedness error: declaration of two functions with the same name
+
+func void test142 (string x) {}
+
+func void test142 (boolean x) {}
+
+start test142("","")

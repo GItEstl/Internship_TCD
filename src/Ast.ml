@@ -86,6 +86,7 @@ type ast =
   | TypeSeqNode of ast * ast option
   | FuncTNode of ast option
   | NoopNode
+  | EmptyList
   | ReturnNode of Lexing.position * ast option
   | NamedTypeNode of Lexing.position * string
   | TypeDeclaNode of Lexing.position * string * ast
@@ -94,159 +95,161 @@ type ast =
 (* Convert an AST into a string *)
 let rec string_of_ast tree =
 match tree with
-    | (ProgramNode (p1,p2)) -> 
+    | ProgramNode (p1,p2) -> 
   (string_of_ast p1) ^ "\n" ^ (string_of_ast p2)
     | (FunctionNode (_,ft,n,params,b)) ->
   "func " ^ (string_of_ast ft) ^ " " ^ n ^ "(" ^ (string_of_ast params) ^ ") " ^ (string_of_ast b)
-    | (ParamsNode (_,t,n,None)) -> 
+    | ParamsNode (_,t,n,None) -> 
   (string_of_ast t) ^ " " ^ n
-    | (ParamsNode (_,t,n,Some(params))) -> 
+    | ParamsNode (_,t,n,Some(params)) -> 
   (string_of_ast t) ^ " " ^ n ^ ", " ^ (string_of_ast params)
-    | (BodyNode (_,Some(v),i)) ->
+    | BodyNode (_,Some(v),i) ->
   "{\ndef\n" ^ (string_of_ast v) ^ "in \n" ^ (string_of_ast i) ^ "}\n"    
-    | (BodyNode (_,None,i)) ->
+    | BodyNode (_,None,i) ->
   "{\n" ^ (string_of_ast i) ^ "}\n"
-    | (VariableDeclaNode (_,t,n)) -> 
+    | VariableDeclaNode (_,t,n) -> 
   (string_of_ast t) ^ " " ^ n
-    | (VariableDeclasNode (v,None)) -> 
+    | VariableDeclasNode (v,None) -> 
   (string_of_ast v) ^ "\n"
-    | (VariableDeclasNode (v,Some(vs))) -> 
+    | VariableDeclasNode (v,Some(vs)) -> 
   (string_of_ast v) ^ ";\n" ^ (string_of_ast vs)
-    | (InstrSeqNode (NoopNode,Some(i))) ->
+    | InstrSeqNode (NoopNode,Some(i)) ->
   ";\n" ^ (string_of_ast i)
-    | (InstrSeqNode (NoopNode,None)) ->
+    | InstrSeqNode (NoopNode,None) ->
   ""
-    | (InstrSeqNode (bi,None)) ->
+    | InstrSeqNode (bi,None) ->
   (string_of_ast bi) ^ "\n"
-    | (InstrSeqNode (bi,Some(i))) ->
+    | InstrSeqNode (bi,Some(i)) ->
   (string_of_ast bi) ^ ";\n" ^ (string_of_ast i)
-    | (BinaryNode (_,a,Assign,e)) -> 
+    | BinaryNode (_,a,Assign,e) -> 
   (string_of_ast a) ^ " = " ^ (string_of_ast e)
-    | (CallNode (_,f,e)) ->
+    | CallNode (_,f,e) ->
   "call " ^ f ^ "(" ^ (string_of_ast e) ^ ")" 
-    | (ReceiveNode (_,a,n)) ->
+    | ReceiveNode (_,a,n) ->
   (string_of_ast a) ^ " = receive(" ^ n ^ ")"
-    | (SendNode (_,n,e)) ->
+    | SendNode (_,n,e) ->
   "send(" ^ n ^ ", " ^ (string_of_ast e) ^ ")"
-    | (IfthenelseInstrNode (_,cond,i1,i2)) ->
+    | IfthenelseInstrNode (_,cond,i1,i2) ->
   "if (" ^ (string_of_ast cond) ^ ") {\n" ^ (string_of_ast i1) ^ "} else {\n" ^ (string_of_ast i2) ^ "}"
-    | (WhileNode (_,e,i)) ->
+    | WhileNode (_,e,i) ->
   "while (" ^ (string_of_ast e) ^ ") {\n" ^ (string_of_ast i) ^ "}"
-    | (ChooseNode (_,c)) ->
+    | ChooseNode (_,c) ->
   "choose {\n" ^ (string_of_ast c) ^ "}"
-    | (SpawnNode (_,f,e)) ->
+    | SpawnNode (_,f,e) ->
   "spawn " ^ f ^ "(" ^ (string_of_ast e) ^ ")" 
-    | (NewNode (_,a)) ->
+    | NewNode (_,a) ->
   (string_of_ast a) ^ " = newChan()" 
-    | (ReturnNode (_,Some (e))) ->
+    | ReturnNode (_,Some (e)) ->
   "return " ^ (string_of_ast e)
-    | (ReturnNode (_,None)) ->
+    | ReturnNode (_,None) ->
   "return "   
-    | (ChoicesNode(_,p,i,Some(cs))) -> 
+    | ChoicesNode(_,p,i,Some(cs)) -> 
   (string_of_ast p) ^ " -> {" ^ (string_of_ast i) ^ "} \n" ^ (string_of_ast cs)
-    | (ChoicesNode(_,p,i,None)) -> 
+    | ChoicesNode(_,p,i,None) -> 
   (string_of_ast p) ^ " -> {" ^ (string_of_ast i) ^ "}"
-    | (PrefixNode(_,None,Tau,None,None)) ->
+    | PrefixNode(_,None,Tau,None,None) ->
   " | tau"
-    | (PrefixNode(_,None,Send,Some(n),Some(e))) -> 
+    | PrefixNode(_,None,Send,Some(n),Some(e)) -> 
   " |send(" ^ n ^ ", " ^ (string_of_ast e) ^ ")"
-    | (PrefixNode(_,Some(a),Receive,Some(n),None)) ->
+    | PrefixNode(_,Some(a),Receive,Some(n),None) ->
   " |" ^ (string_of_ast a) ^ " = receive(" ^ n ^ ")"
-    | (PrefixNode(_,Some(a),New,None,None)) ->
+    | PrefixNode(_,Some(a),New,None,None) ->
   (string_of_ast a) ^ " = newChan()"  
-    | (PrefixNode(_,None,Spawn,Some(f),Some(e))) ->
+    | PrefixNode(_,None,Spawn,Some(f),Some(e)) ->
   " | spawn " ^ f ^ "(" ^ (string_of_ast e) ^ ")"
-    | (UnaryNode (_,NegateInt,e)) ->
+    | UnaryNode (_,NegateInt,e) ->
   "(-" ^ (string_of_ast e) ^ ")"
-    | (UnaryNode (_,NegateBool,e)) ->
+    | UnaryNode (_,NegateBool,e) ->
   "(not" ^ (string_of_ast e) ^ ")"
-    | (UnaryNode (_,Head,e)) ->
+    | UnaryNode (_,Head,e) ->
   "head(" ^ (string_of_ast e) ^ ")"
-    | (UnaryNode (_,Tail,e)) ->
+    | UnaryNode (_,Tail,e) ->
   "tail(" ^ (string_of_ast e) ^ ")"
-    | (UnaryNode (_,Odd,e)) ->
+    | UnaryNode (_,Odd,e) ->
   "odd(" ^ (string_of_ast e) ^ ")"
-    | (UnaryNode (_,Even,e)) ->
+    | UnaryNode (_,Even,e) ->
   "even(" ^ (string_of_ast e) ^ ")"
-    | (UnaryNode (_,Fst,e)) ->
+    | UnaryNode (_,Fst,e) ->
   "fst(" ^ (string_of_ast e) ^ ")"
-    | (UnaryNode (_,Snd,e)) ->
+    | UnaryNode (_,Snd,e) ->
   "snd(" ^ (string_of_ast e) ^ ")"
-    | (BinaryNode (_,e1,Add,e2)) ->
+    | BinaryNode (_,e1,Add,e2) ->
   "(" ^ (string_of_ast e1) ^ " + " ^ (string_of_ast e2) ^ ")"
-    | (BinaryNode (_,e1,Substract,e2)) ->
+    | BinaryNode (_,e1,Substract,e2) ->
   "(" ^ (string_of_ast e1) ^ " - " ^ (string_of_ast e2) ^ ")"
-    | (BinaryNode (_,e1,Or,e2)) ->
+    | BinaryNode (_,e1,Or,e2) ->
   "(" ^ (string_of_ast e1) ^ " || " ^ (string_of_ast e2) ^ ")"
-    | (BinaryNode (_,e1,Multiply,e2)) ->
+    | BinaryNode (_,e1,Multiply,e2) ->
   "(" ^ (string_of_ast e1) ^ " * " ^ (string_of_ast e2) ^ ")"
-    | (BinaryNode (_,e1,Divide,e2)) ->
+    | BinaryNode (_,e1,Divide,e2) ->
   "(" ^ (string_of_ast e1) ^ " / " ^ (string_of_ast e2) ^ ")"
-    | (BinaryNode (_,e1,And,e2)) ->
+    | BinaryNode (_,e1,And,e2) ->
   "(" ^ (string_of_ast e1) ^ " && " ^ (string_of_ast e2) ^ ")"
-    | (BinaryNode (_,e1,Equal,e2)) ->
+    | BinaryNode (_,e1,Equal,e2) ->
   "(" ^ (string_of_ast e1) ^ " == " ^ (string_of_ast e2) ^ ")"
-    | (BinaryNode (_,e1,Different,e2)) ->
+    | BinaryNode (_,e1,Different,e2) ->
   "(" ^ (string_of_ast e1) ^ " != " ^ (string_of_ast e2) ^ ")"
-    | (BinaryNode (_,e1,Lesser,e2)) ->
+    | BinaryNode (_,e1,Lesser,e2) ->
   "(" ^ (string_of_ast e1) ^ " < " ^ (string_of_ast e2) ^ ")"
-    | (BinaryNode (_,e1,Greater,e2)) ->
+    | BinaryNode (_,e1,Greater,e2) ->
   "(" ^ (string_of_ast e1) ^ " > " ^ (string_of_ast e2) ^ ")"
-    | (IfthenelseExprNode (_,cond,e1,e2)) ->
+    | IfthenelseExprNode (_,cond,e1,e2) ->
   "if (" ^ (string_of_ast cond) ^ ") {\n" ^ (string_of_ast e1) ^ "} else {\n" ^ (string_of_ast e2) ^ "}"
-    | (ExprNode (_,e)) ->
+    | ExprNode (_,e) ->
   "(" ^ (string_of_ast e) ^ ")"
-    | (ExprsNode (e1,Some (e2))) ->
+    | ExprsNode (e1,Some (e2)) ->
   (string_of_ast e1) ^ ", " ^ (string_of_ast e2)
-    | (ExprsNode (e1,None)) ->
+    | ExprsNode (e1,None) ->
   (string_of_ast e1)
-    | (ValueNode (v)) ->
+    | ValueNode (EmptyList) ->
+  "[]"
+    | ValueNode (v) ->
   (string_of_ast v)
-    | (IntegerNode (_,c)) ->
+    | IntegerNode (_,c) ->
   (string_of_int c)
-    | (CharNode (_,c)) ->
+    | CharNode (_,c) ->
   "'" ^ c ^ "'"
-    | (StringNode (_,c)) ->
+    | StringNode (_,c) ->
   "\"" ^ c ^ "\""
-    | (TrueNode (_)) ->
+    | TrueNode (_) ->
   "true"
-    | (FalseNode (_)) ->
+    | FalseNode (_) ->
   "false"
-    | (ValueNode (ValueSeqNode (v,None))) ->
+    | ValueNode (ValueSeqNode (v,None)) ->
   "[" ^ (string_of_ast v) ^ "]"
-    | (ValueNode(ValueSeqNode(v,Some(vs)))) ->
+    | ValueNode(ValueSeqNode(v,Some(vs))) ->
   "[" ^ (string_of_ast v) ^ ", " ^ (string_of_ast vs) ^ "]"
-    | (ValueSeqNode (v,None)) ->
+    | ValueSeqNode (v,None) ->
   (string_of_ast v)
-    | (ValueSeqNode (v,Some(vs))) ->
+    | ValueSeqNode (v,Some(vs)) ->
   (string_of_ast v) ^ ", " ^ (string_of_ast vs)
-    | (AssignNode (_,n)) ->
+    | AssignNode (_,n) ->
   n
-    | (TypeNode (_,IntegerT)) ->
+    | TypeNode (_,IntegerT) ->
   "int"
-    | (TypeNode (_,BooleanT)) ->
+    | TypeNode (_,BooleanT) ->
   "boolean"
-    | (TypeNode (_,StringT)) ->
+    | TypeNode (_,StringT) ->
   "string"
-    | (TypeNode (_,CharT)) ->
+    | TypeNode (_,CharT) ->
   "char" 
-    | (ChanTNode (_,t)) ->
+    | ChanTNode (_,t) ->
   "channel " ^ (string_of_ast t) 
-    | (ListTNode (_,t)) ->
+    | ListTNode (_,t) ->
   "list[" ^ (string_of_ast t) ^ "]" 
-    | (TupleTNode (_,t)) ->
+    | TupleTNode (_,t) ->
   "(" ^ (string_of_ast t) ^ ")" 
-    | (TypeSeqNode (t,None)) ->
+    | TypeSeqNode (t,None) ->
   (string_of_ast t) 
-    | (TypeSeqNode (t1,Some(t2))) ->
+    | TypeSeqNode (t1,Some(t2)) ->
   (string_of_ast t1) ^ ", " ^ (string_of_ast t2)
-    | (FuncTNode (None)) ->
+    | FuncTNode (None) ->
   "void"
-    | (FuncTNode (Some (t))) ->
+    | FuncTNode (Some (t)) ->
   (string_of_ast t)
-    | (NamedTypeNode (_,t)) ->
+    | NamedTypeNode (_,t) ->
   t
-    | (TypeDeclaNode (_,n,t)) ->
+    | TypeDeclaNode (_,n,t) ->
   "type " ^ n ^ " = " ^ (string_of_ast t) 
     | _ -> 
   "unknownPrinting"

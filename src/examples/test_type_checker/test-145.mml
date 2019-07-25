@@ -1,0 +1,14 @@
+// Without error: example of shadowing (global variable and local variable with the same name)
+
+int var
+
+func void test143 (string s) {
+def
+    boolean var
+in
+    var = true;
+}
+
+func int test145 (string s) {return var}
+
+start test145("")

@@ -1,0 +1,14 @@
+// Type error : incorrect use of the or operator (variables used are not booleans)
+
+func void test119 (string s) {
+def
+	int i1;
+	int i2;
+	boolean b
+in
+	i1 = 10/2;
+	i2 = 2*3;
+	b = i1 || i2
+}
+
+start test119("")

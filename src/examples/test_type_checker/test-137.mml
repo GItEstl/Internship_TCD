@@ -1,0 +1,9 @@
+// Without error: declaration of a global variable and return of the variable
+
+int globalVar
+
+func int test137 (string s) {
+    return globalVar
+}
+
+start test137("")

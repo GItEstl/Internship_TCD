@@ -1,0 +1,12 @@
+// Type error : declaration of a char and incorrect use of the odd operator
+
+func void test70 (string s) {
+def
+	char c;
+	boolean b
+in
+	c = 't';
+	b = odd(c)
+}
+
+start test70("")

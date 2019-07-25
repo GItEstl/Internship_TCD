@@ -1,0 +1,14 @@
+// Type error : incorrect use of the multiply operator (variables multiplied are not integers)
+
+func void test110 (string s) {
+def
+	char c1;
+	char c2;
+	int i
+in
+	c1 = 't';
+	c2 = 'c';
+	i = c1 * c2
+}
+
+start test110("")

@@ -1,0 +1,14 @@
+// Type error : incorrect assignment of the multiply operation result
+
+func void test109 (string s) {
+def
+	int i1;
+	int i2;
+	boolean b
+in
+	i1 = 2;
+	i2 = 14;
+	b = i1 * i2
+}
+
+start test109("")

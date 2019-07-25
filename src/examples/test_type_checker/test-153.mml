@@ -1,0 +1,11 @@
+// Type error: no assignment of the return of a function
+
+func int addint (int i, int j) {
+    return i + j
+}
+
+func void test153 (string s) {
+    addint(1,2)
+}
+
+start test153("")

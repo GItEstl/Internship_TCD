@@ -1,0 +1,11 @@
+// Type error : incorrect assignment of the odd operation result
+
+func void test71 (string s) {
+def
+	int i;
+in
+	i = 3;
+	i = odd(i)
+}
+
+start test71("")

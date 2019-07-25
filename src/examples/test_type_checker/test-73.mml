@@ -1,0 +1,12 @@
+// Type error : declaration of a boolean and incorrect use of the even operator
+
+func void test73 (string s) {
+def
+	boolean b1;
+	boolean b2
+in
+	b1 = true;
+	b2 = even(b1)
+}
+
+start test73("")

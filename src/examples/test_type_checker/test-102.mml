@@ -1,0 +1,14 @@
+// Type error : incorrect use of the add operator (variables added are not integers)
+
+func void test102 (string s) {
+def
+	boolean b1;
+	boolean b2;
+	int i
+in
+	b1 = true;
+	b2 = false;
+	i = b1 + b2
+}
+
+start test102("")

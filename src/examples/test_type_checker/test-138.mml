@@ -1,0 +1,5 @@
+// Well-formedness error: declaration of function with a unknown type in the parameters
+
+func void test138 (string s1, foo s2) {}
+
+start test138("","")

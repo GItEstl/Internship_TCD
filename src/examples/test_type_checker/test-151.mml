@@ -1,0 +1,15 @@
+// Without error: correct call of a function with a return
+
+func int addint (int i, int j) {
+    return i + j
+}
+
+func int test151 (string s) {
+def
+     int x 
+in
+    x = addint(1,2);
+    return x
+}
+
+start test151("")

@@ -1,0 +1,8 @@
+// Type error : conditional instruction with a return in the if branch and a return outside with a different type
+
+func boolean test130 (string s) {
+	if (true) {return true} else {};
+	return 1
+}
+
+start test130("")

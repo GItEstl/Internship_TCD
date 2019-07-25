@@ -1,0 +1,14 @@
+// Type error : incorrect assignment of the or operation result
+
+func void test118 (string s) {
+def
+	boolean b1;
+	boolean b2;
+	char c
+in
+	b1 = (1 == (2+3));
+	b2 = true;
+	c = b1 || b2
+}
+
+start test118("")

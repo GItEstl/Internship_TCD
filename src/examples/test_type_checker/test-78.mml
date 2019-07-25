@@ -1,0 +1,15 @@
+// Without error : correct use of the equal operator with integers
+
+func boolean test78 (string s) {
+def
+	int i1;
+	int i2;
+	boolean b
+in
+	i1 = 2;
+	i2 = 14;
+	b = (i1 == i2);
+	return b
+}
+
+start test78("")

@@ -1,0 +1,15 @@
+// Without error : correct use of the divide operator
+
+func int test112 (string s) {
+def
+	int i1;
+	int i2;
+	int i
+in
+	i1 = 20;
+	i2 = 4;
+	i = i1 / i2;
+	return i
+}
+
+start test112("")

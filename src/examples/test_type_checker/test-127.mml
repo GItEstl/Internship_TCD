@@ -1,0 +1,7 @@
+// Witouht error : conditional instruction with return
+
+func boolean test127 (string s) {
+	if (true) {return true} else {return false}
+}
+
+start test127("")

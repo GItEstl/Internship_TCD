@@ -1,0 +1,13 @@
+// Without error : correct use of the and operator
+
+func boolean test123 (string s) {
+def
+	int i1;
+	boolean b
+in
+	i1 = 1;
+	b = ("test" != "testt") && even(i1);
+	return b
+}
+
+start test123("")

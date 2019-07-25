@@ -1,0 +1,8 @@
+// Without error: operations with parameters
+
+func int test148 (int i, int j) {
+    i = i*10;
+    return i + j
+}
+
+start test148(1,3)

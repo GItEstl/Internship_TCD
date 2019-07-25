@@ -1,0 +1,12 @@
+// Type error : declaration of a tuple and incorrect use of the operator tail
+
+func void test66 (string s) {
+def
+	(int, string, boolean) tuple;
+	(string, boolean) tl
+in
+	tuple = (2,"t1",true);
+	tl = tail(tuple)
+}
+
+start test66("")

@@ -1,0 +1,12 @@
+// Without error : declaration of a boolean and correct use of the not operator
+
+func boolean test75 (string s) {
+def
+	boolean b
+in
+	b = true;
+	b = not b;
+	return b
+}
+
+start test75("")

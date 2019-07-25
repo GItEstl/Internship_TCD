@@ -1,0 +1,14 @@
+// Type error : incorrect use of the sub operator (variables subtracted are not integers)
+
+func void test106 (string s) {
+def
+	char c1;
+	char c2;
+	int i
+in
+	c1 = 't';
+	c2 = 'c';
+	i = c1 - c2
+}
+
+start test106("")

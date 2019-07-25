@@ -1,0 +1,11 @@
+// Type error : incorrect assignment of the even operation result
+
+func void test74 (string s) {
+def
+	int i;
+in
+	i = 3;
+	i = even(i)
+}
+
+start test74("")

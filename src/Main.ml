@@ -48,7 +48,7 @@ let report_error filename lexbuf msg =
     Printf.eprintf "File \"%s\", line %d, character %d: The name %s is already used by another function/variable\n" file pos.pos_lnum c name;
  | Resolve.Multiple_declaration_param (pos,name) ->
     let c = pos.pos_cnum - pos.pos_bol + 1 in
-    Printf.eprintf "File \"%s\", line %d, character %d: The name %s is used twice in the function paraneters\n" file pos.pos_lnum c name;
+    Printf.eprintf "File \"%s\", line %d, character %d: The name %s is used twice in the function parameters\n" file pos.pos_lnum c name;
  | Resolve.Type_not_found (pos,name) ->
     let c = pos.pos_cnum - pos.pos_bol + 1 in
     Printf.eprintf "File \"%s\", line %d, character %d: Incorrect type: unbound value %s\n" file pos.pos_lnum c name;
@@ -89,7 +89,7 @@ let report_error filename lexbuf msg =
  | TypeChecking.No_assignement_of_the_return(pos,tf,namef) ->
     let c = pos.pos_cnum - pos.pos_bol + 1 in
     let t_func = string_of_type tf in
-    Printf.eprintf "File \"%s\", line %d, character %d: The function %s has the type %s, it must be assign to a variable\n" file pos.pos_lnum c namef t_func;
+    Printf.eprintf "File \"%s\", line %d, character %d: The function %s has the type %s, it must be assigned to a variable\n" file pos.pos_lnum c namef t_func;
  | TypeChecking.Wrong_type_chan_receive (pos,ta,st) ->
     let c = pos.pos_cnum - pos.pos_bol + 1 in
     let t_assign= string_of_type ta in

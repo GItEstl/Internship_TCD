@@ -1,0 +1,11 @@
+// Type error : declaration of an integer and incorrect use of the not operator
+
+func void test76 (string s) {
+def
+	int i
+in
+	i = 4;
+	i = not i
+}
+
+start test76("")

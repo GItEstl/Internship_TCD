@@ -1,0 +1,14 @@
+// Type error: assignment of the return of a function to a variable of the wrong type
+
+func int addint (int i, int j) {
+    return i + j
+}
+
+func void test152 (string s) {
+def
+     boolean x 
+in
+    x = addint(1,2)
+}
+
+start test152("")

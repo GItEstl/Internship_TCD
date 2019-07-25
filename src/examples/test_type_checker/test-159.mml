@@ -1,0 +1,15 @@
+// Without error: example of shadowing and use of global variable in different functions
+
+int var
+
+func void addint (int i, int var) {
+    var = i
+}
+
+func int test159 (string s) {
+    addint(3,4);
+    return var
+
+}
+
+start test159("")

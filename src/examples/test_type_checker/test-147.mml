@@ -1,0 +1,7 @@
+// Type error: example of shadowing (global variable and a parameter with the same name)
+
+int var
+
+func string test147 (string var) {var = 1}
+
+start test147("test")

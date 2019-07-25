@@ -1,0 +1,14 @@
+// Type error : incorrect assignment of the lesser operation result
+
+func void test93 (string s) {
+def
+	int i1;
+	int i2;
+	string s
+in
+	i1 = 2;
+	i2 = 14;
+	s = (i1 < i2)
+}
+
+start test93("")

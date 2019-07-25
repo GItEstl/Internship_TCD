@@ -1,0 +1,7 @@
+// Without error: example of shadowing (global variable and a parameter with the same name)
+
+int var
+
+func string test146 (string var) {return var}
+
+start test146("test")

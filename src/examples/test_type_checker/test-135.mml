@@ -1,0 +1,7 @@
+// Well-formedness error: delcaration of variable using an incorrect type
+
+(int,foo) globalVar
+
+func void test135 (string s) {}
+
+start test135("")

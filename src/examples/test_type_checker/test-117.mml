@@ -1,0 +1,15 @@
+// Without error : correct use of the or operator
+
+func boolean test117 (string s) {
+def
+	int i1;
+	int i2;
+	boolean b
+in
+	i1 = 1;
+	i2 = 3;
+	b = ((i1*2 + i2) < 25) || odd(i1);
+	return b
+}
+
+start test117("")

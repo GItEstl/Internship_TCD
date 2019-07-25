@@ -1,0 +1,17 @@
+// Without error: correct call of a function with a void return
+
+func void addint (int i, int j) {
+def 
+    int x
+in
+    x = i + j
+}
+
+func void test156 (string s) {
+def
+     int x 
+in
+    addint(1,2)
+}
+
+start test156("")

@@ -1,0 +1,5 @@
+// Well-formedness error: declaration of function with two parameters with the same name
+
+func void test140 (string x, boolean x) {}
+
+start test140("",true)

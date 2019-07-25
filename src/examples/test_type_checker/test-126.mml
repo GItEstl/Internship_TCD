@@ -1,0 +1,14 @@
+// Type error : incorrect use of the and operator (variables used are not two booleans)
+
+func void test126 (string s) {
+def
+	int i1;
+	boolean b1;
+	boolean b;
+in
+	i1 = 2;
+	b1 = true;
+	b = b1 && i1
+}
+
+start test126("")

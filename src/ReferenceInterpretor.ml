@@ -13,6 +13,7 @@ type valueType =
   | ErrorVal
 
 exception Unknown_error_reference_interpretor of string
+exception Run_time_error of string
 
 let string_of_val v =
   match v with
@@ -22,9 +23,10 @@ let string_of_val v =
         match v with
         | IntegerVal(i) -> string_of_int i 
         | BooleanVal(b) -> string_of_bool b
-        | StringVal(s) -> s
-        | CharVal(c) -> c
-        | ListVal(l) -> "[" ^ (List.fold_left (fun s e ->  s ^ " " ^ (aux e)) (aux (List.nth l 0)) (List.tl l)) ^ "]"
+        | StringVal(s) -> "\"" ^ s ^ "\""
+        | CharVal(c) -> "\'" ^ c ^ "\'"
+        | ListVal([]) -> "[]"
+        | ListVal(l) -> "[" ^ (List.fold_left (fun s e ->  s ^ ", " ^ (aux e)) (aux (List.nth l 0)) (List.tl l)) ^ "]"
         | TupleVal(t) -> "(" ^ (List.fold_left (fun s e ->  s ^ ", " ^ (aux e)) (aux (List.nth t 0)) (List.tl t)) ^ ")"
         | _ -> "ERROR"
       in aux vs 
@@ -57,7 +59,9 @@ ruleUnary op expr state =
       (match op with
         | NegateBool -> BooleanVal((not b))
         | _ -> raise (Unknown_error_reference_interpretor "ruleUnary2")
-      ) 
+      )
+    | ListVal([]) -> 
+      raise (Run_time_error "You cannot apply an operator to an empty list") 
     | ListVal(t::q) -> 
       (match op with
         | Head -> t
@@ -95,9 +99,11 @@ ruleBinary op lexpr rexpr state =
       (match op with
         | Equal -> BooleanVal(bl == br)
         | Different -> BooleanVal(bl != br)
+        | Or -> BooleanVal(bl || br)
+        | And -> BooleanVal(bl && br)
         | _ -> raise (Unknown_error_reference_interpretor "ruleBinary2")
       ) 
-    | (StringVal(sl),StringVal(sr)) -> 
+    | ((StringVal(sl),StringVal(sr)) | (CharVal(sl),CharVal(sr)))-> 
       (match op with
         | Equal -> BooleanVal(String.equal sl sr)
         | Different -> BooleanVal(not (String.equal sl sr))
@@ -136,6 +142,7 @@ ruleValue v state =
     | StringNode (_,s) -> StringVal(s)
     | TrueNode(_) -> BooleanVal(true)
     | FalseNode(_) -> BooleanVal(false)
+    | EmptyList -> ListVal([])
     | ValueSeqNode (_,_) -> ListVal (
         let rec aux vs l =
           (match vs with

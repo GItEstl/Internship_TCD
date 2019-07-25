@@ -1,11 +1,11 @@
 // Without error : declaration of a boolean list and return of the tail of the list 
 
-func list[boolean] test62 (string s) {
+func list[boolean] test64 (string s) {
 def
 	list[boolean] l
 in
-	l = [true,true,false,false,true,false];
+	l = [true];
 	return tail(l)
 }
 
-start test62("")
+start test64("")

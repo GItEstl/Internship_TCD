@@ -1,0 +1,14 @@
+// Type error : incorrect use of the equal operator (differents types compared)
+
+func void test88 (string s) {
+def
+	boolean b1;
+	string s1;
+	boolean b
+in
+	b1 = true;
+	s1 = "test";
+	b = (b1 != s1)
+}
+
+start test88("")

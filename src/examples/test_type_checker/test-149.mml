@@ -1,0 +1,11 @@
+// Without error: example of shadowing (local variable and a parameter with the same name)
+
+func boolean test149 (int i) {
+def
+    boolean i
+in 
+    i = true;
+    return i 
+}
+
+start test149(1)

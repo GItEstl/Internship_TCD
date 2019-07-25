@@ -157,6 +157,7 @@ cst :
 value :
  | c = cst                                                                                                              {ValueNode (c)}              
  | LeftSqBracketToken vs = valueSeq RightSqBracketToken                                                                 {ValueNode (vs)}
+ | LeftSqBracketToken RightSqBracketToken                                                                               {ValueNode (EmptyList)}
 
 valueSeq :
  | v = value                                                                                                            {ValueSeqNode (v,None)}

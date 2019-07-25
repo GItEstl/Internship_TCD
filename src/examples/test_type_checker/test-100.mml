@@ -1,0 +1,15 @@
+// Without error : correct use of the add operator
+
+func int test100 (string s) {
+def
+	int i1;
+	int i2;
+	int i
+in
+	i1 = 2;
+	i2 = 14;
+	i = i1 + i2;
+	return i
+}
+
+start test100("")

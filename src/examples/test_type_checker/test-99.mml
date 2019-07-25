@@ -1,0 +1,14 @@
+// Type error : incorrect use of the greater operator (variables compared are not two integers)
+
+func void test99 (string s) {
+def
+	int i1;
+	string s1;
+	boolean b
+in
+	i1 = 2;
+	s1 = "test";
+	b = (i1 > s1)
+}
+
+start test99("")

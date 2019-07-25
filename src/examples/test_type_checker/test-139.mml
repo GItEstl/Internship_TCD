@@ -1,0 +1,5 @@
+// Well-formedness error: declaration of function with a unknown return type
+
+func foo test139 (string s1) {}
+
+start test139("")

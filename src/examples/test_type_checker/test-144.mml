@@ -1,0 +1,12 @@
+// Type error: example of shadowing (global variable and local variable with the same name)
+
+int var
+
+func boolean test143 (string s) {
+def
+    boolean var
+in
+    var = 1
+}
+
+start test143("")

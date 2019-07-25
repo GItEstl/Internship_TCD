@@ -1,0 +1,8 @@
+// Without error : while instruction with a void return and an int return
+
+func int test132 (string s) {
+	while (false) {return };
+	return 2
+}
+
+start test132("")
