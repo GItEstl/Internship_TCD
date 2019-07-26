@@ -1,11 +1,11 @@
 How to install this project ?
-You will need to use opam to install dune and menhir.
+You will need to use opam to install dune, menhir, utop and the test library.
 You can use the following commands:
         opam install dune
         opam install menhir
         opam install utop
         opam install ppx_expect
-/!\ You have to autorize opam to install all the necessary packages for both installations
+/!\ You have to autorize opam to install all the necessary packages for all installations
 
 
 How to use this project?
@@ -17,6 +17,8 @@ You will now be able to compile any examples by executing the following command:
         Main.main "<path of the file you want to compile>";;
 For example :
         Main.main "examples/examples/example-00.mml";;
+To exit dune use:
+        exit 0;;
         
 How to run the automated tests?
 Simply execute the following command:
