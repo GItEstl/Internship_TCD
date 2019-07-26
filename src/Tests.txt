@@ -1,0 +1,209 @@
+Declaration and assignment of variable
+   test-00: Without error: declaration of an integer variable and assignment of an integer value to this variable
+   test-01: Well-formedness error: assignment of an integer value to an undeclared variable
+   test-02: Type error: declaration of an integer variable and assignment of an boolean value to this variable
+   test-07: Type error: assignment of the value of a boolean variable to an integer variable
+
+Binary expression and assignment
+   test-03: Without error: declaration of an integer variable and assignment of a binary expression to this variable
+   test-04: Type error: declaration of an integer variable and assignment of a binary expression with inconsistents types
+   test-05: Type error: declaration of an integer variable and assignment of a binary expression with inconsistents types
+   test-06: Well-formedmess error: declaration of an integer variable and assignment of a binary expression with an undeclared variable
+
+Variable declaration
+   test-08: Type error: declaration twice of the same local variable
+   test-09: Type error: declaration twice of the same local variable with different types
+   test-10: Without error: declaration twice of the same variable (same name and type): one global, one local
+   test-11: Without error: declaration twice of the same variable (same name but not the same type): one global, one local
+   test-12: Without error: declaration thrice of the same variable (same name and type): one global, two locals in 2 differents fonctions
+   test-13: Without error: declaration thrice of the same variable (same name but not the same type): one global, two locals in 2 differents fonctions
+   
+Variable in a condition (while and if instructions)  
+   test-14: Without error: use of a variable in a condition
+   test-19: Without error: use of a boolean variable in a condition
+   test-20: Type error: use of a char expression for a condition
+   test-21: Type error: use of an integer expression for a condition
+   test-26: Without error: use of a variable in a condition
+   test-30: Without error: use of a boolean variable in a condition
+   test-31: Type error: use of an integer expression for a condition
+   test-32: Type error: use of a string expression for a condition
+
+Condtional expression
+   test-22: Without error: conditional expression with integer values
+   test-23: Without error: conditional expression with integer variables
+   test-24: Without error: conditional expression with boolean expressions
+   test-25: Type error: conditional expression with different types
+   test-27: Syntax error: conditional expression with only an expression inside one branch
+
+Various assignments tests with if and while instruction
+   test-15: Without error: use of a variable in the then branch of a conditional instruction
+   test-16: Without error: use of a variable in the else branch of a conditional instruction
+   test-17: Type error: assignment of the value of an integer variable to a boolean variable in a conditional instruction
+   test-18: Without error: use of a variable after a conditional instruction
+   test-28: Without error: use of a variable in a while instruction
+   test-29: Without error: use of a variable in and after a while instruction
+
+Declaration and assignment of tuple, use of the tuple operators
+   test-33: Without error: Correct assignment of an integer tuple with integer values
+   test-34: Without error: Correct assignment of a string tuple with string values and extraction of the first element thanks to 2 ways
+   test-35: Without error: Correct assignment of an char tuple with char values and extraction of the second element thanks to 2 ways
+   test-36: Without error: Correct assignment of a tuple with correct type values and extraction of each element
+   test-37: Type error: Incorrect assignment of a tuple, the second element assigned is a boolean value while a string was expected
+   test-38: Without error: extraction of the first and second elenent of a tuple and assignment of a binary expression with these two telements to an integer variable
+   test-39: Without error: correct assignment of 2 tuples thanks to elements of another tuple
+   test-40: Type error: get of an inexistant element of a tuple
+   test-41: Without error: declaration of a couple (int,int) and correct assignment of a couple (int,int)
+   test-42: Without error: declaration of a tuple (int,char,bool) and use of the third value for the condition in a conditional instruction
+   test-43: Without error: declaration of a couple (int,char,string,bool) and use of the fourth value for the condition of a while instruction
+   test-44: Type error: declaration of a couple (int,bool) and assignment of couple (int,int)
+   test-45: Without error: declaration of a couple (int,bool) and assignment of the first value to a variable
+   test-46: Type error: declaration of a couple (int,bool) and assignment of a couple (int,int)
+   test-47: Without error: declaration of a couple (int,bool) and use of the second value for the condition in a conditional instruction
+   test-48: Without error: declaration of a couple (int,bool) and use of the second value for the condition of a while instruction
+   
+Return instruction
+   test-49: Without error : return of void
+   test-50: Type error: declaration of a function with a void return and return of an integer
+   test-51: Type error: multiple returns type in the same function
+   test-52: Type error: declaration of a function with an int return and no return instruction in the function
+   test-53: Type error: declaration of a function with a int return and return of a boolean
+   test-54: Without error: declaration of a function with a return of interger list and return of this type
+   test-55: Without error: declaration of a function with a return of a (int,bool,char) tuple and return of this type
+   test-56: Without error: declaration of a function with a integer return and return an expression of this type
+   test-57: Without error: declaration of a function with a integer return and return an expression of this type
+   test-58: Without error: declaration of a function with a (int,bool,bool) return and return an expression of this type
+
+Declaration and assignment of list, use of list operators
+   test-59: Type error: declaration of a boolean list and assignment of a list of integers
+   test-60: Type error: declaration of a boolean list and assignment of a list of mix types
+   test-61: Without error: declaration of a boolean list and return of the head of the list 
+   test-62: Without error: declaration of a boolean list and return of the tail of the list 
+   test-63: Runtime error: declaration of a boolean list and return of the tail of an empty list
+   test-64: Without error: declaration of a boolean list and return of the tail of the list
+   test-65: Type error: declaration of a string tuple and incorrect use of the operator head
+   test-66: Type error : declaration of a tuple and incorrect use of the operator tail
+
+Unary integer operators
+   test-67: Without error: declaration of an integer and correct use of the negate operator
+   test-68: Type error: declaration of a string and incorrect use of the negate operator
+   test-69: Without error: declaration of an integer and correct use of the odd operator
+   test-70: Type error: declaration of a char and incorrect use of the odd operator
+   test-71: Type error: incorrect assignment of the odd operation result
+   test-72: Without error: declaration of an integer and correct use of the even operator
+   test-73: Type error: declaration of a boolean and incorrect use of the even operator
+   test-74: Type error: incorrect assignment of the even operation result
+
+Unary boolean operator
+   test-75: Without error: declaration of a boolean and correct use of the not operator
+   test-76: Type error: declaration of an integer and incorrect use of the not operator
+   test-77: Type error: incorrect assignment of the not operation result
+   test-78: Without error: correct use of the equal operator with integers
+
+Binary operator equal
+   test-79: Type error: incorrect assignment of the equal operation result
+   test-80: Without error: correct use of the equal operator with booleans
+   test-81: Type error: incorrect use of the equal operator (differents types compared)
+   test-82: Without error: correct use of the equal operator with chars
+   test-83: Type error: incorrect use of the equal operator (differents types compared)
+   test-84: Without error: correct use of the equal operator with chars
+
+Binary operator different
+   test-85: Without error: correct use of the equal operator with integers
+   test-86: Type error: incorrect assignment of the different operation result
+   test-87: Without error: correct use of the different operator with booleans
+   test-88: Type error: incorrect use of the different operator (differents types compared)
+   test-89: Without error: correct use of the different operator with chars
+   test-90: Type error: incorrect use of the different operator (differents types compared)
+   test-91: Without error: correct use of the different operator with chars
+
+Binary operator Lesser and Greater
+   test-92: Without error: correct use of the lesser operator
+   test-93: Type error: incorrect assignment of the lesser operation result
+   test-94: Type error: incorrect use of the lesser operator (variables compared are not integers)
+   test-95: Type error: incorrect use of the lesser operator (variables compared are not two integers)
+   test-96: Without error: correct use of the greater operator
+   test-97: Type error: incorrect assignment of the greater operation result
+   test-98: Type error: incorrect use of the greater operator (variables compared are not integers)
+   test-99: Type error: incorrect use of the greater operator (variables compared are not two integers)
+
+Binary operator add, sub, multiple, divide
+   test-100: Without error: correct use of the add operator
+   test-101: Type error: incorrect assignment of the add operation result
+   test-102: Type error: incorrect use of the add operator (variables added are not integers)
+   test-103: Type error: incorrect use of the add operator (variables added are not two integers)
+   test-104: Without error: correct use of the sub operator
+   test-105: Type error: incorrect assignment of the sub operation result
+   test-106: Type error: incorrect use of the sub operator (variables subtracted are not integers)
+   test-107: Type error: incorrect use of the sub operator (variables subtracted are not two integers)
+   test-108: Without error: correct use of the multiply operator
+   test-109: Type error: incorrect assignment of the multiply operation result
+   test-110: Type error: incorrect use of the multiply operator (variables multiplied are not integers)
+   test-111: Type error: incorrect use of the multiply operator (variables multiplied are not two integers)
+   test-112: Without error: correct use of the divide operator
+   test-113: Type error: incorrect assignment of the divide operation result
+   test-114: Type error: incorrect use of the divide operator (variables divided are not integers)
+   test-115: Type error: incorrect use of the divide operator (variables divided are not two integers)
+   test-116: Without error: correct use of the or operator
+   test-117: Without error: correct use of the or operator
+   test-118: Type error: incorrect assignment of the or operation result
+   test-119: Type error: incorrect use of the or operator (variables used are not booleans)
+   test-120: Type error: incorrect use of the or operator (variables used are not two booleans)
+   test-121: Without error: correct use of the and operator
+   test-122: Without error: correct use of the and operator
+   test-123: Without error: correct use of the and operator
+   test-124: Type error: incorrect assignment of the and operation result
+   test-125: Type error: incorrect use of the and operator (variables used are not booleans)
+   test-126: Type error: incorrect use of the and operator (variables used are not two booleans)
+
+Condtional instruction with return
+   test-127: Without error: conditional instruction with return
+   test-128: Type error: conditional instruction with different return types
+   test-129: Without error: conditional instruction with a return in the if branch and a return outside
+   test-130: Type error: conditional instruction with a return in the if branch and a return outside with a different type
+
+While instruction with return
+   test-131: Without error: while instruction with a return and a return outside of the same type
+   test-132: Without error: while instruction with a void return and an int return
+   test-133: Type error: while instruction with a return and a return outside with a different type
+
+Incorrect declaration of functions and variables
+   test-134: Well-formedness error: declaration of a global variable and a function with the same name
+   test-135: Well-formedness error: declaration of variable using an incorrect type
+   test-138: Well-formedness error: declaration of function with a unknown type in the parameters
+   test-139: Well-formedness error: declaration of function with a unknown return type
+   test-140: Well-formedness error: declaration of function with two parameters with the same name
+   test-141: Well-formedness error: declaration of function with two parameters with the same name
+   test-142: Well-formedness error: declaration of two functions with the same name
+
+Use of global variable
+   test-136: Without error: declaration of a global variable and assignment to this variable
+   test-137: Without error: declaration of a global variable and return of the variable
+   test-143: Without error: example of shadowing (global variable and local variable with the same name)
+   test-144: Type error: example of shadowing (global variable and local variable with the same name)
+   test-145: Without error: example of shadowing (global variable and local variable with the same name)
+   test-146: Without error: example of shadowing (global variable and a parameter with the same name)
+   test-147: Type error: example of shadowing (global variable and a parameter with the same name)
+   test-149: Without error: example of shadowing (local variable and a parameter with the same name)
+   test-150: Type error: example of shadowing (local variable and a parameter with the same name)
+   test-158: Without error: Use of global variable in different functions
+   test-159: Without error: example of shadowing and use of global variable in different functions
+
+Use of parameters in a function
+   test-148: Without error: operations with parameters
+
+Function call
+   test-151: Without error: correct call of a function with a return
+   test-152: Type error: assignment of the return of a function to a variable of the wrong type
+   test-153: Type error: no assignment of the return of a function
+   test-154: Type error: expression as a parameter of the function with the wrong type 
+   test-155: Type error: expression as a parameter of the function with the wrong type 
+   test-156: Without error: correct call of a function with a void return
+   test-157: Type error: expression as a parameter of the function with the wrong type 
+
+
+Recursive functions:
+   test-160: Without error: fibonacci
+   test-161: Without error: factorial
+
+
+

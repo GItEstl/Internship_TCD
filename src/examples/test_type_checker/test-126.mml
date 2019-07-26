@@ -1,4 +1,4 @@
-// Type error : incorrect use of the and operator (variables used are not two booleans)
+// Type error: incorrect use of the and operator (variables used are not two booleans)
 
 func void test126 (string s) {
 def

@@ -1,4 +1,4 @@
-// Without error : correct use of the or operator
+// Without error: correct use of the or operator
 
 func boolean test116 (string s) {
 def

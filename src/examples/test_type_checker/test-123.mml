@@ -1,4 +1,4 @@
-// Without error : correct use of the and operator
+// Without error: correct use of the and operator
 
 func boolean test123 (string s) {
 def

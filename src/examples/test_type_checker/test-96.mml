@@ -1,4 +1,4 @@
-// Without error : correct use of the greater operator
+// Without error: correct use of the greater operator
 
 func boolean test96 (string s) {
 def

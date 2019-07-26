@@ -1,4 +1,4 @@
-// Type error : declaration of a boolean and incorrect use of the even operator
+// Type error: declaration of a boolean and incorrect use of the even operator
 
 func void test73 (string s) {
 def

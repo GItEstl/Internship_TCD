@@ -1,4 +1,4 @@
-// Without error : declaration of a function with a (int,bool,bool) return and return an expression of this type
+// Without error: declaration of a function with a (int,bool,bool) return and return an expression of this type
 
 func (int,boolean,boolean) test58 (string s) {
 def

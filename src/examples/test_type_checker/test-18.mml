@@ -1,4 +1,4 @@
-// Without error: use of a variable after a sub-block
+// Without error: use of a variable after a conditional instruction
 
 func void test18 (string s) {
 def 

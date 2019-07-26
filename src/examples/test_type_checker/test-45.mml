@@ -1,4 +1,4 @@
-// Type error: declaration of a couple (int,bool) and assignment of the first value to a variable
+// Without error: declaration of a couple (int,bool) and assignment of the first value to a variable
 
 func void test45 (string s) {
 def

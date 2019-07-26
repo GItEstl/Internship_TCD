@@ -1,4 +1,4 @@
-// Type error : incorrect assignment of the multiply operation result
+// Type error: incorrect assignment of the multiply operation result
 
 func void test109 (string s) {
 def

@@ -1,4 +1,4 @@
-// Type error: use of a char variable in a condition
+// Type error: use of a char expression for a condition
 
 func void test20 (string s) {
 def 

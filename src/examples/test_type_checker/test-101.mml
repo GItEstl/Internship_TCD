@@ -1,4 +1,4 @@
-// Type error : incorrect assignment of the add operation result
+// Type error: incorrect assignment of the add operation result
 
 func void test101 (string s) {
 def

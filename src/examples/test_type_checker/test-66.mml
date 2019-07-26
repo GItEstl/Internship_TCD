@@ -1,4 +1,4 @@
-// Type error : declaration of a tuple and incorrect use of the operator tail
+// Type error: declaration of a tuple and incorrect use of the operator tail
 
 func void test66 (string s) {
 def

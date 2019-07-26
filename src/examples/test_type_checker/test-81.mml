@@ -1,4 +1,4 @@
-// Type error : incorrect use of the equal operator (differents types compared)
+// Type error: incorrect use of the equal operator (differents types compared)
 
 func void test81 (string s) {
 def

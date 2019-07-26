@@ -1,4 +1,4 @@
-// Without error : declaration of a function with a return of interger list and return of this type
+// Without error: declaration of a function with a return of interger list and return of this type
 
 func list[int] test54 (string s) {
 	return [1,2,3,4]

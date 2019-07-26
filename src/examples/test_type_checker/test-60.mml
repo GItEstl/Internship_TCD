@@ -1,4 +1,4 @@
-// Type error : declaration of a boolean list and assignment of a list of mix types 
+// Type error: declaration of a boolean list and assignment of a list of mix types 
 
 func void test60 (string s) {
 def

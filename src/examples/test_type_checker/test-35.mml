@@ -1,4 +1,4 @@
-// Without error: Correct assignment of an char tuple with char values and retrieval of the second element thanks to 2 ways
+// Without error: Correct assignment of an char tuple with char values and extraction of the second element thanks to 2 ways
 
 func void test35 (string s) {
 def

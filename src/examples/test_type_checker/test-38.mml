@@ -1,4 +1,4 @@
-// Without error: retrieval of the first and second elenent of a tuple and assignment of a binary expression with these two telements to an integer variable
+// Without error: extraction of the first and second elenent of a tuple and assignment of a binary expression with these two telements to an integer variable
 
 func void test38 (string s) {
 def

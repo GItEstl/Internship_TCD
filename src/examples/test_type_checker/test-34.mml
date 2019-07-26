@@ -1,4 +1,4 @@
-// Without error: Correct assignment of an string tuple with string values and retrieval of the first element thanks to 2 ways
+// Without error: Correct assignment of a string tuple with string values and extraction of the first element thanks to 2 ways
 
 func void test34 (string s) {
 def

@@ -1,4 +1,4 @@
-// Type error : incorrect assignment of the divide operation result
+// Type error: incorrect assignment of the divide operation result
 
 func void test113 (string s) {
 def

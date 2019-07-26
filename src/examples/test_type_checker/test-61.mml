@@ -1,4 +1,4 @@
-// Without error : declaration of a boolean list and return of the head of the list 
+// Without error: declaration of a boolean list and return of the head of the list 
 
 func boolean test61 (string s) {
 def

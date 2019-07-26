@@ -1,4 +1,4 @@
-// Without error: Correct assignment of a tuple with correct type values and retrieval of each element
+// Without error: Correct assignment of a tuple with correct type values and extraction of each element
 
 func void test36 (string s) {
 def

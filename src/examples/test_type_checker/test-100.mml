@@ -1,4 +1,4 @@
-// Without error : correct use of the add operator
+// Without error: correct use of the add operator
 
 func int test100 (string s) {
 def

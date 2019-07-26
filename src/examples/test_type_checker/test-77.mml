@@ -1,4 +1,4 @@
-// Type error : incorrect assignment of the not operation result
+// Type error: incorrect assignment of the not operation result
 
 func void test77 (string s) {
 def

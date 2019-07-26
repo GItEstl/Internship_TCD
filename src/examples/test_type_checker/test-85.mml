@@ -1,4 +1,4 @@
-// Without error : correct use of the equal operator with integers
+// Without error: correct use of the different operator with integers
 
 func boolean test85 (string s) {
 def

@@ -1,4 +1,4 @@
-// Type error : declaration of a char and incorrect use of the odd operator
+// Type error: declaration of a char and incorrect use of the odd operator
 
 func void test70 (string s) {
 def

@@ -1,4 +1,4 @@
-// Type error : declaration of an integer and incorrect use of the not operator
+// Type error: declaration of an integer and incorrect use of the not operator
 
 func void test76 (string s) {
 def

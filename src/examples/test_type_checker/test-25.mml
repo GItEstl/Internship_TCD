@@ -1,11 +1,12 @@
-// Type error: assignment of a char to a string variable after a sub-block
+// Type error: conditional expression with different types
 
 func void test25 (string s) {
 def 
-    string i;
+    boolean x;
+    boolean b
 in
-    if (true) {} else {};
-    i = 't'
+    b = true;
+    x = if (b) {b} else {2}
 }
 
-start test25("") 
+start test25("")

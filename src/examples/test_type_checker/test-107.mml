@@ -1,4 +1,4 @@
-// Type error : incorrect use of the sub operator (variables subtracted are not two integers)
+// Type error: incorrect use of the sub operator (variables subtracted are not two integers)
 
 func void test107 (string s) {
 def

@@ -1,4 +1,4 @@
-// Without error : correct use of the lesser operator
+// Without error: correct use of the lesser operator
 
 func boolean test92 (string s) {
 def

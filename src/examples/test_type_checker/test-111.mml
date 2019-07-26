@@ -1,4 +1,4 @@
-// Type error : incorrect use of the multiply operator (variables multiplied are not two integers)
+// Type error: incorrect use of the multiply operator (variables multiplied are not two integers)
 
 func void test111 (string s) {
 def

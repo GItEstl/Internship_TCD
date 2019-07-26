@@ -1,4 +1,4 @@
-// Without error : declaration of an integer and correct use of the odd operator
+// Without error: declaration of an integer and correct use of the odd operator
 
 func boolean test69 (string s) {
 def

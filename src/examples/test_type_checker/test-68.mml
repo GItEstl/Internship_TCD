@@ -1,4 +1,4 @@
-// Type error : declaration of a string and incorrect use of the negate operator
+// Type error: declaration of a string and incorrect use of the negate operator
 
 func void test68 (string s) {
 def

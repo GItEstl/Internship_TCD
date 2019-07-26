@@ -1,4 +1,4 @@
-// Without error : correct use of the equal operator with booleans
+// Without error: correct use of the different operator with booleans
 
 func boolean test87 (string s) {
 def

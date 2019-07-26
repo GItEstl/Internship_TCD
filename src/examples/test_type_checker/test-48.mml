@@ -1,4 +1,4 @@
-// Without error : declaration of a couple (int,bool) and use of the second value for the condition of a while instruction
+// Without error: declaration of a couple (int,bool) and use of the second value for the condition of a while instruction
 
 func void test48 (string s) {
 def

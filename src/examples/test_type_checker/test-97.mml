@@ -1,4 +1,4 @@
-// Type error : incorrect assignment of the greater operation result
+// Type error: incorrect assignment of the greater operation result
 
 func void test97 (string s) {
 def

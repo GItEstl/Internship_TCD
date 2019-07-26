@@ -1,4 +1,4 @@
-// Without error : return of void
+// Without error: return of void
 
 func void test49 (string s) {
     return;

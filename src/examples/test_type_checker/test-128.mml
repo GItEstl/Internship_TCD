@@ -1,4 +1,4 @@
-// Type error : conditional instruction with different return types
+// Type error: conditional instruction with different return types
 
 func boolean test128 (string s) {
 	if (true) {return true} else {return 1}

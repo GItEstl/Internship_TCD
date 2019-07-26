@@ -1,4 +1,4 @@
-// Type error : incorrect use of the greater operator (variables compared are not two integers)
+// Type error: incorrect use of the greater operator (variables compared are not two integers)
 
 func void test99 (string s) {
 def

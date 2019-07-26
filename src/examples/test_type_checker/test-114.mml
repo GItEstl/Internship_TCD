@@ -1,4 +1,4 @@
-// Type error : incorrect use of the divide operator (variables divided are not integers)
+// Type error: incorrect use of the divide operator (variables divided are not integers)
 
 func void test114 (string s) {
 def

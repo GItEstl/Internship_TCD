@@ -1,4 +1,4 @@
-// Type error : incorrect assignment of the equal operation result
+// Type error: incorrect assignment of the different operation result
 
 func void test86 (string s) {
 def

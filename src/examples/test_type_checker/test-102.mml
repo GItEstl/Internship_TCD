@@ -1,4 +1,4 @@
-// Type error : incorrect use of the add operator (variables added are not integers)
+// Type error: incorrect use of the add operator (variables added are not integers)
 
 func void test102 (string s) {
 def

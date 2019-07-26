@@ -1,4 +1,4 @@
-// Witouht error : conditional instruction with return
+// Without error: conditional instruction with return
 
 func boolean test127 (string s) {
 	if (true) {return true} else {return false}

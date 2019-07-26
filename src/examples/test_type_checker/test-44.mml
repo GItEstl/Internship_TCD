@@ -1,4 +1,5 @@
 // Type error: declaration of a couple (int,bool) and assignment of couple (int,int)
+
 func void test44 (string s) {
 def
 	(int,boolean) t

@@ -1,4 +1,4 @@
-// Without error : declaration of a boolean and correct use of the not operator
+// Without error: declaration of a boolean and correct use of the not operator
 
 func boolean test75 (string s) {
 def

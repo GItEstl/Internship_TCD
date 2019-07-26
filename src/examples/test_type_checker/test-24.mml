@@ -1,13 +1,12 @@
-// Type error: assignment of the value of an integer variable to a boolean variable after a sub-block
+// Without error: conditional expression with boolean expressions
 
 func void test24 (string s) {
 def 
-    int i;
-    boolean j
+    boolean x;
+    boolean b
 in
-    i = 1;
-    if (i == 4) {} else {};
-    j = i
+    b = true;
+    x = if (b) {b && false} else {b}
 }
 
-start test24("") 
+start test24("")

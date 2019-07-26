@@ -1,4 +1,4 @@
-// Type error : incorrect assignment of the or operation result
+// Type error: incorrect assignment of the or operation result
 
 func void test118 (string s) {
 def

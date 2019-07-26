@@ -1,4 +1,4 @@
-// Type error : incorrect use of the lesser operator (variables compared are not two integers)
+// Type error: incorrect use of the lesser operator (variables compared are not two integers)
 
 func void test95 (string s) {
 def

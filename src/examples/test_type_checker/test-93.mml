@@ -1,4 +1,4 @@
-// Type error : incorrect assignment of the lesser operation result
+// Type error: incorrect assignment of the lesser operation result
 
 func void test93 (string s) {
 def

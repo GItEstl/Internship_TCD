@@ -1,4 +1,4 @@
-// Type error: use of an integer variable in a condition
+// Type error: use of an integer expression for a condition
 
 func void test31 (string s) {
 def 

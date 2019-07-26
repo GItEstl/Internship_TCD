@@ -1,4 +1,4 @@
-// Type error : incorrect use of the or operator (variables used are not booleans)
+// Type error: incorrect use of the or operator (variables used are not booleans)
 
 func void test119 (string s) {
 def

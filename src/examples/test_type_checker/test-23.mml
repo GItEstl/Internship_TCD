@@ -1,12 +1,14 @@
-// Type error: assignment of a char to a string variable in a sub-block
+// Without error: conditional expression with integer variables
 
 func void test23 (string s) {
 def 
-    string i;
+    int i;
+    int a;
+    int b
 in
-    if (true) {
-        i = 't'
-    } else {}
+    a = 2;
+    b = 8;
+    i = if (i == 1) {a} else {b}
 }
 
-start test23("") 
+start test23("")

@@ -1,4 +1,4 @@
-// Without error : conditional instruction with a return in the if branch and a return outside
+// Without error: conditional instruction with a return in the if branch and a return outside
 
 func boolean test129 (string s) {
 	if (true) {return true} else {};

@@ -1,4 +1,4 @@
-// Type error : declaration of a string tuple and incorrect use of the operator head
+// Type error: declaration of a string tuple and incorrect use of the operator head
 
 func void test65 (string s) {
 def

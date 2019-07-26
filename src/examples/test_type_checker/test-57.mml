@@ -1,4 +1,4 @@
-// Without error : declaration of a function with a integer return and return an expression of this type
+// Without error: declaration of a function with a integer return and return an expression of this type
 
 func int test57 (string s) {
 def

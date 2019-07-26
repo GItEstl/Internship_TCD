@@ -1,4 +1,4 @@
-// Run time error : declaration of a boolean list and return of the tail of an empty list 
+// Runtime error: declaration of a boolean list and return of the tail of an empty list 
 
 func list[boolean] test63 (string s) {
 def

@@ -1,4 +1,4 @@
-// Well-formedness error: delcaration of variable using an incorrect type
+// Well-formedness error: declaration of variable using an incorrect type
 
 (int,foo) globalVar
 

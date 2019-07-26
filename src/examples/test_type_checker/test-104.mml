@@ -1,4 +1,4 @@
-// Without error : correct use of the sub operator
+// Without error: correct use of the sub operator
 
 func int test104 (string s) {
 def

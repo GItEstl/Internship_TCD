@@ -1,4 +1,4 @@
-// Without error : declaration of an integer and correct use of the negate operator
+// Without error: declaration of an integer and correct use of the negate operator
 
 func int test67 (string s) {
 def

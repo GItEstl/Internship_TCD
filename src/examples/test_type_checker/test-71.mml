@@ -1,4 +1,4 @@
-// Type error : incorrect assignment of the odd operation result
+// Type error: incorrect assignment of the odd operation result
 
 func void test71 (string s) {
 def

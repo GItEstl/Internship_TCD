@@ -1,4 +1,4 @@
-// Without error : while instruction with a void return and an int return
+// Type error: while instruction with a return and a return outside with a different type
 
 func int test133 (string s) {
 	while (false) {return true};

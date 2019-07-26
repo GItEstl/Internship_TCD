@@ -1,4 +1,4 @@
-// Without error : declaration of a function with a return of a (int,bool,char) tuple and return of this type
+// Without error: declaration of a function with a return of a (int,bool,char) tuple and return of this type
 
 func (int,boolean,char) test55 (string s) {
 	return (1,true,'a')

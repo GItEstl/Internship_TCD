@@ -1,4 +1,4 @@
-// Type error : multiple returns type in the same function
+// Type error: multiple returns type in the same function
 
 func int test51 (string s) {
 	return 2;

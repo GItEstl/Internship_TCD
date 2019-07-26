@@ -1,4 +1,4 @@
-// Type error : incorrect assignment of the sub operation result
+// Type error: incorrect assignment of the sub operation result
 
 func void test105 (string s) {
 def

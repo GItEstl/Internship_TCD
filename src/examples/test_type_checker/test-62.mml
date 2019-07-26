@@ -1,4 +1,4 @@
-// Without error : declaration of a boolean list and return of the tail of the list 
+// Without error: declaration of a boolean list and return of the tail of the list 
 
 func list[boolean] test62 (string s) {
 def

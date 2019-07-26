@@ -1,4 +1,4 @@
-// Without error : correct use of the divide operator
+// Without error: correct use of the divide operator
 
 func int test112 (string s) {
 def
