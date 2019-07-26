@@ -26,7 +26,7 @@ let report_error filename lexbuf msg =
   print_string ("Environment well-formed \n");
   let _ = type_check_prg envVar envType nameListType ast in
   print_string ("Program type-checked \n");
-  let result = execution_prg ast start envType in
+  let result = string_of_val (execution_prg ast start envType) in
   print_string ("Program executed \n");
   print_string("Result: " ^ result ^ "\n")
   with
@@ -120,3 +120,8 @@ let report_error filename lexbuf msg =
    Printf.eprintf "File \"%s\": A list containing different types has been found, a list can contain only elements of one type\n" file;
 | TypeChecking.Unknown_error_type_checking(m) ->
     Printf.eprintf "File \"%s\": Unknown error during type checking: please check the function %s in the file TypeChecking.ml\n" file m;
+| TypeChecking.Get_tuple_too_short(pos) -> 
+    let c = pos.pos_cnum - pos.pos_bol + 1 in
+    Printf.eprintf "File \"%s\", line %d, character %d: Incorrect use of get: index out of bound \n" file pos.pos_lnum c;
+| ReferenceInterpretor.Run_time_error(m) -> 
+    Printf.eprintf "File \"%s\": Runtime error %s\n" file m;

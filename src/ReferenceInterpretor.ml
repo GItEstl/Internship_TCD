@@ -334,7 +334,7 @@ let execution_prg prg start env =
           let ve = value_of_expr expr state in
           let localstate = create_local_state p b state ve in
           (match b with 
-          | BodyNode (_,_,instr) -> string_of_val (ruleInstr instr localstate)
+          | BodyNode (_,_,instr) -> ruleInstr instr localstate
           | _ -> raise (Unknown_error_reference_interpretor "execution_prg3"))
         | _ -> raise (Unknown_error_reference_interpretor "execution_prg2")) 
       | _ -> raise (Unknown_error_reference_interpretor "execution_prg")
