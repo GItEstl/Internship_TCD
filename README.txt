@@ -1,5 +1,4 @@
 How to install this project ?
-
 You will need to use opam to install dune and menhir.
 You can use the following commands:
         opam install dune
