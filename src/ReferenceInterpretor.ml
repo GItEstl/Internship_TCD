@@ -15,6 +15,13 @@ type valueType =
 exception Unknown_error_reference_interpretor of string
 exception Run_time_error of string
 
+
+(* string_of_val: valueType option -> string
+Function converting a value into a string
+Parameters:
+  - v: the value to convert
+Return: string representing the value
+*)
 let string_of_val v =
   match v with
     | None -> "unit"
@@ -31,6 +38,14 @@ let string_of_val v =
         | _ -> "ERROR"
       in aux vs 
 
+
+(* value_of_expr: (string, valueType ref) Hashtbl.t -> valueType
+Function calculating the value of an expression
+Parameters:
+  - expr: abstract syntax tree representing the expression
+  - state: hash table representing the state of all the variables  
+Return: a string corresponding to the expression
+*)
 let rec value_of_expr expr state =
   match expr with
     | BinaryNode (_,left,op,right) -> ruleBinary op left right state
@@ -45,6 +60,15 @@ let rec value_of_expr expr state =
 
 and
 
+
+(* ruleUnary: unary -> ast -> (string, valueType ref) Hashtbl.t -> valueType
+Function calculating the value of an unary operation
+Parameters:
+  - op: unary operator
+  - expr: abstract syntax tree representing the expression
+  - state: hash table representing the state of all the variables  
+Return: the result corresponding to the unary operation
+*)
 ruleUnary op expr state = 
   let v = value_of_expr expr state in
   (match v with
@@ -79,6 +103,16 @@ ruleUnary op expr state =
 
 and
 
+
+(* ruleBinary: binary -> ast -> ast -> (string, valueType ref) Hashtbl.t -> valueType
+Function calculating the value of an binary operation
+Parameters:
+  - op: unary operator
+  - lexpr: abstract syntax tree representing the left expression
+  _ rexpr: abstract syntax tree representing the right expression
+  - state: hash table representing the state of all the variables  
+Return: the result corresponding to the binary operation
+*)
 ruleBinary op lexpr rexpr state = 
   let vl = value_of_expr lexpr state in
   let vr = value_of_expr rexpr state in  
@@ -115,6 +149,16 @@ ruleBinary op lexpr rexpr state =
 
 and 
 
+
+(* ruleIfThenElseExpr: ast -> ast -> ast -> (string, valueType ref) Hashtbl.t -> valueType
+Function calculating the value of an binary operation
+Parameters:
+  - cond_expr: abstract syntax tree representing the expression for the condition
+  - then_expr: abstract syntax tree representing the expression in the then branch
+  - else_expr: abstract syntax tree representing the expression in the else branch
+  - state: hash table representing the state of all the variables  
+Return: the result corresponding to the conditional expression
+*)
 ruleIfThenElseExpr cond_expr then_expr else_expr state =
   let vcond = value_of_expr cond_expr state in
   match vcond with
@@ -124,6 +168,14 @@ ruleIfThenElseExpr cond_expr then_expr else_expr state =
     
 and
 
+
+(* ruleTupleExpr: ast -> (string, valueType ref) Hashtbl.t -> valueType
+Function calculating the value of an expression tuple
+Parameters:
+  - exprs: abstract syntax tree representing the tuple of expressions
+  - state: hash table representing the state of all the variables  
+Return: the result corresponding to the expression tuple
+*)
 ruleTupleExpr exprs state =
   TupleVal (
   let rec aux exs l =
@@ -135,6 +187,14 @@ ruleTupleExpr exprs state =
 
 and
 
+
+(* ruleValue: ast -> (string, valueType ref) Hashtbl.t -> valueType
+Function converting a value node into a valueType
+Parameters:
+  - v: the abstract syntax tree representing the value
+  - state: hash table representing the state of all the variables  
+Return: the result corresponding to the value node
+*)
 ruleValue v state =
   match v with
     | IntegerNode (_,i) -> IntegerVal(i)
@@ -154,8 +214,23 @@ ruleValue v state =
     | _ -> raise (Unknown_error_reference_interpretor "ruleValue")
 and
 
+
+(* ruleIdentifier: ast -> (string, valueType ref) Hashtbl.t -> valueType
+Function finding the value associated to an identifier
+Parameters:
+  - a: the abstract syntax tree representing the assignable
+  - state: hash table representing the state of all the variables  
+Return: the result corresponding to the assignable
+*)
 ruleIdentifier a state = !(Hashtbl.find state a)
 
+
+(* def_value: ast -> valueType
+Function returning the default value for a type
+Parameter:
+  - t: the abstract syntax tree representing the type
+Return: the default value for the type passed in parameter
+*)
 let rec def_value t =
   match t with
     | TypeNode (_,IntegerT) -> IntegerVal(0)
@@ -173,6 +248,14 @@ let rec def_value t =
     | NamedTypeNode (_,st) -> let _,_,t,_ = (List.find (fun (_,name,_,_) -> String.equal name st) !envType) in (def_value t)
     | _ -> raise (Unknown_error_reference_interpretor "def_value")
 
+
+(* extend_state_with_params: ast -> (string, valueType ref) Hashtbl.t -> valueType -> unit
+Function adding the parameters of a function to the state 
+Parameters:
+  - paramsnode: the abstract syntax tree representing the paramerers
+  - state: hash table representing the state of all the variables
+  - vparams: the value of the parameters
+*)
 let extend_state_with_params paramsnode state vparams =
   let vp = (match vparams with 
     | TupleVal(l) -> l
@@ -185,6 +268,13 @@ let extend_state_with_params paramsnode state vparams =
       | _ -> raise (Unknown_error_reference_interpretor "extend_state_with_params2")
   in aux paramsnode vp
 
+
+(* extend_state_with_local_declas: ast -> (string, valueType ref) Hashtbl.t -> unit
+Function adding the local variable of a function to the state 
+Parameters:
+  - body: the abstract syntax tree representing the function body
+  - state: hash table representing the state of all the variables
+*)  
 let extend_state_with_local_declas body state =
   match body with
     | BodyNode (_,None,_) -> ()
@@ -198,12 +288,30 @@ let extend_state_with_local_declas body state =
       in aux d
     | _ -> raise (Unknown_error_reference_interpretor "extend_state_with_local_declas")
 
+
+(* create_local_state: ast -> ast -> (string, valueType ref) Hashtbl.t -> valueType -> (string, valueType ref) Hashtbl.t
+Function creating a new local state containing the parameters, the global and local variables 
+Parameters:
+  - params: the abstract syntax tree representing the paramerers
+  - body: the abstract syntax tree representing the function body
+  - state: hash table representing the state of all the variables
+  - vparams: the value of the parameters
+Return: the new local state
+*)  
 let create_local_state params body state vparams =
   let local = Hashtbl.copy state in
   extend_state_with_params params local vparams;
   extend_state_with_local_declas body local;
   local
 
+
+(* ruleInstr: ast -> (string, valueType ref) Hashtbl.t -> valueType option
+Function executing a sequence of instructions and calculating its value
+Parameters:
+  - i: the abstract syntax tree representing the instructions
+  - state: hash table representing the state of all the variables
+Return: the value of the instructions if there is one
+*)  
 let rec ruleInstr i state =
   let rec aux i v =
     match v with
@@ -220,6 +328,14 @@ let rec ruleInstr i state =
     
 and
 
+
+(* value_of_binstr: ast -> (string, valueType ref) Hashtbl.t -> valueType option
+Function executing the basic instruction and calculating its value
+Parameters:
+  - binstr: the abstract syntax tree representing the basic instruction
+  - state: hash table representing the state of all the variables
+Return: the value of the basic instruction if there is one
+*)
 value_of_binstr binstr state =
   match binstr with
     | BinaryNode (_,a,Assign,CallNode (_,namef,e)) -> ruleCallFuncWithReturn a namef e state
@@ -234,6 +350,15 @@ value_of_binstr binstr state =
 
 and
 
+
+(* ruleAssignInstr: ast -> ast -> (string, valueType ref) Hashtbl.t -> valueType option
+Function assigning a value to an assignable (update of the state)
+Parameters:
+  - a: the abstract syntax tree representing the assignable
+  - e: the abstract syntax tree representing the expression to assign
+  - state: hash table representing the state of all the variables
+Return: None (this instruction return no value)
+*)
 ruleAssignInstr a e state =
   match a with 
     | AssignNode (_,name) ->
@@ -245,6 +370,16 @@ ruleAssignInstr a e state =
 
 and
 
+
+(* ruleCallFuncWithReturn: ast -> string -> ast -> (string, valueType ref) Hashtbl.t -> valueType option
+Function executing a function call and assigning its result to an assignable (update of the state)
+Parameters:
+  - a: the abstract syntax tree representing the assignable
+  - namef: name of the function to call
+  - e: the abstract syntax tree representing the expression to assign
+  - state: hash table representing the state of all the variables
+Return: None (this instruction return no value)
+*)
 ruleCallFuncWithReturn a namef e state = 
   match (!(Hashtbl.find state namef),a) with 
     | (FuncVal(p,b),AssignNode(_,name)) ->
@@ -264,6 +399,14 @@ ruleCallFuncWithReturn a namef e state =
 
 and
 
+(* ruleCallFuncVoid: string -> ast -> (string, valueType ref) Hashtbl.t -> valueType option
+Function executing a function call
+Parameters:
+  - namef: name of the function to call
+  - e: the abstract syntax tree representing the expression to assign
+  - state: hash table representing the state of all the variables
+Return: None (this instruction return no value)
+*)
 ruleCallFuncVoid namef e state = 
   match (!(Hashtbl.find state namef)) with 
     | FuncVal(p,b) ->
@@ -278,6 +421,16 @@ ruleCallFuncVoid namef e state =
 
 and
 
+
+(* ruleIfThenElseInstr: ast -> ast -> ast -> (string, valueType ref) Hashtbl.t -> valueType option
+Function executing a function call
+Parameters:
+  - cond: the abstract syntax tree representing the expression for the condition
+  - i1: the abstract syntax tree representing the instruction in the then branch
+  - i2: the abstract syntax tree representing the instruction in the else branch
+  - state: hash table representing the state of all the variables
+Return: the value obtained by executing the appropriate instruction (if there is one)
+*)
 ruleIfThenElseInstr cond i1 i2 state =
   let vcond = value_of_expr cond state in
   match vcond with
@@ -287,6 +440,15 @@ ruleIfThenElseInstr cond i1 i2 state =
 
 and 
 
+
+(* ruleWhile: ast -> ast -> (string, valueType ref) Hashtbl.t -> valueType option
+Function executing a function call
+Parameters:
+  - cond: the abstract syntax tree representing the expression for the condition
+  - i: the abstract syntax tree representing the instruction in the body
+  - state: hash table representing the state of all the variables
+Return: the value obtained by executing the while instruction (if there is one)
+*)
 ruleWhile cond i state =
   let vcond = value_of_expr cond state in
   match vcond with
@@ -299,10 +461,24 @@ ruleWhile cond i state =
 
 and
 
+
+(* ruleWhile: valueType option
+Function returning None (representing the absence of value)
+Return: None
+*)
 ruleReturnVoid = None
 
 and
 
+
+(* ruleReturnFunc: string -> ast -> (string, valueType ref) Hashtbl.t -> valueType option
+Function executing a function call and returning the value obtained by the execution
+Parameters:
+  - namef: name of the function to call
+  - e: the abstract syntax tree representing the expression passed as parameter of the function
+  - state: hash table representing the state of all the variables
+Return: the value obtained by executing the function call (if there is one)
+*)
 ruleReturnFunc namef e state =
   match (!(Hashtbl.find state namef)) with
     | FuncVal(p,b) ->
@@ -315,11 +491,31 @@ ruleReturnFunc namef e state =
 
 and
 
+
+(* ruleReturnExpr: ast -> (string, valueType ref) Hashtbl.t -> valueType option
+Function calculating an expression and returning its value
+Parameters:
+  - e: the abstract syntax tree representing the expression
+  - state: hash table representing the state of all the variables
+Return: value of the expression
+*)
 ruleReturnExpr e state = Some(value_of_expr e state)
 
+
+(* execution_prg: ast -> (position * string * ast) -> (position * string * ast * bool) list -> valueType option
+Function executing a program and returning its result
+Parameters:
+  - prg: the abstract syntax tree representing the program
+  - start: tuple representing the function which starts the program
+  - env: the type environment created previously (cf. Resolve.ml)
+Return: result of the execution of the program
+*)
 let execution_prg prg start env =
+  (* Assignment of the type environment to the global variable envType *)
   envType := env;
+  (* Creation of the hash table representing the state of all the varaibles *)
   let state = Hashtbl.create 100 in 
+  (* Filling of the hash table with all the variables and functions *)
   let rec aux tree =
     match tree with
         | ProgramNode (p1,p2) -> aux p1; aux p2
@@ -327,6 +523,7 @@ let execution_prg prg start env =
         | VariableDeclaNode(_,t,n) -> Hashtbl.add state n (ref (def_value t))
         | _ -> ()
     in aux prg;
+    (* Launch of the execution with the start function *)
     match start with
       | Some(_,name,expr) ->
         (match (!(Hashtbl.find state name)) with 
