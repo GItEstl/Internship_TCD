@@ -139,12 +139,7 @@ Body ::= { Instruction } | { def VariableDeclas in Instruction }
 \vspace*{3pt}
 
 \begin{verbnobox}[\normalfont]
-VariableDecla ::= Typ identifier | Typ ( TupleDecla )
-\end{verbnobox}
-\vspace*{3pt}
-
-\begin{verbnobox}[\normalfont]
-TupleDecla ::= identifier | identifier , TupleDecla
+VariableDecla ::= Typ identifier
 \end{verbnobox}
 \vspace*{3pt}
 
@@ -196,10 +191,13 @@ Prefix ::= | tau
 
 \begin{verbnobox}[\normalfont]
 Expression ::= - Expression
+               | not Expression
                | head ( Expression )
                | tail ( Expression )
                | odd ( Expression )
                | even ( Expression )
+               | fst ( Expression )
+               | snd ( Expression )
                | Expression + Expression
                | Expression - Expression
                | Expression || Expression
@@ -210,6 +208,7 @@ Expression ::= - Expression
                | Expression != Expression 
                | Expression < Expression
                | Expression > Expression
+               | get(Expression,Expression)
                | if ( Expression ) { Expression } else { Expression }
                | ( ExpressionSeq )
                | Value
@@ -225,6 +224,7 @@ ExpressionSeq ::= Expression | Expression , ExpressionSeq
 \begin{verbnobox}[\normalfont]
 Constant ::= integer
              | ' char '
+             | ""
              | " string "
              | true
              | false
@@ -232,7 +232,7 @@ Constant ::= integer
 \vspace*{3pt}
 
 \begin{verbnobox}[\normalfont]
-Value ::= Constant | { ValueSeq }
+Value ::= Constant | [ ValueSeq ] | []
 \end{verbnobox}
 \vspace*{3pt}
 
@@ -710,8 +710,6 @@ Finally, we have to check that the function used in the start function is declar
 \AxiomC{$x \in dom(s)$}
 \UnaryInfC{$s \vdash type \ x \Downarrow s::[x \mapsto v_{type}]$}
 \end{prooftree}
-
-\tabto{0cm} {\large \textbf{Function Declaration}}
 
 \newpage
 \centerline{\textbf{\Huge Examples}}
