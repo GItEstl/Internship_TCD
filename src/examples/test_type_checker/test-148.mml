@@ -1,8 +1,11 @@
 // Without error: operations with parameters
 
 func int test148 (int i, int j) {
-    i = i*10;
-    return i + j
+def
+    int x
+in
+    x = i*10;
+    return x + j
 }
 
 start test148(1,3)

@@ -47,7 +47,7 @@ def
     channel boolean rightFork;
     int c
 in
-    c = fstPhiloLeftFork;
+    c = 0;
     fstPhiloLeftFork = newChan();
     leftFork = fstPhiloLeftFork;
     rightFork = newChan();

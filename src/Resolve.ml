@@ -26,7 +26,7 @@ Return: boolean meaning if the type is recursive or not
 
 let rec find_rec typeNode name =
   match typeNode with
-    | NamedTypeNode(_,n) -> String.equal n name
+    | NamedTypeNode(_,n) -> (String.equal n name) 
     | TypeNode (_) -> false
     | ChanTNode (_,st) -> find_rec st name
     | ListTNode (_,st) -> find_rec st name
@@ -63,23 +63,6 @@ let rec create_env (envType,envVar,start) tree =
       (envType,envVar,Some((pos,name,expr))) 
         | _ -> 
       (envType,envVar,start)
-
-
-(* uniqueType: TenvType -> string list -> string list
-Function checking that all type declared are unique 
-Parameters:
-  - envType: list of the type declarations
-  - nameList: list of names of already declared types
-Return: the names of the declared types
-*)
-
-let rec uniqueType envType nameList = 
-  match envType with
-    | [] -> nameList
-    | (pos,name,_,_)::q -> if (List.mem name nameList) 
-                         then raise (Multiple_declaration_type (pos,name))                   
-                         else (uniqueType q (name::nameList))
-
 
 (* well_formed_type_aux: ast -> string list -> bool
 Function checking that the type declared is well-formed 
@@ -134,9 +117,14 @@ Return: the names of the declared types
 *)
 
 let well_formed_envType envType =
-    let nameList = uniqueType envType [] in
-    let _ = List.for_all (fun d -> well_formed_type_decla d nameList) envType in
-    nameList
+  let rec aux envType nameList = 
+    match envType with
+      | [] -> nameList
+      | (pos,name,t,trec)::q -> if (List.mem name nameList) 
+                           then raise (Multiple_declaration_type (pos,name))                   
+                           else let _ = well_formed_type_decla (pos,name,t,trec) (name::nameList) in
+                           (aux q (name::nameList))
+  in aux envType []
 
 
 (* uniqueVar: TenvVar -> string list -> string list -> string list

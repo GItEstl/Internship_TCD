@@ -22,7 +22,7 @@ let report_error filename lexbuf msg =
   print_string ("Environment created \n");
   let nameListType = (well_formed_envType envType) in
   let _ = (well_formed_envVar envVar nameListType) in
-  let a = well_formed_start start envVar in
+  let _ = well_formed_start start envVar in
   print_string ("Environment well-formed \n");
   let _ = type_check_prg envVar envType nameListType ast in
   print_string ("Program type-checked \n");
@@ -30,10 +30,10 @@ let report_error filename lexbuf msg =
   print_string ("Program executed \n");
   print_string("Result: " ^ result ^ "\n")
   with
-  | Lexer.Error s ->
-      report_error file filebuf "lexical error (unexpected character).";
+  | Lexer.Error _ ->
+      report_error file filebuf "lexical error (unexpected character)";
   | Parser.Error ->
-      report_error file filebuf "syntax error.";
+      report_error file filebuf "syntax error";
   | Resolve.Multiple_declaration_type (pos,name) ->
     let c = pos.pos_cnum - pos.pos_bol + 1 in
     Printf.eprintf "File \"%s\", line %d, character %d: The type %s is declared twice\n" file pos.pos_lnum c name;

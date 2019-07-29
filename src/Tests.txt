@@ -190,6 +190,14 @@ Use of global variable
 
 Use of parameters in a function
    test-148: Without error: operations with parameters
+   test-164: Without error: assignment of a value to a parameters
+   test-165: Without error: use of parameter inside a while instruction
+   test-166: Without error: use of parameter inside a conditional instruction
+   test-167: Without error: use of parameter inside a conditional expression
+   test-168: Type error: assignement of parameter to a variable of the wrong type 
+   test-169: Type error: wrong use of an operator
+   test-170: Type error: different type of return inside a conditional instruction
+   test-171: Type-error: return of a parameter with the wrong type 
 
 Function call
    test-151: Without error: correct call of a function with a return
@@ -200,10 +208,28 @@ Function call
    test-156: Without error: correct call of a function with a void return
    test-157: Type error: expression as a parameter of the function with the wrong type 
 
-
 Recursive functions:
    test-160: Without error: fibonacci
    test-161: Without error: factorial
+   test-162: Without error: crossed recursivity: parity of positive integer
+   test-163: Type error: crossed recursivity: different types of return
+
+Named Type:
+   test-172: Well-formedness error: declaration of two named types with the same time
+   test-173: Well-formedness error: declaration of a named type with an unbound type
+   test-174: Well-formedness error: declaration of a recursive named type without a channel
+   test-175: Without error: correct declaration and assignment of a value
+   test-176: Without error: use of an operator with a variable having a named type
+   test-177: Without error: use of a variable having a named type inside a condition
+   test-178: Without error: use of variable having a named type inside a conditional expression
+   test-179: Without error: use of variable having a named type inside a while instruction
+   test-180: Type error: incorrect use of an operator on a variable with a named type
+   test-181: Type error: incorrect assignement of a variable with a named type
+   test-182: Without error: function returning a named type
+   test-183: Type error: function returning a named type and with an another type inside the return instruction
+   test-184: Without error: assignment of a variable with a named type to another variable with the same type but not named
+   test-185: Well-formedness error: croseed recursivity in type declarations
+   test-186: Without error: Type declaration using a named type
 
 
 

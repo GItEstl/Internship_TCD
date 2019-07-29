@@ -7,4 +7,4 @@ func int main (int x, int y) {
     return y + x
 }
 
-start main(0)
+start main(0,0)
