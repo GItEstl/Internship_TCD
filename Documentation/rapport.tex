@@ -51,7 +51,7 @@
 \vspace*{\stretch{8}}
 
 
-\centerline{\textbf{\Huge Parser Documentation}}
+\centerline{\textbf{\Huge Documentation}}
 \bigbreak\bigbreak
 \bigbreak\bigbreak
 
@@ -269,7 +269,7 @@ CallMain ::= start name ( ExpressionSeq )
 \vspace*{3pt}
 
 \newpage
-\centerline{\textbf{\Huge Technical choices}}
+\centerline{\textbf{\Huge Technical choices for the parser}}
 \vspace*{3pt}
 \vspace*{10pt}
 \tabto{0cm} {\Large \textbf{Conflicts resolution}}
@@ -306,7 +306,7 @@ We have also used semi-colons to resolve conflicts. \\ \\
 \centerline{\textbf{\Huge Type Grammar}}
 \vspace*{3pt}
 \vspace*{20pt}
-We have created types that simplify our grammar and so allow us to perform a more efficient check type. We have separated the types for expressions and instructions.
+We have created types that simplify our grammar and so allow us to perform a more efficient type checking. We have separated the types for expressions and instructions.
 
 \tabto{0cm} {\Large \textbf{Simplified type for Expressions}}
 
@@ -336,7 +336,7 @@ So, the environments only concern what is declared at the top level.\\
 
 In order to create these 2 environments, it is necessary to verify that each declared element is well formed before adding it to its corresponding environment.\\ \\
 Concerning the type environment, being well-formed means: 
-The name used is unique in the environment, the other types used to declare this type are well-formed types = other named types defined above or a basic type defined in our language (int, string, char...) and the declared type is recursive only if it is a channel type\\ \\ \\
+The name used is unique in the environment, the other types used to declare this type are well-formed types i.e. other named types defined above or a basic type defined in our language (int, string, char...) and the declared type is recursive only if it is a channel type\\ \\ \\
 Concerning the variable environment, first it is  necessary to distinguish functions and variables.
 \begin{itemize}
     \item  For variables, being well-formed means: The name used is unique in the environment and the variables's type is a well formed type
