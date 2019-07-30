@@ -1,0 +1,14 @@
+// Without error: correct declaration and assignment of a value
+
+type testType1 = (int,boolean)
+type testType2 = (string,string)
+type testType3 = (testType1,testType2)
+
+func void test186 (string s) {
+def
+    testType3 t
+in
+    t = ((1,true),("s1","s2"))
+}
+
+start test186("")

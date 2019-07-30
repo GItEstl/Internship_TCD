@@ -1,0 +1,7 @@
+// Well-formedness error: declaration of a named type with an unbound type
+
+type testType = (int,foo)
+
+func void test173 (string s) {}
+
+start test173("")

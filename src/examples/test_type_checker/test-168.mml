@@ -1,0 +1,10 @@
+// Type error: assignement of parameter to a variable of the wrong type 
+
+func void test168 (list[int] l) {
+def
+    int i
+in
+    i = l    
+}
+
+start test168([1,2,3])

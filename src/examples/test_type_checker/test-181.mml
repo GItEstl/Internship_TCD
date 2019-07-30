@@ -1,0 +1,14 @@
+// Type error: incorrect assignement of a variable having a named type
+
+type testType = (int,int,boolean)
+
+func void test181 (string s) {
+def
+    (int,int) i;
+    testType t
+in
+    t = (2,4,true);
+    i = t
+}
+
+start test181("")

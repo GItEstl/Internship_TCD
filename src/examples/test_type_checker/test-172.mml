@@ -1,0 +1,8 @@
+// Well-formedness error: declaration of two named types with the same time
+
+type testType = (int,int)
+type testType = bool
+
+func void test172 (string s) {}
+
+start test172("")

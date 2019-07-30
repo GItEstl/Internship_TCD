@@ -1,0 +1,12 @@
+// Without error: assignment of a value to a parameters
+
+func int test164 (int i, int j) {
+def
+    int x
+in
+    x = 100 + i*10;
+    i = x;
+    return x + j
+}
+
+start test164(1,3)

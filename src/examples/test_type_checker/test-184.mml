@@ -1,0 +1,15 @@
+// Without error: assignment of a variable with a named type to another variable with the same type but not named
+
+type testType = (int,int,boolean)
+
+func testType test184 (string s) {
+def
+    testType t1;
+    (int,int,boolean) t2
+in
+    t1 = (1,2,false);
+    t2 = t1;
+    return t2
+}
+
+start test184("")

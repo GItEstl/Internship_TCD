@@ -1,0 +1,12 @@
+// Type error: function returning a named type and with an another type inside the return instruction
+
+type testType = (int,int,boolean)
+
+func testType test183 (string s) {
+def
+    boolean b
+in
+    return b
+}
+
+start test183("")

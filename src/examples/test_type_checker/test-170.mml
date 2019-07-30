@@ -1,0 +1,11 @@
+// Type error: different type of return inside a conditional instruction
+
+func void test170 (boolean b) {
+    if (b) {
+        return 1
+    } else {
+        return b
+    }   
+}
+
+start test170(true)

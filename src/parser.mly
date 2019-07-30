@@ -6,6 +6,7 @@ open Ast
 %token <Lexing.position * int> NumberToken
 %token <Lexing.position * string> IdentToken
 %token <Lexing.position * string> CharValueToken
+%token <Lexing.position * string> StringValueToken
 %token <Lexing.position> ArrowToken
 %token <Lexing.position> IfToken
 %token <Lexing.position> ElseToken
@@ -24,7 +25,6 @@ open Ast
 %token <Lexing.position> AddToken, SubToken
 %token <Lexing.position> MulToken, DivToken
 %token <Lexing.position> ComaToken
-%token <Lexing.position> DoubleQuoteToken
 %token <Lexing.position> BoolToken, StringToken, IntegerToken, CharToken, ChannelToken, ListToken
 %token <Lexing.position> VoidToken
 %token <Lexing.position> FunctionToken
@@ -149,8 +149,7 @@ exprs :
 cst : 
  | c = NumberToken                                                                                                        {IntegerNode(fst(c),snd(c))}
  | c = CharValueToken                                                                                                    {CharNode (fst(c),snd(c))}
- | pos = DoubleQuoteToken DoubleQuoteToken                                                                                    {StringNode (pos,"")}
- | DoubleQuoteToken c = IdentToken DoubleQuoteToken                                                                       {StringNode (fst(c),snd(c))}
+ | s = StringValueToken                                                                                                  {StringNode (fst(s),snd(s))}
  | pos = TrueToken                                                                                                              {TrueNode (pos)}
  | pos = FalseToken                                                                                                             {FalseNode (pos)}
 

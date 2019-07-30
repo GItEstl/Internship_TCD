@@ -1,5 +1,0 @@
-type testType = channel foo
-
-func void main (int x) {}
-
-start main(0)

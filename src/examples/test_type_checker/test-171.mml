@@ -1,0 +1,7 @@
+// Type error: return of a parameter with the wrong type
+
+func int test171 (boolean b) {
+    return b
+}
+
+start test171(true)

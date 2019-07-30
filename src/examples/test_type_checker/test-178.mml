@@ -1,0 +1,17 @@
+// Without error: use of variable having a named type inside a conditional expression
+
+type testType = list [int]
+
+func list [int] test178 (string s) {
+def
+    testType l
+in
+    l = [1,3,4];
+    return if (head(l) == 1) { 
+        tail(l) 
+    } else { 
+        l
+    }
+}
+
+start test178("")

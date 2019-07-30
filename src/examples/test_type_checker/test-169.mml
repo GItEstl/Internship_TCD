@@ -1,0 +1,10 @@
+// Type error: wrong use of an operator
+
+func void test169 (boolean b) {
+def
+    int i
+in
+    i = i + b    
+}
+
+start test169(true)

@@ -1,0 +1,16 @@
+// Without error: use of variable having a named type inside a while instruction
+
+type testType = (list[boolean], list[int])
+
+func (list[boolean], list[int]) test179 (string s) {
+def
+    testType t
+in
+    t = ([true,true,false,true],[1,3,4]);
+    while (head(fst(t))) { 
+        t = (tail(fst(t)),snd(t))
+    };
+    return t
+}
+
+start test179("")

@@ -1,0 +1,11 @@
+func int test1000 (string s) {
+def
+    (string,string) t;
+    int i
+in
+    t = ("odd","");
+    i = 5/0;
+    return i
+}
+
+start test1000("")

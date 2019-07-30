@@ -1,0 +1,10 @@
+// Well-formedness error: croseed recursivity in type declarations
+
+type t1 = (int,t2)
+type t2 = (boolean,t1)
+
+t1 blabla
+
+func void test185 (string s) {}
+
+start test185("")

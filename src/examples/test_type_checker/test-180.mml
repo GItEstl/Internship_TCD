@@ -1,0 +1,14 @@
+// Type error: incorrect use of an operator on a variable with a named type
+
+type testType = (int,int,boolean)
+
+func void test180 (string s) {
+def
+    int i;
+    testType t
+in
+    t = (2,4,true);
+    i = t + 5
+}
+
+start test180("")

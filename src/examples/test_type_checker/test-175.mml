@@ -1,0 +1,12 @@
+// Without error: correct declaration and assignment of a value
+
+type testType = (int,boolean)
+
+func void test175 (string s) {
+def
+    testType t
+in
+    t = (1,true)
+}
+
+start test175("")

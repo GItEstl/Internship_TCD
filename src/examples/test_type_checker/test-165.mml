@@ -1,0 +1,15 @@
+// Without error: use of parameter inside a while instruction
+
+func int power (int i, int e) {
+def 
+    int x
+in
+    x = i;
+    while (e > 1) {
+        x = x*i;
+        e = e - 1
+    };
+    return x
+}
+
+start power(4,3)

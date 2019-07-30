@@ -1,0 +1,11 @@
+// Without error: use of parameter inside a conditional instruction
+
+func int test166 (int i, boolean b) {
+    if (b) {
+        return i + 1
+    } else {
+        return i
+    }
+}
+
+start test166(3,true)

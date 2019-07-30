@@ -1,0 +1,7 @@
+// Well-formedness error: declaration of a recursive named type without a channel
+
+type testType = (int,testType)
+
+func void test174 (string s) {}
+
+start test174("")

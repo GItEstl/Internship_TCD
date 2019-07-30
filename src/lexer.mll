@@ -11,8 +11,10 @@ let lowercase = ['a' - 'z']
 let uppercase = ['A' - 'Z']
 let alphabet = lowercase | uppercase
 let alphanum = alphabet | digit | '_'
+let alphanum_extended = alphanum | ' ' | ':' | ',' | '.' | '(' | ')' | '&' | '%' | ';' | '{' | '}' | '[' | ']' | '?' | '=' | '+' | '*' | '^' | '!' | '@' | '<' | '>' | '$' | '|' | '/' | '-'
 let id = alphanum alphanum*
-let char = '\'' alphanum '\''
+let char = '\'' alphanum? '\''
+let string = '"' alphanum* '"'
 let comments =
   (* Comments end of line *)
   "//" [^'\n']*
@@ -40,7 +42,6 @@ rule token = parse
   | '-'       {SubToken (Lexing.lexeme_start_p lexbuf)}
   | '*'       {MulToken (Lexing.lexeme_start_p lexbuf)}
   | '/'       {DivToken (Lexing.lexeme_start_p lexbuf)}
-  | '"'       {DoubleQuoteToken (Lexing.lexeme_start_p lexbuf)}
   | "&&"      {AndToken (Lexing.lexeme_start_p lexbuf)}
   | "||"      {OrToken (Lexing.lexeme_start_p lexbuf)}
   | "->"      {ArrowToken (Lexing.lexeme_start_p lexbuf)}
@@ -81,6 +82,8 @@ rule token = parse
               {NumberToken (((Lexing.lexeme_start_p lexbuf)),(int_of_string inum))}
   | char as text
               {CharValueToken ((Lexing.lexeme_start_p lexbuf),(String.sub text 1 1))}
+  | string as text
+              {StringValueToken ((Lexing.lexeme_start_p lexbuf),(String.sub text 1 ((String.length text) - 2)))}
   | id as text
               {IdentToken ((Lexing.lexeme_start_p lexbuf),text)}
 | eof         { EOF }

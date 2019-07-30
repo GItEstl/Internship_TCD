@@ -1,0 +1,13 @@
+// Without error: function returning a named type
+
+type testType = (int,int,boolean)
+
+func testType test182 (string s) {
+def
+    testType t
+in
+    t = (2,4,true);
+    return t
+}
+
+start test182("")

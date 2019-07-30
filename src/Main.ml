@@ -95,33 +95,36 @@ let report_error filename lexbuf msg =
     let t_assign= string_of_type ta in
     let t_chan = string_of_type st in
     Printf.eprintf "File \"%s\", line %d, character %d: Incorrect assignment of the channel reception: the elements passed along the channel have the type %s but the type %s was found\n" file pos.pos_lnum c t_assign t_chan;
-| TypeChecking.Wrong_type_chan_send (pos,te,st) ->
+ | TypeChecking.Wrong_type_chan_send (pos,te,st) ->
     let c = pos.pos_cnum - pos.pos_bol + 1 in
     let t_elt = string_of_type te in
     let t_chan = string_of_type st in
     Printf.eprintf "File \"%s\", line %d, character %d: Wrong type of element send: the elements passed along the channel have the type %s but the type %s was found\n" file pos.pos_lnum c t_elt t_chan;
-| TypeChecking.Different_type_of_return_if (pos,t1,t2) ->
+ | TypeChecking.Different_type_of_return_if (pos,t1,t2) ->
     let c = pos.pos_cnum - pos.pos_bol + 1 in
     let t_then = string_of_type t1 in
     let t_else = string_of_type t2 in
     Printf.eprintf "File \"%s\", line %d, character %d: Inconsistent types: The return type %s and %s were found in the then and else branch\n" file pos.pos_lnum c t_then t_else;
-| TypeChecking.Return_not_match_with_decla (pos,rt,ft,namef) ->
+ | TypeChecking.Return_not_match_with_decla (pos,rt,ft,namef) ->
     let c = pos.pos_cnum - pos.pos_bol + 1 in
     let t_return = string_of_type rt in
     let t_func = string_of_type ft in
     Printf.eprintf "File \"%s\", line %d, character %d: Wrong type of function return: The function %s returns the type %s but the type %s was found\n" file pos.pos_lnum c namef t_func t_return;
-| TypeChecking.Different_type_of_return_func (pos,namef) ->
+ | TypeChecking.Different_type_of_return_func (pos,namef) ->
     let c = pos.pos_cnum - pos.pos_bol + 1 in 
     Printf.eprintf "File \"%s\", line %d, character %d: Multiple return types found in the function %s\n" file pos.pos_lnum c namef;
-| TypeChecking.Illegal_type_argument(pos) ->
+ | TypeChecking.Illegal_type_argument(pos) ->
     let c = pos.pos_cnum - pos.pos_bol + 1 in
     Printf.eprintf "File \"%s\", line %d, character %d: Illegal type argument\n" file pos.pos_lnum c;
-| TypeChecking.Different_types_in_list ->
+ | TypeChecking.Different_types_in_list ->
    Printf.eprintf "File \"%s\": A list containing different types has been found, a list can contain only elements of one type\n" file;
-| TypeChecking.Unknown_error_type_checking(m) ->
+ | TypeChecking.Unknown_error_type_checking(m) ->
     Printf.eprintf "File \"%s\": Unknown error during type checking: please check the function %s in the file TypeChecking.ml\n" file m;
-| TypeChecking.Get_tuple_too_short(pos) -> 
+ | TypeChecking.Get_tuple_too_short(pos) -> 
     let c = pos.pos_cnum - pos.pos_bol + 1 in
     Printf.eprintf "File \"%s\", line %d, character %d: Incorrect use of get: index out of bound \n" file pos.pos_lnum c;
-| ReferenceInterpretor.Run_time_error(m) -> 
-    Printf.eprintf "File \"%s\": Runtime error %s\n" file m;
+ | ReferenceInterpretor.Run_time_error(m) -> 
+    Printf.eprintf "File \"%s\": Runtime error: %s\n" file m;
+ | Division_by_zero -> 
+    Printf.eprintf "File \"%s\": Runtime error: Division by zero\n" file;
+   

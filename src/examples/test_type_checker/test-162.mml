@@ -1,0 +1,19 @@
+// Without error: crossed recursivity: parity of positive integer
+
+func boolean evenfunc (int n) {
+    if (n==0) {
+        return true
+    } else {
+        return oddfunc(n-1)
+    }
+}
+
+func boolean oddfunc (int n) {
+    if (n == 0) {
+        return false
+    } else {
+        return evenfunc(n-1)
+    }
+}
+
+start oddfunc(9)

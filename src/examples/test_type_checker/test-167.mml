@@ -1,0 +1,7 @@
+// Without error: use of parameter inside a conditional expression
+
+func int test167 (int i, boolean b) {
+    return if(b) { i + 1} else {i} 
+}
+
+start test167(3,false)

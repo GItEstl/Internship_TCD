@@ -1,0 +1,15 @@
+// Without error: use of an operator with a variable having a named type
+
+type testType = (int,int,boolean)
+
+func int test176 (string s) {
+def
+    int i;
+    testType t
+in
+    t = (2,4,true);
+    i = snd(t);
+    return i
+}
+
+start test176("")
