@@ -1,6 +1,6 @@
 // Well-formedness error: declaration of variable using an incorrect type
 
-(int,foo) globalVar
+(int,foo) globalVar = (0,0)
 
 func void test135 (string s) {}
 

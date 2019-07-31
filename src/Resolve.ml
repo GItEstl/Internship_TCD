@@ -6,7 +6,7 @@ open Ast
 *)
 
 exception Multiple_declaration_type of Lexing.position * string
-exception Unknow_error_in_type_checking
+exception Unknow_error_in_resolve of string
 exception Unbound_value of Lexing.position * string
 exception Undeclared_type of Lexing.position * string
 exception Unauthorized_recursivity of Lexing.position
@@ -33,7 +33,7 @@ let rec find_rec typeNode name =
     | TupleTNode (_,tSeq) -> find_rec tSeq name         
     | TypeSeqNode (st,None) -> find_rec st name 
     | TypeSeqNode (st1, Some(st2)) -> if (find_rec st1 name) then true else find_rec st2 name
-    | _ -> raise Unknow_error_in_type_checking
+    | _ -> raise (Unknow_error_in_resolve "find_rec")
 
 
 (* create_env: TenvType * TenvVar * 
@@ -54,9 +54,9 @@ let rec create_env (envType,envVar,start) tree =
         | ProgramNode (p1,p2) -> 
       create_env (create_env (envType,envVar,start) p1) p2
         | FunctionNode (pos,ft,name,params,_) ->
-      (envType,(pos,ft,name,Some(params))::envVar,start)
-        | VariableDeclaNode (pos,t,name) -> 
-      (envType,(pos,t,name,None)::envVar,start)      
+      (envType,(pos,ft,name,Some(params),true)::envVar,start)
+        | GlobalVarDeclaNode (pos,t,name,_) -> 
+      (envType,(pos,t,name,None,true)::envVar,start)      
         | TypeDeclaNode (pos,name,t) ->
       ((pos,name,t,find_rec t name)::envType,envVar,start)
         | CallNode (pos,name,expr) ->
@@ -85,8 +85,8 @@ let rec well_formed_type_aux t nameList  =
    | TypeSeqNode (st,None) -> well_formed_type_aux st nameList 
    | TypeSeqNode (st1, Some(st2)) -> if (well_formed_type_aux st1 nameList)
                                      then well_formed_type_aux st2 nameList
-                                     else raise Unknow_error_in_type_checking
-   | _ -> raise Unknow_error_in_type_checking
+                                     else raise (Unknow_error_in_resolve "well_formed_type_aux2")
+   | _ -> raise (Unknow_error_in_resolve "well_formed_type_aux")
 
 
 (* well_formed_type_decla: position * string * ast * bool -> string list -> bool
@@ -139,10 +139,10 @@ Return: the names of the declared variables/functions
 let rec uniqueVar envVar nameListVar nameListType = 
   match envVar with
     | [] -> nameListVar
-    | (pos,_,name,None)::q -> if (List.mem name nameListVar) 
+    | (pos,_,name,None,_)::q -> if (List.mem name nameListVar) 
                          then raise (Multiple_declaration_var (pos,name))                   
                          else uniqueVar q (name::nameListVar) nameListType
-    | (pos,_,name,_)::q -> if (List.mem name nameListVar) 
+    | (pos,_,name,_,_)::q -> if (List.mem name nameListVar) 
                          then raise (Multiple_declaration_var (pos,name))                   
                          else uniqueVar q (name::nameListVar) nameListType
 
@@ -159,7 +159,7 @@ let well_formed_func_type t nameList =
   match t with
     | FuncTNode (None) -> true
     | FuncTNode (Some(st)) -> well_formed_type_aux st nameList 
-    | _ -> raise Unknow_error_in_type_checking
+    | _ -> raise (Unknow_error_in_resolve "well_formed_func_type")
 
 
 (* well_formed_params: ast -> string list -> string list -> string list
@@ -180,7 +180,7 @@ let rec well_formed_params params nameListType nameListVar =
     | ParamsNode (pos,t,name,Some(p)) -> if (List.mem name nameListVar) 
                   then raise (Multiple_declaration_param (pos,name))
                   else let _ = (well_formed_type_aux t nameListType) in well_formed_params p nameListType (name::nameListVar)
-    | _ -> raise Unknow_error_in_type_checking 
+    | _ -> raise (Unknow_error_in_resolve "well_formed_params") 
 
 
 (* well_formed_var: (position * ast * string * ast option) -> string list -> bool
@@ -196,8 +196,8 @@ Return: true if the variable/function is well-formed, false if not
 
 let well_formed_var decla nameListType =
   match decla with
-    | (_,t,_,None) -> well_formed_type_aux t nameListType 
-    | (_,ft,_,Some(params)) -> let _ = (well_formed_params params nameListType []) in (well_formed_func_type ft nameListType)
+    | (_,t,_,None,_) -> well_formed_type_aux t nameListType 
+    | (_,ft,_,Some(params),_) -> let _ = (well_formed_params params nameListType []) in (well_formed_func_type ft nameListType)
 
 
 (* well_formed_envVar: TenvVar -> string list -> string list
@@ -228,7 +228,7 @@ Return: the tuple representing the start function
 let well_formed_start decla envVar =
   match decla with 
     | Some((pos,name,_)) -> (try 
-                              List.find (fun (_,_,n,p) -> (p != None) && (String.equal n name)) envVar 
+                              List.find (fun (_,_,n,p,_) -> (p != None) && (String.equal n name)) envVar 
                             with
                               | Not_found -> raise (Function_not_found (pos,name)))
-    | _ -> raise Unknow_error_in_type_checking  
+    | _ -> raise (Unknow_error_in_resolve "well_formed_start")

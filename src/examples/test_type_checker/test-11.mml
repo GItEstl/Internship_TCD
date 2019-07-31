@@ -1,6 +1,6 @@
 // Without error: declaration twice of the same variable (same name but not the same type): one global, one local
 
-int i
+int i = 0
 
 func void test11 (string s) {
 def 

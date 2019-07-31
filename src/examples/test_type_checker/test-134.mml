@@ -1,6 +1,6 @@
 // Well-formedness error: declaration of a global variable and a function with the same name
 
-bool sameName
+bool sameName = true
 
 func int sameName (string s) {}
 

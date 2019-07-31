@@ -2,7 +2,6 @@
 open Ast
 %}
 
-
 %token <Lexing.position * int> NumberToken
 %token <Lexing.position * string> IdentToken
 %token <Lexing.position * string> CharValueToken
@@ -56,9 +55,9 @@ main : a = program EOF   {a}
 program :
  | t = typeDecla p = program                                                                                {ProgramNode (t,p)} 
  | f = funcDecla p = program                                                                                 {ProgramNode (f,p)}
- | v = variableDecla p = program                                                                             {ProgramNode (v,p)}
+ | v = variableDeclaGlobal p = program                                                                             {ProgramNode (v,p)}
  | f = funcDecla c = callMain                                                                                    {ProgramNode (f,c)}
- | v = variableDecla c = callMain                                                                                {ProgramNode (v,c)}
+ | v = variableDeclaGlobal c = callMain                                                                                {ProgramNode (v,c)}
 
 funcDecla :
  | pos = FunctionToken ft = funcType n = IdentToken LeftParenthesisToken params = parameters RightParenthesisToken b = body       {FunctionNode (pos,ft,snd(n),params,b)}
@@ -73,6 +72,10 @@ parameters :
 body :
  | pos = LeftBracketToken i = instruction RightBracketToken                                                     {BodyNode (pos,None,i)}
  | pos = LeftBracketToken DefToken v = variableDeclas InToken i = instruction RightBracketToken                 {BodyNode (pos,Some(v),i)}
+
+variableDeclaGlobal :
+ | t = typ n = IdentToken pos = AssignToken v = value                                                                 {GlobalVarDeclaNode (pos,t,snd(n),v)}
+ | t = typ n = IdentToken pos = AssignToken LeftParenthesisToken vs = valueSeq RightParenthesisToken                  {GlobalVarDeclaNode (pos,t,snd(n),vs)}
 
 variableDecla :
  | t = typ n = IdentToken                                                                                   {VariableDeclaNode (fst(n),t,snd(n))}

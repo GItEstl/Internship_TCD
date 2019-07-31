@@ -1,6 +1,6 @@
 // Without error: example of shadowing (global variable and a parameter with the same name)
 
-int var
+int var = 0
 
 func string test146 (string var) {return var}
 

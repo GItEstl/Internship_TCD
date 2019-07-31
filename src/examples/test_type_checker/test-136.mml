@@ -1,6 +1,6 @@
-// Without error: declaration of a global variable and assignment to this variable
+// Type error: declaration of a global variable and assignment to this variable
 
-int globalVar
+int globalVar = 0
 
 func void test136 (string s) {
     globalVar = 3;

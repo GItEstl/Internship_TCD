@@ -31,7 +31,7 @@ let report_error filename lexbuf msg =
   | Resolve.Multiple_declaration_param (_,name) -> "The name " ^ name ^ "is used twice in the function parameters"
   | Resolve.Type_not_found (_,name) -> "Incorrect type: unbound value " ^ name
   | Resolve.Function_not_found (_,name) -> "Incorrect function for start: unbound value " ^ name
-  | Resolve.Unknow_error_in_type_checking -> "Fatal error in type checking. Good luck"
+  | Resolve.Unknow_error_in_resolve (m) -> "Unknown error during well-formness: please check the function " ^ m ^ " in the file Resolve.ml"
   | TypeChecking.Wrong_type (_,tfound,texpec) ->
     let f = string_of_type tfound in
     let e = string_of_type texpec in
@@ -69,13 +69,15 @@ let report_error filename lexbuf msg =
   | TypeChecking.Return_not_match_with_decla (_,rt,ft,namef) ->
     let t_return = string_of_type rt in
     let t_func = string_of_type ft in
-    "Wrong type of function return: The function" ^ namef ^ "returns the type" ^ t_func ^ "but the type " ^ t_return ^ " was found"
+    "Wrong type of function return: The function " ^ namef ^ " returns the type " ^ t_func ^ " but the type " ^ t_return ^ " was found"
   | TypeChecking.Different_type_of_return_func (_,namef) -> "Multiple return types found in the function %s" ^ namef;
   | TypeChecking.Illegal_type_argument(_) -> "Illegal type argument"
   | TypeChecking.Different_types_in_list -> "A list containing different types has been found, a list can contain only elements of one type"
-  | TypeChecking.Unknown_error_type_checking(_) -> "Unknown error during type checking: please check the function %s in the file TypeChecking.ml"
+  | TypeChecking.Unknown_error_type_checking(m) -> "Unknown error during type checking: please check the function " ^ m ^ " in the file TypeChecking.ml"
   | TypeChecking.Get_tuple_too_short(_) -> "Incorrect use of get: index out of bound"
+  | TypeChecking.Assignment_to_global_var(_,n) -> "You cannot assign a value to the global variable " ^ n
   | ReferenceInterpretor.Run_time_error(_) -> "Runtime error"
+  | ReferenceInterpretor.Unknown_error_reference_interpretor(m) -> "Unknown error during execution: please check the function " ^ m ^ " in the file ReferenceInterpretor.ml"
 
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-00.mml"); [%expect{| unit |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-01.mml"); [%expect{| Unknown variable: unbound value i |}]
@@ -127,10 +129,10 @@ let%expect_test _ = print_string (main "../../examples/test_type_checker/test-46
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-47.mml"); [%expect{| unit |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-48.mml"); [%expect{| unit |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-49.mml"); [%expect{| unit |}]
-let%expect_test _ = print_string (main "../../examples/test_type_checker/test-50.mml"); [%expect{| Wrong type of function return: The functiontest50returns the typevoidbut the type integer was found |}]
+let%expect_test _ = print_string (main "../../examples/test_type_checker/test-50.mml"); [%expect{| Wrong type of function return: The function test50 returns the type void but the type integer was found |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-51.mml"); [%expect{| Multiple return types found in the function %stest51 |}]
-let%expect_test _ = print_string (main "../../examples/test_type_checker/test-52.mml"); [%expect{| Wrong type of function return: The functiontest52returns the typeintegerbut the type void was found |}]
-let%expect_test _ = print_string (main "../../examples/test_type_checker/test-53.mml"); [%expect{| Wrong type of function return: The functiontest53returns the typeintegerbut the type boolean was found |}]
+let%expect_test _ = print_string (main "../../examples/test_type_checker/test-52.mml"); [%expect{| Wrong type of function return: The function test52 returns the type integer but the type void was found |}]
+let%expect_test _ = print_string (main "../../examples/test_type_checker/test-53.mml"); [%expect{| Wrong type of function return: The function test53 returns the type integer but the type boolean was found |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-54.mml"); [%expect{| [1, 2, 3, 4] |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-55.mml"); [%expect{| (1, true, 'a') |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-56.mml"); [%expect{| 12 |}]
@@ -213,8 +215,8 @@ let%expect_test _ = print_string (main "../../examples/test_type_checker/test-13
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-133.mml"); [%expect{| Multiple return types found in the function %stest133 |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-134.mml"); [%expect{| The name sameNameis already used by another function/variable |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-135.mml"); [%expect{| Incorrect type: unbound value foo |}]
-let%expect_test _ = print_string (main "../../examples/test_type_checker/test-136.mml"); [%expect{| unit |}]
-let%expect_test _ = print_string (main "../../examples/test_type_checker/test-137.mml"); [%expect{| 0 |}]
+let%expect_test _ = print_string (main "../../examples/test_type_checker/test-136.mml"); [%expect{| You cannot assign a value to the global variable globalVar |}]
+let%expect_test _ = print_string (main "../../examples/test_type_checker/test-137.mml"); [%expect{| (1, true, [1, 2, 3]) |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-138.mml"); [%expect{| Incorrect type: unbound value foo |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-139.mml"); [%expect{| Incorrect type: unbound value foo |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-140.mml"); [%expect{| The name xis used twice in the function parameters |}]
@@ -235,7 +237,7 @@ let%expect_test _ = print_string (main "../../examples/test_type_checker/test-15
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-155.mml"); [%expect{| Wrong type of argument in the function addint: the type (integer, integer, integer) was found but the type (integer, integer) was expected |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-156.mml"); [%expect{| unit |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-157.mml"); [%expect{| Incorrect assignment: the function addint does not have a return |}]
-let%expect_test _ = print_string (main "../../examples/test_type_checker/test-158.mml"); [%expect{| 7 |}]
+let%expect_test _ = print_string (main "../../examples/test_type_checker/test-158.mml"); [%expect{| Wrong type: The type (integer, char, list integer) was found but the type (integer, boolean, list integer) was expected |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-159.mml"); [%expect{| 0 |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-160.mml"); [%expect{| 21 |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-161.mml"); [%expect{| 3628800 |}]
@@ -248,7 +250,7 @@ let%expect_test _ = print_string (main "../../examples/test_type_checker/test-16
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-168.mml"); [%expect{| Wrong type: The type list integer was found but the type integer was expected |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-169.mml"); [%expect{| Wrong type: The type boolean was found but the type integer was expected |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-170.mml"); [%expect{| Inconsistent types: The return type boolean and integer were found in the then and else branch |}]
-let%expect_test _ = print_string (main "../../examples/test_type_checker/test-171.mml"); [%expect{| Wrong type of function return: The functiontest171returns the typeintegerbut the type boolean was found |}]
+let%expect_test _ = print_string (main "../../examples/test_type_checker/test-171.mml"); [%expect{| Wrong type of function return: The function test171 returns the type integer but the type boolean was found |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-172.mml"); [%expect{| The typetestTypeis declared twice |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-173.mml"); [%expect{| Incorrect declaration type: unbound value foo |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-174.mml"); [%expect{| Incorrect declaration type: only channel type can be recursive |}]
@@ -260,7 +262,7 @@ let%expect_test _ = print_string (main "../../examples/test_type_checker/test-17
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-180.mml"); [%expect{| Wrong type: The type (integer, integer, boolean) was found but the type integer was expected |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-181.mml"); [%expect{| Wrong type: The type (integer, integer, boolean) was found but the type (integer, integer) was expected |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-182.mml"); [%expect{| (2, 4, true) |}]
-let%expect_test _ = print_string (main "../../examples/test_type_checker/test-183.mml"); [%expect{| Wrong type of function return: The functiontest183returns the type(integer, integer, boolean)but the type boolean was found |}]
+let%expect_test _ = print_string (main "../../examples/test_type_checker/test-183.mml"); [%expect{| Wrong type of function return: The function test183 returns the type (integer, integer, boolean) but the type boolean was found |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-184.mml"); [%expect{| (1, 2, false) |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-185.mml"); [%expect{| Incorrect declaration type: unbound value t2 |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-186.mml"); [%expect{| unit |}] 

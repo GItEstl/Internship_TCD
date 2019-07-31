@@ -1,9 +1,9 @@
 // Without error: declaration of a global variable and return of the variable
 
-int globalVar
+(int,boolean,list[int]) var = (1,true,[1,2,3])
 
-func int test137 (string s) {
-    return globalVar
+func (int,boolean,list[int]) test137 (string s) {
+    return var
 }
 
 start test137("")

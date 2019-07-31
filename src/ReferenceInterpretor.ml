@@ -54,7 +54,7 @@ let rec value_of_expr expr state =
     | ExprNode (_,e) -> value_of_expr e state
     | ExprsNode (e,None) -> value_of_expr e state
     | ExprsNode (e1,Some(e2)) -> ruleTupleExpr (ExprsNode (e1,Some(e2))) state
-    | ValueNode(ValueNode (v)) -> ruleValue v state
+    | ValueNode (v) -> ruleValue v
     | AssignNode (_,a) -> ruleIdentifier a state
     | _ -> raise (Unknown_error_reference_interpretor "value_of_expr")
 
@@ -195,22 +195,21 @@ Parameters:
   - state: hash table representing the state of all the variables  
 Return: the result corresponding to the value node
 *)
-ruleValue v state =
+ruleValue v =
+  let rec aux vs l =
+    (match vs with
+      | ValueSeqNode (val1,None) -> List.rev ((ruleValue val1)::l)
+      | ValueSeqNode (val1,Some(val2)) -> aux val2 ((ruleValue val1)::l)
+      | _ -> raise (Unknown_error_reference_interpretor "ruleValue2")) in
   match v with
-    | IntegerNode (_,i) -> IntegerVal(i)
-    | CharNode (_,c) -> CharVal(c)
-    | StringNode (_,s) -> StringVal(s)
-    | TrueNode(_) -> BooleanVal(true)
-    | FalseNode(_) -> BooleanVal(false)
-    | EmptyList -> ListVal([])
-    | ValueSeqNode (_,_) -> ListVal (
-        let rec aux vs l =
-          (match vs with
-            | ValueSeqNode (ValueNode(val1),None) -> List.rev ((ruleValue val1 state)::l)
-            | ValueSeqNode (ValueNode(val1),Some(val2)) -> aux val2 ((ruleValue val1 state)::l)
-            | _ -> raise (Unknown_error_reference_interpretor "ruleValue2")
-          ) in aux v []
-      )
+    | ValueNode (IntegerNode (_,i)) -> IntegerVal(i)
+    | ValueNode (CharNode (_,c)) -> CharVal(c)
+    | ValueNode (StringNode (_,s)) -> StringVal(s)
+    | ValueNode (TrueNode(_)) -> BooleanVal(true)
+    | ValueNode (FalseNode(_)) -> BooleanVal(false)
+    | ValueNode (EmptyList) -> ListVal([])
+    | ValueNode (ValueSeqNode (v1,v2)) -> ListVal (aux (ValueSeqNode(v1,v2)) [])
+    | ValueSeqNode (_,_) -> TupleVal (aux v [])
     | _ -> raise (Unknown_error_reference_interpretor "ruleValue")
 and
 
@@ -520,7 +519,7 @@ let execution_prg prg start env =
     match tree with
         | ProgramNode (p1,p2) -> aux p1; aux p2
         | FunctionNode (_,_,n,p,b) -> Hashtbl.add state n (ref (FuncVal(p,b)))
-        | VariableDeclaNode(_,t,n) -> Hashtbl.add state n (ref (def_value t))
+        | GlobalVarDeclaNode(_,_,n,vnode) -> Hashtbl.add state n (ref (ruleValue vnode))
         | _ -> ()
     in aux prg;
     (* Launch of the execution with the start function *)

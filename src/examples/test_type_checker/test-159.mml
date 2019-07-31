@@ -1,6 +1,6 @@
 // Without error: example of shadowing and use of global variable in different functions
 
-int var
+int var = 0
 
 func void addint (int i, int var) {
     var = i

@@ -55,8 +55,8 @@ let report_error filename lexbuf msg =
  | Resolve.Function_not_found (pos,name) ->
     let c = pos.pos_cnum - pos.pos_bol + 1 in
     Printf.eprintf "File \"%s\", line %d, character %d: Incorrect function for start: unbound value %s\n" file pos.pos_lnum c name;
- | Resolve.Unknow_error_in_type_checking ->
-    Printf.eprintf "Fatal error in type checking. Good luck";
+ | Resolve.Unknow_error_in_resolve (m) ->
+    Printf.eprintf "File \"%s\": Unknown error during well-formness checking: please check the function %s in the file Resolve.ml\n" file m;
  | TypeChecking.Wrong_type (pos,tfound,texpec) ->
     let c = pos.pos_cnum - pos.pos_bol + 1 in
     let f = string_of_type tfound in
@@ -127,4 +127,6 @@ let report_error filename lexbuf msg =
     Printf.eprintf "File \"%s\": Runtime error: %s\n" file m;
  | Division_by_zero -> 
     Printf.eprintf "File \"%s\": Runtime error: Division by zero\n" file;
+ | Unknown_error_reference_interpretor (m) -> 
+    Printf.eprintf "File \"%s\": Unknown error during execution: please check the function %s in the file ReferenceInterpretor.ml\n" file m;
    

@@ -176,7 +176,7 @@ Incorrect declaration of functions and variables
    test-142: Well-formedness error: declaration of two functions with the same name
 
 Use of global variable
-   test-136: Without error: declaration of a global variable and assignment to this variable
+   test-136: Type error: declaration of a global variable and assignment to this variable
    test-137: Without error: declaration of a global variable and return of the variable
    test-143: Without error: example of shadowing (global variable and local variable with the same name)
    test-144: Type error: example of shadowing (global variable and local variable with the same name)
@@ -185,7 +185,7 @@ Use of global variable
    test-147: Type error: example of shadowing (global variable and a parameter with the same name)
    test-149: Without error: example of shadowing (local variable and a parameter with the same name)
    test-150: Type error: example of shadowing (local variable and a parameter with the same name)
-   test-158: Without error: Use of global variable in different functions
+   test-158: Type error: wrong of a value for the declaration 
    test-159: Without error: example of shadowing and use of global variable in different functions
 
 Use of parameters in a function

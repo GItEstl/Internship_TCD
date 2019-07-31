@@ -1,6 +1,6 @@
 // Without error: declaration thrice of the same variable (same name and type): one global, two locals in 2 differents fonctions
 
-char i
+char i = 'a'
 
 func void test12 (string s) {
 def 

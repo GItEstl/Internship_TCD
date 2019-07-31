@@ -3,7 +3,7 @@ open Resolve
 
 (* For all the function using as parameters envVar & envType:
     - TenvType: (position * string * ast * bool) list 
-    - TenvVar: (position * ast * string * ast option) list
+    - TenvVar: (position * ast * string * ast option * bool) list
 *)
 
 type typeType =
@@ -42,8 +42,8 @@ exception Return_not_match_with_decla of Lexing.position * typeType * typeType *
 exception Different_type_of_return_func of Lexing.position * string
 exception Illegal_type_argument of Lexing.position
 exception Get_tuple_too_short of Lexing.position
+exception Assignment_to_global_var of Lexing.position * string
 exception Unknown_error_type_checking of string
-exception Unknown_error_type_checking_ of ast
 
 (* string_of_type: typeType -> string
 Function converting a typeType into a string
@@ -63,10 +63,7 @@ let rec string_of_type t =
     | ChannelGenType -> "channel"
     | ListType(st) -> "list " ^ (string_of_type st)
     | ListGenType -> "list"
-    | TupleType(st) -> "(" ^ (List.fold_left (fun s e ->  s ^ ", " ^ (string_of_type e)) (string_of_type (List.nth st 0)) (List.tl st)) ^ ")"(*"(" ^ (let rec aux l = match l with 
-                                      | [] -> ""
-                                      | t::q -> (string_of_type t) ^ ", " ^ (aux q)
-                        in aux st) ^ ")"  *)
+    | TupleType(st) -> "(" ^ (List.fold_left (fun s e ->  s ^ ", " ^ (string_of_type e)) (string_of_type (List.nth st 0)) (List.tl st)) ^ ")"
     | TupleGenType -> "tuple"
     | NamedType(s) -> s 
     | ErrorType -> "ERROR"
@@ -128,8 +125,8 @@ Return: typeType corresponding to the variable
 
 let type_of_var namevar envVar envType pos =
   try 
-    let _,tnode,_,_ = List.find (fun (_,_,name,p) -> (String.equal name namevar) && (p == None)) envVar in
-    type_of_tree tnode envType
+    let _,tnode,_,_,g = List.find (fun (_,_,name,p,_) -> (String.equal name namevar) && (p == None)) envVar in
+    (type_of_tree tnode envType,g)
   with
     | Not_found -> raise (Unknown_variable (pos,namevar))
 
@@ -146,7 +143,7 @@ Return: typeType corresponding to the function
 
 let type_of_func namef envVar envType pos =
   try 
-    let _,tnode,_,pnode = List.find (fun (_,_,name,p) -> (String.equal name namef) && (p != None)) envVar in
+    let _,tnode,_,pnode,_ = List.find (fun (_,_,name,p,_) -> (String.equal name namef) && (p != None)) envVar in
     (type_of_tree tnode envType,pnode)
   with
     | Not_found -> raise (Unknown_variable (pos,namef))
@@ -219,12 +216,21 @@ let rec type_of_expr expr envVar envType =
     | ExprNode (_,e) -> type_of_expr e envVar envType
     | ExprsNode (e,None) -> type_of_expr e envVar envType
     | ExprsNode (e1,Some(e2)) -> ruleTupleExpr (ExprsNode (e1,Some(e2))) envVar envType
-    | ValueNode(ValueNode (v)) -> ruleValue v envType
-    | AssignNode (pos,a) -> ruleIdentifier a envVar envType pos
+    | ValueNode (v) -> ruleValue v envType
+    | AssignNode (pos,a) -> ruleIdentifier a envVar envType false pos
     | _ -> raise (Unknown_error_type_checking "type_of_expr")
 
-and
+and 
 
+type_of_assignable assign envVar envType =
+  match assign with
+    | ExprNode (_,a) -> type_of_assignable a envVar envType
+    | ExprsNode (a,None) -> type_of_assignable a envVar envType
+    | ExprsNode (a1,Some(a2)) -> ruleAssignable (ExprsNode (a1,Some(a2))) envVar envType
+    | AssignNode (pos,a) -> ruleIdentifier a envVar envType true pos
+    | _ -> raise (Unknown_error_type_checking "type_of_assignable")
+
+and
 
 (* Rule for unary operators *)
 
@@ -345,32 +351,55 @@ and
 
 ruleValue v envType =
   match v with
-    | IntegerNode (_,_) -> IntegerType
-    | CharNode (_,_) -> CharType
-    | StringNode (_,_) -> StringType
-    | TrueNode(_) -> BooleanType
-    | FalseNode(_) -> BooleanType
-    | EmptyList -> ListGenType
-    | ValueSeqNode (ValueNode(v),None) -> ListType (ruleValue v envType)
-    | ValueSeqNode (ValueNode(v),Some(vs)) -> ListType (
+    | ValueNode (IntegerNode (_,_)) -> IntegerType
+    | ValueNode (CharNode (_,_)) -> CharType
+    | ValueNode (StringNode (_,_)) -> StringType
+    | ValueNode (TrueNode(_)) -> BooleanType
+    | ValueNode (FalseNode(_)) -> BooleanType
+    | ValueNode (EmptyList) -> ListGenType
+    | ValueNode (ValueSeqNode (v,None)) -> ListType (ruleValue v envType)
+    | ValueNode (ValueSeqNode (v,Some(vs))) -> ListType (
         let rec aux v1 vs1 =
           (match vs1 with
-            | ValueSeqNode (ValueNode(v2),None) -> 
+            | ValueSeqNode (v2,None) -> 
               let bv, tv = compare envType (ruleValue v1 envType) (ruleValue v2 envType) in
                 if (bv) then tv else raise (Different_types_in_list)
-            | ValueSeqNode (ValueNode(v2),Some(vs2)) ->
+            | ValueSeqNode (v2,Some(vs2)) ->
               let bv,_ = compare envType (ruleValue v1 envType) (ruleValue v2 envType) in
               if (bv) then (aux v2 vs2) else raise (Different_types_in_list)
-            | _ -> raise (Unknown_error_type_checking ("ruleValue")))
-        in aux v vs) 
-    | _ -> raise (Unknown_error_type_checking_ v)
+            | _ -> raise (Unknown_error_type_checking ("ruleValue1")))
+        in aux v vs)
+    | ValueSeqNode (v,None) -> ruleValue v envType
+    | ValueSeqNode (_,Some(_)) -> TupleType (
+        let rec aux vals l =
+          (match vals with
+            | ValueSeqNode (v1,None) -> List.rev ((ruleValue v1 envType)::l)
+            | ValueSeqNode (v1,Some(v2)) -> aux v2 ((ruleValue v1 envType)::l)
+            | _ -> raise (Unknown_error_type_checking ("ruleValue2")))
+        in aux v [])  
+    | _ -> raise (Unknown_error_type_checking "ruleValue")
 
 and
 
-
 (* Rule for assignable *)
 
-ruleIdentifier a envVar envType pos = type_of_var a envVar envType pos
+ruleAssignable assigns envVar envType = 
+TupleType (
+  let rec aux exs l =
+    (match exs with
+      | ExprsNode (a,None) -> List.rev ((type_of_assignable a envVar envType)::l)
+      | ExprsNode (a1,Some(a2)) -> aux a2 ((type_of_assignable a1 envVar envType)::l)
+      | _ -> raise (Unknown_error_type_checking ("ruleAssignable")))
+  in aux assigns [])
+
+and
+
+(* Rule for Identifier *)
+
+ruleIdentifier a envVar envType checkStatus pos = 
+  let t,b = type_of_var a envVar envType pos in
+  if (checkStatus) then (if b then raise (Assignment_to_global_var (pos,a)) else t)
+  else t
 
 (* Rule for instructions *)
 
@@ -442,7 +471,7 @@ and
 (* Rule for assignement instructions *)
 
 ruleAssignInstr assign expr envVar envType pos =
-  let tassign = (type_of_expr assign envVar envType) in
+  let tassign = (type_of_assignable assign envVar envType) in
   let texpr = (type_of_expr expr envVar envType) in
   try
     let be,_ = compare envType tassign texpr in
@@ -458,7 +487,7 @@ and
 ruleCallFuncWithReturn a namef e envVar envType pos posf =
   let tf,pnode = type_of_func namef envVar envType posf in
   if (tf != VoidType) then
-    let ta = type_of_expr a envVar envType in
+    let ta = type_of_assignable a envVar envType in
     try
       let br,_ = compare envType ta tf in
       if (br) then
@@ -498,8 +527,8 @@ and
 (* Rule for a receive instruction *)
 
 ruleReceive a namechan envVar envType pos = 
-  let ta = type_of_expr a envVar envType in
-  let tchan = type_of_var namechan envVar envType pos in
+  let ta = type_of_assignable a envVar envType in
+  let tchan,_ = type_of_var namechan envVar envType pos in
   (match tchan with
     | ChannelType(st) -> (try 
                           let b,_ = compare envType (ChannelType(ta)) tchan in 
@@ -515,7 +544,7 @@ and
 
 ruleSend namechan e envVar envType pos = 
   let te = type_of_expr e envVar envType in
-  let tchan = type_of_var namechan envVar envType pos in
+  let tchan,_ = type_of_var namechan envVar envType pos in
   (match tchan with
     | ChannelType(st) -> (try 
                           let b,_ = compare envType (ChannelType(te)) tchan in 
@@ -596,7 +625,7 @@ and
 (* Rule for a newChan instruction *)
 
 ruleNew a envVar envType pos = 
-  let ta = type_of_expr a envVar envType in
+  let ta = type_of_assignable a envVar envType in
   try
     let bc,_ = compare envType ta ChannelGenType in
     if (bc) then OK else raise (Wrong_type (pos,ta,ChannelGenType))
@@ -643,8 +672,8 @@ Return: the envVar passed in argument extended with the parameters
 
 let rec extend_envVar_with_params params envVar =
     match params with
-      | ParamsNode (pos,t,name,None) -> (pos,t,name,None)::(List.filter (fun (_,_,namevar,_) -> not (String.equal name namevar)) envVar)
-      | ParamsNode (pos,t,name,Some(p)) -> extend_envVar_with_params p ((pos,t,name,None)::(List.filter (fun (_,_,namevar,_) -> not (String.equal name namevar)) envVar))
+      | ParamsNode (pos,t,name,None) -> (pos,t,name,None,false)::(List.filter (fun (_,_,namevar,_,_) -> not (String.equal name namevar)) envVar)
+      | ParamsNode (pos,t,name,Some(p)) -> extend_envVar_with_params p ((pos,t,name,None,false)::(List.filter (fun (_,_,namevar,_,_) -> not (String.equal name namevar)) envVar))
       | _ -> raise (Unknown_error_type_checking ("extend_params"))
 
 
@@ -661,12 +690,12 @@ Return: the envVar passed in argument extended with the local declarations
 let extend_envVar_with_local_declas declas envVar nameListType =
   let addedDecla = (let rec aux d l = 
     match d with
-      | VariableDeclasNode (VariableDeclaNode (pos,t,name),None) -> ((pos,t,name,None)::l)
-      | VariableDeclasNode (VariableDeclaNode (pos,t,name),Some(vs)) -> aux vs ((pos,t,name,None)::l)
+      | VariableDeclasNode (VariableDeclaNode (pos,t,name),None) -> ((pos,t,name,None,false)::l)
+      | VariableDeclasNode (VariableDeclaNode (pos,t,name),Some(vs)) -> aux vs ((pos,t,name,None,false)::l)
       | _ -> raise (Unknown_error_type_checking ("extend_ldecla"))
     in aux declas []) in
   let _ = well_formed_envVar addedDecla nameListType in
-  let restricted_envVar = List.filter (fun (_,_,name,_) -> not (List.exists (fun (_,_,lname,_) -> String.equal name lname) addedDecla)) envVar in
+  let restricted_envVar = List.filter (fun (_,_,name,_,_) -> not (List.exists (fun (_,_,lname,_,_) -> String.equal name lname) addedDecla)) envVar in
   restricted_envVar @ addedDecla
 
 
@@ -741,8 +770,13 @@ let type_check_prg envVar envType nameListType prg =
     match tree with
         | ProgramNode (p1,p2) -> aux (aux l p1) p2
         | FunctionNode (_,_,_,_,_) -> (tree::l)
+        | GlobalVarDeclaNode(pos,t,_,vnode) -> 
+          let tdecla = type_of_tree t envType in
+          let tval = ruleValue vnode envType in
+          let b,_ = compare envType tdecla tval in
+          if (b) then l else raise (Wrong_type (pos,tval,tdecla))    
         | CallNode(pos,namef,expr) ->   
-          (let tf,pnode = type_of_func namef envVar envType pos in
+          (let _,pnode = type_of_func namef envVar envType pos in
           let tp = type_of_params pnode envType in
           let te = type_of_expr expr envVar envType in
           try
