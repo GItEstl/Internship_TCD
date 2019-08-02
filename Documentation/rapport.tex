@@ -112,9 +112,9 @@ tuples, local and global variables, functions declaration and call, different bi
 \begin{Verbatim}[fontfamily=textsf]
 Program ::= TypeDecla Program
             | FuncDecla Program
-            | VariableDecla Program
+            | VariableDeclaGlobal Program
             | FuncDecla CallMain
-            | VariableDecla CallMain
+            | VariableDeclaGlobal CallMain
 \end{Verbatim}
 \vspace*{3pt}
 
@@ -135,6 +135,11 @@ Parameters ::= Typ identifier | Typ identifier , Parameters
 
 \begin{verbnobox}[\normalfont]
 Body ::= { Instruction } | { def VariableDeclas in Instruction }
+\end{verbnobox}
+\vspace*{3pt}
+
+\begin{verbnobox}[\normalfont]
+VariableDeclaGlobal ::= Typ identifier = Value | Typ identifier = (ValueSeq)
 \end{verbnobox}
 \vspace*{3pt}
 
@@ -556,123 +561,123 @@ Finally, we have to check that the function used in the start function is declar
 
 \tabto{0cm} {\large \textbf{Binary Operator}}
 \begin{prooftree}
-\AxiomC{$s_1 \vdash e_1 \Downarrow  v_1,s_2 $}
-\AxiomC{$s_2 \vdash e_2 \Downarrow  v_2,s_3$}
-\BinaryInfC{$s_1 \vdash e_1 \ op \ e_2 \Downarrow v_1 \ op \ v_2, s_3 $}
+\AxiomC{$s \vdash e_1 \Downarrow  v_1 $}
+\AxiomC{$s \vdash e_2 \Downarrow  v_2$}
+\BinaryInfC{$s \vdash e_1 \ op \ e_2 \Downarrow v_1 \ op \ v_2 $}
 \end{prooftree}
 
 \tabto{0cm} {\large \textbf{Unary Operator}}
 \begin{prooftree}
-\AxiomC{$s_1 \vdash e \Downarrow  v,s_2 $}
-\UnaryInfC{$s_1 \vdash op \ e \Downarrow v, s_2 $}
+\AxiomC{$s \vdash e \Downarrow  v $}
+\UnaryInfC{$s \vdash op \ e \Downarrow v $}
 \end{prooftree}
 
 \tabto{0cm} {\large \textbf{Condition Expression}}
 \begin{prooftree}
-\AxiomC{$s_1 \vdash e_1 \Downarrow true, s_2$}
-\AxiomC{$s_2 \vdash e_2 \Downarrow v, s_3$}
-\BinaryInfC{$s_1 \vdash if \ e_1 \ then \ e_2 \ else \ e_3  \Downarrow v, s_3 $}
+\AxiomC{$s \vdash e_1 \Downarrow true $}
+\AxiomC{$s \vdash e_2 \Downarrow v $}
+\BinaryInfC{$s \vdash if \ e_1 \ then \ e_2 \ else \ e_3  \Downarrow v $}
 \end{prooftree}
 \vspace*{1pt}
 \begin{prooftree}
-\AxiomC{$s_1 \vdash e_1 \Downarrow false, s_2$}
-\AxiomC{$s_2 \vdash e_3 \Downarrow v, s_3$}
-\BinaryInfC{$s_1 \vdash if \ e_1 \ then \ e_2 \ else \ e_3  \Downarrow v, s_3 $}
+\AxiomC{$s \vdash e_1 \Downarrow false $}
+\AxiomC{$s \vdash e_3 \Downarrow v $}
+\BinaryInfC{$s \vdash if \ e_1 \ then \ e_2 \ else \ e_3  \Downarrow v $}
 \end{prooftree}
 
 
 \tabto{0cm} {\large \textbf{Tuple}}
 \begin{prooftree}
-\AxiomC{$s_1 \vdash e_1 \Downarrow v_1,s_2$}
-\AxiomC{$s_2 \vdash e_2 \Downarrow v_2,s_3$}
+\AxiomC{$s \vdash e_1 \Downarrow v_1 $}
+\AxiomC{$s \vdash e_2 \Downarrow v_2 $}
 \AxiomC{$\ldots$}
-\AxiomC{$s_n \vdash E_n \Downarrow v_n,s_{n+1}$}
-\QuaternaryInfC{$s_1 \vdash (e_1,e_2,\ldots,e_n) \Downarrow (v_1, v_2, \ldots, v_n),s_{n+1}$}
+\AxiomC{$s \vdash e_n \Downarrow v_n $}
+\QuaternaryInfC{$s \vdash (e_1,e_2,\ldots,e_n) \Downarrow (v_1, v_2, \ldots, v_n)$}
 \end{prooftree}
 
 \tabto{0cm} {\large \textbf{Value}}
 \begin{prooftree}
 \AxiomC{ }
-\UnaryInfC{$s \vdash v \Downarrow v,s$}
+\UnaryInfC{$s \vdash v \Downarrow v $}
 \end{prooftree}
 
 \tabto{0cm} {\large \textbf{Identifier}}
 \begin{prooftree}
 \AxiomC{ }
-\UnaryInfC{$s \vdash n \Downarrow lookup \ n \ in \ s,s$}
+\UnaryInfC{$s \vdash n \Downarrow lookup \ n \ in \ s $}
 \end{prooftree}
 
 \tabto{0cm} {\large \textbf{Assignment}}
 \begin{prooftree}
-\AxiomC{$s_1 \vdash e \Downarrow v,s_2$}
-\UnaryInfC{$s_1 \vdash a = e \Downarrow s_2[a \mapsto v] $}
+\AxiomC{$s \vdash e \Downarrow v $}
+\UnaryInfC{$s \vdash a = e \Downarrow \emptyset, s[a \mapsto v] $}
 \end{prooftree}
 
 \tabto{0cm} {\large \textbf{Condition Instruction}}
 \begin{prooftree}
-\AxiomC{$s_1 \vdash e_1 \Downarrow true, s_2$}
-\AxiomC{$s_2 \vdash i_1 \Downarrow s_3$}
-\BinaryInfC{$s_1 \vdash if \ e_1 \ then \ i_1 \ else \ i_2  \Downarrow s_3 $}
+\AxiomC{$s_1 \vdash e_1 \Downarrow true $}
+\AxiomC{$s_1 \vdash i_1 \Downarrow \emptyset, s_2$}
+\BinaryInfC{$s_1 \vdash if \ e_1 \ then \ i_1 \ else \ i_2  \Downarrow \emptyset, s_2 $}
 \end{prooftree}
 \vspace*{1pt}
 \begin{prooftree}
-\AxiomC{$s_1 \vdash e_1 \Downarrow true, s_2$}
-\AxiomC{$s_2 \vdash i_1 \Downarrow v, s_3$}
-\BinaryInfC{$s_1 \vdash if \ e_1 \ then \ i_1 \ else \ i_2  \Downarrow v, s_3 $}
+\AxiomC{$s_1 \vdash e_1 \Downarrow true $}
+\AxiomC{$s_1 \vdash i_1 \Downarrow v, s_2$}
+\BinaryInfC{$s_1 \vdash if \ e_1 \ then \ i_1 \ else \ i_2  \Downarrow v, s_2 $}
 \end{prooftree}
 \vspace*{1pt}
 \begin{prooftree}
-\AxiomC{$s_1 \vdash e_1 \Downarrow false, s_2$}
-\AxiomC{$s_2 \vdash i_2 \Downarrow s_3$}
-\BinaryInfC{$s_1 \vdash if \ e_1 \ then \ i_1 \ else \ i_2  \Downarrow s_3 $}
+\AxiomC{$s_1 \vdash e_1 \Downarrow false $}
+\AxiomC{$s_1 \vdash i_2 \Downarrow \emptyset, s_2$}
+\BinaryInfC{$s_1 \vdash if \ e_1 \ then \ i_1 \ else \ i_2  \Downarrow \emptyset, s_2 $}
 \end{prooftree}
 \vspace*{1pt}
 \begin{prooftree}
-\AxiomC{$s_1 \vdash e_1 \Downarrow false, s_2$}
-\AxiomC{$s_2 \vdash i_2 \Downarrow v, s_3$}
-\BinaryInfC{$s_1 \vdash if \ e_1 \ then \ i_1 \ else \ i_2  \Downarrow v, s_3 $}
+\AxiomC{$s_1 \vdash e_1 \Downarrow false $}
+\AxiomC{$s_1 \vdash i_2 \Downarrow v, s_2$}
+\BinaryInfC{$s_1 \vdash if \ e_1 \ then \ i_1 \ else \ i_2  \Downarrow v, s_2 $}
 \end{prooftree}
 
 
 \tabto{0cm} {\large \textbf{Function Call with return}}
 \begin{prooftree}
-\AxiomC{$s_1 \vdash f \Downarrow (\lambda x.i),s_2 $}
-\AxiomC{$s_2 \vdash e \Downarrow v_1,s_3 $}
-\AxiomC{$s_3 \vdash i[x \mapsto v_1] \Downarrow v_2,s_4$}
-\TrinaryInfC{$s_1 \vdash a = f (e) \Downarrow s_4[a \mapsto v_2]$}
+\AxiomC{$s \vdash f \Downarrow (\lambda x.i),(s::s_l) $}
+\AxiomC{$s \vdash e \Downarrow v_1 $}
+\AxiomC{$(s::s_l)::[x \mapsto v_1] \vdash i \Downarrow v_2, s$}
+\TrinaryInfC{$s \vdash a = f (e) \Downarrow s[a \mapsto v_2]$}
 \end{prooftree}
 
 \tabto{0cm} {\large \textbf{Function Call without return}}
 \begin{prooftree}
-\AxiomC{$s_1 \vdash f \Downarrow (\lambda x.i),s_2 $}
-\AxiomC{$s_2 \vdash e \Downarrow v_1,s_3 $}
-\AxiomC{$s_3 \vdash i[x \mapsto v_1] \Downarrow s_4$}
-\TrinaryInfC{$s_1 \vdash f (e) \Downarrow s_4$}
+\AxiomC{$s \vdash f \Downarrow (\lambda x.i),(s::s_l) $}
+\AxiomC{$s \vdash e \Downarrow v $}
+\AxiomC{$(s::s_l)::[x \mapsto v] \vdash i \Downarrow \emptyset, s$}
+\TrinaryInfC{$s_1 \vdash f (e) \Downarrow \emptyset, s$}
 \end{prooftree}
 
 \tabto{0cm} {\large \textbf{While Instruction}}
 \begin{prooftree}
-\AxiomC{$s_1 \vdash e \Downarrow true, s_2$}
-\AxiomC{$s_2 \vdash i \Downarrow s_3$}
-\BinaryInfC{$s_1 \vdash while(e) \ \{i\} \Downarrow  while(e) \ \{i\},s_3 $}
+\AxiomC{$s_1 \vdash e \Downarrow true $}
+\AxiomC{$s_1 \vdash i \Downarrow \emptyset, s_2$}
+\BinaryInfC{$s_1 \vdash while(e) \ \{i\} \Downarrow  while(e) \ \{i\},s_2 $}
 \end{prooftree}
 \vspace*{1pt}
 \begin{prooftree}
-\AxiomC{$s_1 \vdash e \Downarrow false, s_2$}
-\UnaryInfC{$s_1 \vdash while(e) \ \{i\} \Downarrow s_2 $}
+\AxiomC{$s \vdash e \Downarrow false $}
+\UnaryInfC{$s \vdash while(e) \ \{i\} \Downarrow \emptyset, s $}
 \end{prooftree}
 \vspace*{1pt}
 \begin{prooftree}
-\AxiomC{$s_1 \vdash e \Downarrow true, s_2$}
-\AxiomC{$s_2 \vdash i \Downarrow v,s_3$}
-\BinaryInfC{$s_1 \vdash while(e) \ \{i\} \Downarrow  v,s_3 $}
+\AxiomC{$s_1 \vdash e \Downarrow true $}
+\AxiomC{$s_1 \vdash i \Downarrow v,s_2 $}
+\BinaryInfC{$s_1 \vdash while(e) \ \{i\} \Downarrow  v,s_2 $}
 \end{prooftree}
 
 
 \tabto{0cm} {\large \textbf{Return void}}
 \begin{prooftree}
 \AxiomC{$ $}
-\UnaryInfC{$s \vdash return \Downarrow s $}
+\UnaryInfC{$s \vdash return \Downarrow \emptyset $}
 \end{prooftree}
 
 \tabto{0cm} {\large \textbf{Return Function }}
@@ -689,14 +694,14 @@ Finally, we have to check that the function used in the start function is declar
 
 \tabto{0cm} {\large \textbf{Sequence of Instructions}}
 \begin{prooftree}
-\AxiomC{$s_1 \vdash i_1 \Downarrow s_2$}
-\AxiomC{$s_2 \vdash i_2 \Downarrow s_3 $}
-\BinaryInfC{$s_1 \vdash i_1 \ ; \ i_2 \Downarrow s_3 $}
+\AxiomC{$s_1 \vdash i_1 \Downarrow \emptyset, s_2$}
+\AxiomC{$s_2 \vdash i_2 \Downarrow \emptyset, s_3 $}
+\BinaryInfC{$s_1 \vdash i_1 \ ; \ i_2 \Downarrow \emptyset, s_3 $}
 \end{prooftree}
 \vspace*{1pt}
 \begin{prooftree}
-\AxiomC{$s_1 \vdash i_1 \Downarrow s_2$}
-\AxiomC{$s_2 \vdash i_2 \Downarrow v,s_3 $}
+\AxiomC{$s_1 \vdash i_1 \Downarrow \emptyset, s_2$}
+\AxiomC{$s_2 \vdash i_2 \Downarrow v, s_3 $}
 \BinaryInfC{$s_1 \vdash i_1 \ ; \ i_2 \Downarrow v,s_3 $}
 \end{prooftree}
 \vspace*{1pt}
@@ -705,10 +710,16 @@ Finally, we have to check that the function used in the start function is declar
 \UnaryInfC{$s_1 \vdash i_1 \ ; \ i_2 \Downarrow v,s_2 $}
 \end{prooftree}
 
-\tabto{0cm} {\large \textbf{Variable Declaration}}
+\tabto{0cm} {\large \textbf{Local Variable Declaration}}
 \begin{prooftree}
-\AxiomC{$x \in dom(s)$}
+\AxiomC{$x \notin dom(s)$}
 \UnaryInfC{$s \vdash type \ x \Downarrow s::[x \mapsto v_{type}]$}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Global Variable Declaration}}
+\begin{prooftree}
+\AxiomC{$x \notin dom(s)$}
+\UnaryInfC{$s \vdash type \ x = v \Downarrow s::[x \mapsto v]$}
 \end{prooftree}
 
 \newpage
