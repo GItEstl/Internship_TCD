@@ -39,8 +39,6 @@ type prefixAction =
   | Tau
   | Send
   | Receive
-  | New
-  | Spawn
 ;;
 
 (* Type for the Construction of the Abstract Syntaxic Tree  *)
@@ -154,10 +152,6 @@ match tree with
   " |send(" ^ n ^ ", " ^ (string_of_ast e) ^ ")"
     | PrefixNode(_,Some(a),Receive,Some(n),None) ->
   " |" ^ (string_of_ast a) ^ " = receive(" ^ n ^ ")"
-    | PrefixNode(_,Some(a),New,None,None) ->
-  (string_of_ast a) ^ " = newChan()"  
-    | PrefixNode(_,None,Spawn,Some(f),Some(e)) ->
-  " | spawn " ^ f ^ "(" ^ (string_of_ast e) ^ ")"
     | UnaryNode (_,NegateInt,e) ->
   "(-" ^ (string_of_ast e) ^ ")"
     | UnaryNode (_,NegateBool,e) ->

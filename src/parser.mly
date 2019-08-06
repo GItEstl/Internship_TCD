@@ -116,8 +116,6 @@ prefix :
  | pos = ChoiceToken TauToken                                                                                                                {PrefixNode(pos,None,Tau,None,None)}
  | pos = ChoiceToken SendToken LeftParenthesisToken n = IdentToken ComaToken e = expr RightParenthesisToken                                {PrefixNode(pos,None,Send,Some(snd(n)),Some(e))}
  | pos = ChoiceToken a = expr AssignToken ReceiveToken LeftParenthesisToken n = IdentToken RightParenthesisToken                         {PrefixNode(pos,Some(a),Receive,Some(snd(n)),None)}
- | pos = ChoiceToken a = expr AssignToken NewToken LeftParenthesisToken RightParenthesisToken                                             {PrefixNode(pos,Some(a),New,None,None)}
- | pos = ChoiceToken SpawnToken f = IdentToken LeftParenthesisToken e = exprs RightParenthesisToken                                  {PrefixNode(pos,None,Spawn,Some(snd(f)),Some(e))}
  
 expr :
  | pos = SubToken e = expr                                                                                   {UnaryNode (pos,NegateInt,e)}

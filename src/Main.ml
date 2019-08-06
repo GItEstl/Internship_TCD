@@ -2,7 +2,8 @@ open Ast
 open Lexing
 open Resolve
 open TypeChecking
-open ReferenceInterpretor
+open BetaRedInterpretor
+open ExpressionInterpretor
 
 let report_error filename lexbuf msg =
  let (b,e) = (lexeme_start_p lexbuf, lexeme_end_p lexbuf) in
@@ -26,7 +27,7 @@ let report_error filename lexbuf msg =
   print_string ("Environment well-formed \n");
   let _ = type_check_prg envVar envType nameListType ast in
   print_string ("Program type-checked \n");
-  let result = string_of_val (execution_prg ast start envType) in
+  let result = string_of_val (run_prg ast envType start) in
   print_string ("Program executed \n");
   print_string("Result: " ^ result ^ "\n")
   with
