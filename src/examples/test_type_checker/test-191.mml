@@ -1,0 +1,10 @@
+// Without error: declaration of local variable of type channel
+
+func void test191 (string s) {
+def
+    channel int chan
+in
+    chan = newChan()
+}
+
+start test191("")

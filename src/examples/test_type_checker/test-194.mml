@@ -1,0 +1,12 @@
+// Wthout error: use of NewChan inside a branch of conditional instruction
+
+func channel int test194 (string s) {
+def
+    channel int chan
+in
+    chan = newChan();
+    if (true) {chan = newChan()} else {};
+    return (chan)
+}
+
+start test194("")

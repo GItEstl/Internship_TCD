@@ -76,6 +76,7 @@ body :
 variableDeclaGlobal :
  | t = typ n = IdentToken pos = AssignToken v = value                                                                 {GlobalVarDeclaNode (pos,t,snd(n),v)}
  | t = typ n = IdentToken pos = AssignToken LeftParenthesisToken vs = valueSeq RightParenthesisToken                  {GlobalVarDeclaNode (pos,t,snd(n),vs)}
+ | t = typ n = IdentToken pos = AssignToken NewToken LeftParenthesisToken RightParenthesisToken                       {GlobalChanDeclaNode (pos,t,snd(n))}
 
 variableDecla :
  | t = typ n = IdentToken                                                                                   {VariableDeclaNode (fst(n),t,snd(n))}

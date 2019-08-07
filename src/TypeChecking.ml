@@ -283,7 +283,7 @@ ruleBinary op left right envVar envType pos =
       | (Equal | Different) -> 
         let (_,t) = compare envType tleft tright in
           (match t with 
-            | IntegerType | BooleanType | CharType | StringType -> BooleanType
+            | IntegerType | BooleanType | CharType | StringType | ChannelType(_) -> BooleanType
             | ErrorType -> raise (Wrong_type (pos,tright,tleft))
             | _ -> raise (Illegal_type_argument pos))
       | (Lesser | Greater) ->
@@ -772,7 +772,11 @@ let type_check_prg envVar envType nameListType prg =
           let tdecla = type_of_tree t envType in
           let tval = ruleValue vnode envType in
           let b,_ = compare envType tdecla tval in
-          if (b) then l else raise (Wrong_type (pos,tval,tdecla))    
+          if (b) then l else raise (Wrong_type (pos,tval,tdecla))
+        | GlobalChanDeclaNode(pos,t,_) ->
+          let tdecla = type_of_tree t envType in
+          let b,_ = compare envType tdecla ChannelGenType in
+          if (b) then l else raise (Wrong_type (pos,tdecla,ChannelGenType))   
         | CallNode(pos,namef,expr) ->   
           (let _,pnode = type_of_func namef envVar envType pos in
           let tp = type_of_params pnode envType in

@@ -1,0 +1,7 @@
+// Type error: initialisation of a global channel with a value
+
+channel boolean globalchan = true
+
+func void test189 (string s) {}
+
+start test189("")

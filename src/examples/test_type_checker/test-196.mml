@@ -1,0 +1,7 @@
+// Well-formedmess error: use of the same name for a function and global channel
+
+channel boolean test196 = newChan()
+
+func channel int test196 (string s) {}
+
+start test196("")

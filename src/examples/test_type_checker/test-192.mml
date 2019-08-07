@@ -1,0 +1,10 @@
+// Type error: use of NewChan on a value with a non-channel type
+
+func void test192 (string s) {
+def
+    channel int chan
+in
+    chan = 5
+}
+
+start test192("")

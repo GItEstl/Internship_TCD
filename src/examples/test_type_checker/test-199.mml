@@ -1,0 +1,12 @@
+// Type error: use of the operator with a variable which is not a channel
+
+func boolean test199 (string s) {
+def
+    channel string ch1;
+    string s
+in
+    ch1 = newChan();
+    return (ch1 == s)
+}
+
+start test199("")

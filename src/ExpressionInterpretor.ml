@@ -1,4 +1,5 @@
 open Ast
+open Channel
 
 type valueType =
   | IntegerVal of int
@@ -8,6 +9,7 @@ type valueType =
   | ListVal of valueType list
   | TupleVal of valueType list
   | FuncVal of ast * ast
+  | ChannelVal of channel
   | ErrorVal
 
 exception Unknown_error_reference_interpretor of string
@@ -32,6 +34,7 @@ let string_of_val v =
         | ListVal([]) -> "[]"
         | ListVal(l) -> "[" ^ (List.fold_left (fun s e ->  s ^ ", " ^ (aux e)) (aux (List.nth l 0)) (List.tl l)) ^ "]"
         | TupleVal(t) -> "(" ^ (List.fold_left (fun s e ->  s ^ ", " ^ (aux e)) (aux (List.nth t 0)) (List.tl t)) ^ ")"
+        | ChannelVal(id) -> "Chan@" ^ (string_of_int id)
         | _ -> "ERROR"
       in aux vs 
 
@@ -139,7 +142,8 @@ ruleBinary op lexpr rexpr state =
         | Different -> BooleanVal(not (String.equal sl sr))
         | _ -> raise (Unknown_error_reference_interpretor "ruleBinary3")
       )
-    | (IntegerVal(i),TupleVal(t)) -> List.nth t i 
+    | (IntegerVal(i),TupleVal(t)) -> List.nth t i
+    | (ChannelVal(ch1),ChannelVal(ch2)) -> BooleanVal(Channel.equal ch1 ch2) 
     | _ -> raise (Unknown_error_reference_interpretor "ruleBinary")
   )
 

@@ -1,0 +1,7 @@
+// Without error: declaration of a global channel
+
+channel boolean globalchan = newChan()
+
+func void test187 (string s) {}
+
+start test187("")

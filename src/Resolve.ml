@@ -56,7 +56,9 @@ let rec create_env (envType,envVar,start) tree =
         | FunctionNode (pos,ft,name,params,_) ->
       (envType,(pos,ft,name,Some(params),true)::envVar,start)
         | GlobalVarDeclaNode (pos,t,name,_) -> 
-      (envType,(pos,t,name,None,true)::envVar,start)      
+      (envType,(pos,t,name,None,true)::envVar,start)
+        | GlobalChanDeclaNode (pos,t,name) -> 
+      (envType,(pos,t,name,None,true)::envVar,start)       
         | TypeDeclaNode (pos,name,t) ->
       ((pos,name,t,find_rec t name)::envType,envVar,start)
         | CallNode (pos,name,expr) ->

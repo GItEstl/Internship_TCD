@@ -231,5 +231,21 @@ Named Type:
    test-185: Well-formedness error: croseed recursivity in type declarations
    test-186: Without error: Type declaration using a named type
 
+Channel declaration and NewChan()
+   test-187: Without error: declaration of a global channel
+   test-188: Syntax error: non initialisation of a global channel
+   test-189: Type error: initialisation of a global channel with a value
+   test-190: Type error: assignment of a new channel to a global variable of type channel
+   test-191: Without error: declaration of local variable of type channel
+   test-192: Type error: use of NewChan on a value with a non-channel type
+   test-193: Without error: return of a channel 
+   test-194: Wthout error: use of NewChan inside a branch of conditional instruction
+   test-195: Without error: use of NewChan inside a while instruction
+   test-196: Well-formedmess error: use of the same name for a function and global channel
 
+Binary operator equal for channels
+   test-197: Without error: use of the operator with two equals channels
+   test-198: Without error: use of the operator with two different channels
+   test-199: Type error: use of the operator with a variable which is not a channel
+   test-200: Without error: use of the operator inside a condition
 

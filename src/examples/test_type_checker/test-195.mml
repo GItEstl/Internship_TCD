@@ -1,0 +1,16 @@
+// Without error: use of NewChan inside a while instruction
+
+func channel int test195 (string s) {
+def
+    channel int chan;
+    int i
+in
+    i = 0;
+    while(i < 10) {
+        chan = newChan();
+        i = i + 1
+    };
+    return (chan)
+}
+
+start test195("")

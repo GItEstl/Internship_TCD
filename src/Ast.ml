@@ -53,6 +53,7 @@ type ast =
   | FunctionNode of Lexing.position * ast * string * ast * ast
   | ParamsNode of Lexing.position * ast * string * ast option
   | GlobalVarDeclaNode of Lexing.position * ast * string * ast
+  | GlobalChanDeclaNode of Lexing.position * ast * string
   | VariableDeclasNode of ast * ast option
   | VariableDeclaNode of Lexing.position *  ast * string
   | BodyNode of Lexing.position * ast option * ast

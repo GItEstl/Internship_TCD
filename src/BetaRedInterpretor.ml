@@ -38,6 +38,7 @@ let rec def_value t =
         | _ -> raise (Unknown_error_reference_interpretor "def_value2")
       in aux tSeq [])
     | NamedTypeNode (_,st) -> let _,_,t,_ = (List.find (fun (_,name,_,_) -> String.equal name st) !envType) in (def_value t)
+    | ChanTNode(_,_) -> ChannelVal(Channel.create_chan_id ())
     | _ -> raise (Unknown_error_reference_interpretor "def_value")
 
 
@@ -155,7 +156,7 @@ let ruleReturnBreak ast =
   let _ = pop (!e) in ast
 
 (* Numero 9 *)
-let ruleNoop ast =
+let ruleNoop () =
   let frame = pop (!e) in
   match frame with
     | InstrSeqFrame(i) -> i
@@ -177,7 +178,7 @@ let ruleAssignReturn ast =
   | _ -> raise (Unknown_error_reference_interpretor "ruleAssignReturn1")
 
 (* Numero 4 *)
-let ruleVoid ast =
+let ruleVoid () =
   let frame = pop (!e) in
   match frame with 
     | FuncCallVoidFrame(old_s) -> 
@@ -191,6 +192,15 @@ let ruleFinalValue ast =
     | ReturnNode (_,Some(expr)) -> Some(value_of_expr expr (!g,!s))
     | _ -> raise (Unknown_error_reference_interpretor "ruleFinalValue")
 
+let ruleNewChan ast = 
+  match ast with 
+  | AssignNode (_,name) ->
+    let ch = ChannelVal(Channel.create_chan_id ()) in
+    let pa = find (!s) name in
+    pa := ch;
+    NoopNode
+  | _ -> raise (Unknown_error_reference_interpretor "ruleNewChan")
+
 let exec_step ast frame =
   match (frame,ast) with 
     | (_, InstrSeqNode(_,_)) -> ruleSeqInstr ast
@@ -201,9 +211,10 @@ let exec_step ast frame =
     | (_, WhileNode (pos,expr,i)) -> ruleWhile pos expr i
     | (_, ReturnNode (_,Some (CallNode (_,_,_)))) -> raise (Unknown_error_reference_interpretor "notImplemented")
     | (Some(InstrSeqFrame(_)), ReturnNode (_,_)) -> ruleReturnBreak ast
-    | (Some(InstrSeqFrame(_)), NoopNode) -> ruleNoop ast
+    | (Some(InstrSeqFrame(_)), NoopNode) -> ruleNoop ()
     | (Some(FuncCallReturnFrame(_,_)), ReturnNode (_,_)) -> ruleAssignReturn ast
-    | (Some(FuncCallVoidFrame(_)), ReturnNode (_,_)) -> ruleVoid ast
+    | (Some(FuncCallVoidFrame(_)), ReturnNode (_,_)) -> ruleVoid ()
+    | (_, NewNode(_,ast)) -> ruleNewChan ast
     | (None,NoopNode) -> ReturnNode(Lexing.dummy_pos,None)
     | (Some(FuncCallVoidFrame(_)), NoopNode) -> ReturnNode(Lexing.dummy_pos,None)
     | (_,_) -> raise (Unknown_error_reference_interpretor_ (frame,ast))
@@ -227,6 +238,7 @@ let run_prg ast env_type start =
         | ProgramNode (p1,p2) -> aux p1; aux p2
         | FunctionNode (_,_,n,p,b) -> add (!g) n (ref (FuncVal(p,b)))
         | GlobalVarDeclaNode(_,_,n,vnode) -> add (!g) n (ref (ruleValue vnode))
+        | GlobalChanDeclaNode(_,_,n) -> add (!g) n (ref (ChannelVal(Channel.create_chan_id ())))
         | _ -> ()
     in aux ast;
     (* Launch of the execution with the start function *)

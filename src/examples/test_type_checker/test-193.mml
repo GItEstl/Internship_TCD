@@ -1,0 +1,11 @@
+// Without error: return of a channel 
+
+func channel int test193 (string s) {
+def
+    channel int chan
+in
+    chan = newChan();
+    return chan
+}
+
+start test193("")

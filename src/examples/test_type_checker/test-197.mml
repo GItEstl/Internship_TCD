@@ -1,0 +1,13 @@
+// Without error: use of the operator with two equals channels
+
+func boolean test197 (string s) {
+def
+    channel string ch1;
+    channel string ch2
+in
+    ch1 = newChan();
+    ch2 = ch1;
+    return (ch1 == ch2)
+}
+
+start test197("")

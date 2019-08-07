@@ -1,0 +1,7 @@
+// Syntax error: non initialisation of a global channel
+
+channel boolean globalchan
+
+func void test188 (string s) {}
+
+start test188("")

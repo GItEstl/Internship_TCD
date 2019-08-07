@@ -124,7 +124,10 @@ let report_error filename lexbuf msg =
  | TypeChecking.Get_tuple_too_short(pos) -> 
     let c = pos.pos_cnum - pos.pos_bol + 1 in
     Printf.eprintf "File \"%s\", line %d, character %d: Incorrect use of get: index out of bound \n" file pos.pos_lnum c;
- | ReferenceInterpretor.Run_time_error(m) -> 
+ | TypeChecking.Assignment_to_global_var(pos,n) ->
+   let c = pos.pos_cnum - pos.pos_bol + 1 in
+   Printf.eprintf "File \"%s\", line %d, character %d: You cannot assign a value to the global variable %s \n" file pos.pos_lnum c n;
+ | Run_time_error(m) -> 
     Printf.eprintf "File \"%s\": Runtime error: %s\n" file m;
  | Division_by_zero -> 
     Printf.eprintf "File \"%s\": Runtime error: Division by zero\n" file;

@@ -1,0 +1,9 @@
+// Type error: assignment of a new channel to a global variable of type channel
+
+channel boolean globalchan = newChan()
+
+func void test190 (string s) {
+    globalchan = newChan()
+}
+
+start test190("")
