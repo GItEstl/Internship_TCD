@@ -592,9 +592,9 @@ and
 
 rulePrefix p envVar envType = 
     match p with 
-      | PrefixNode(_,_,Tau,_,_) -> OK
-      | PrefixNode(pos,_,Send,Some(namechan),Some(e)) -> ruleSend namechan e envVar envType pos
-      | PrefixNode(pos,Some(a),Receive,Some(namechan),_) -> ruleReceive a namechan envVar envType pos
+      | PrefixNode(_,_,Tau,_) -> OK
+      | PrefixNode(pos,Some(e),Send,Some(namechan)) -> ruleSend namechan e envVar envType pos
+      | PrefixNode(pos,Some(a),Receive,Some(namechan)) -> ruleReceive a namechan envVar envType pos
       | _ -> raise (Unknown_error_type_checking ("rulePrefix"))
 
 and

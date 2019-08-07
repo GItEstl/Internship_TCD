@@ -114,9 +114,9 @@ choices :
  | p = prefix pos = ArrowToken LeftBracketToken i = instruction RightBracketToken                                            {ChoicesNode(pos,p,i,None)}
 
 prefix :
- | pos = ChoiceToken TauToken                                                                                                                {PrefixNode(pos,None,Tau,None,None)}
- | pos = ChoiceToken SendToken LeftParenthesisToken n = IdentToken ComaToken e = expr RightParenthesisToken                                {PrefixNode(pos,None,Send,Some(snd(n)),Some(e))}
- | pos = ChoiceToken a = expr AssignToken ReceiveToken LeftParenthesisToken n = IdentToken RightParenthesisToken                         {PrefixNode(pos,Some(a),Receive,Some(snd(n)),None)}
+ | pos = ChoiceToken TauToken                                                                                                                {PrefixNode(pos,None,Tau,None)}
+ | pos = ChoiceToken SendToken LeftParenthesisToken n = IdentToken ComaToken e = expr RightParenthesisToken                                {PrefixNode(pos,Some(e),Send,Some(snd(n)))}
+ | pos = ChoiceToken a = expr AssignToken ReceiveToken LeftParenthesisToken n = IdentToken RightParenthesisToken                         {PrefixNode(pos,Some(a),Receive,Some(snd(n)))}
  
 expr :
  | pos = SubToken e = expr                                                                                   {UnaryNode (pos,NegateInt,e)}

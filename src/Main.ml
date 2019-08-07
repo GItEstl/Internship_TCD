@@ -2,7 +2,7 @@ open Ast
 open Lexing
 open Resolve
 open TypeChecking
-open BetaRedInterpretor
+open SingleThreadInterpretor
 open ExpressionInterpretor
 
 let report_error filename lexbuf msg =

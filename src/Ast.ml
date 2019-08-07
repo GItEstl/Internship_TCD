@@ -67,7 +67,7 @@ type ast =
   | IfthenelseInstrNode of Lexing.position * ast * ast * ast
   | ChooseNode of Lexing.position * ast
   | ChoicesNode of Lexing.position * ast * ast * ast option
-  | PrefixNode of Lexing.position * ast option * prefixAction * string option * ast option
+  | PrefixNode of Lexing.position * ast option * prefixAction * string option
   | IntegerNode of Lexing.position * int
   | CharNode of Lexing.position * string
   | StringNode of Lexing.position * string
@@ -147,11 +147,11 @@ match tree with
   (string_of_ast p) ^ " -> {" ^ (string_of_ast i) ^ "} \n" ^ (string_of_ast cs)
     | ChoicesNode(_,p,i,None) -> 
   (string_of_ast p) ^ " -> {" ^ (string_of_ast i) ^ "}"
-    | PrefixNode(_,None,Tau,None,None) ->
+    | PrefixNode(_,None,Tau,None) ->
   " | tau"
-    | PrefixNode(_,None,Send,Some(n),Some(e)) -> 
+    | PrefixNode(_,Some(e),Send,Some(n)) -> 
   " |send(" ^ n ^ ", " ^ (string_of_ast e) ^ ")"
-    | PrefixNode(_,Some(a),Receive,Some(n),None) ->
+    | PrefixNode(_,Some(a),Receive,Some(n)) ->
   " |" ^ (string_of_ast a) ^ " = receive(" ^ n ^ ")"
     | UnaryNode (_,NegateInt,e) ->
   "(-" ^ (string_of_ast e) ^ ")"

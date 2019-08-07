@@ -1,0 +1,14 @@
+func int test1002 (string s) {
+def
+    channel int chan;
+    int i
+in
+    chan = newChan();
+    choose {
+        | tau -> {return 10}
+        | i = receive(chan) -> {return 20}
+        | send(chan,123) -> {return 30}
+    }
+}
+
+start test1002("")

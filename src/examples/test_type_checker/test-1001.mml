@@ -1,0 +1,10 @@
+func void test1001 (string s) {
+def
+    channel int chan;
+    int i
+in
+    chan = newChan();
+    i = receive(chan)
+}
+
+start test1001("")

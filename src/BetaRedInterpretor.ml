@@ -10,12 +10,12 @@ type frame =
   | FuncCallVoidFrame of state
   | InstrSeqFrame of ast
 
+exception Unknown_error_reference_interpretor_ of (frame option * ast)
+
 let envType = ref([(Lexing.dummy_pos,"",NoopNode,false)])
 let g = ref (Hashtbl.create 100)
 let s = ref (Hashtbl.create 100)
 let e = ref (Stack.create ()) 
-
-exception Unknown_error_reference_interpretor_ of (frame option * ast)
 
 (* def_value: ast -> valueType
 Function returning the default value for a type
@@ -186,12 +186,6 @@ let ruleVoid () =
       NoopNode
     | _ -> raise (Unknown_error_reference_interpretor "ruleVoid")
 
-let ruleFinalValue ast =
-  match ast with
-    | ReturnNode (_, None) -> None
-    | ReturnNode (_,Some(expr)) -> Some(value_of_expr expr (!g,!s))
-    | _ -> raise (Unknown_error_reference_interpretor "ruleFinalValue")
-
 let ruleNewChan ast = 
   match ast with 
   | AssignNode (_,name) ->
@@ -201,7 +195,7 @@ let ruleNewChan ast =
     NoopNode
   | _ -> raise (Unknown_error_reference_interpretor "ruleNewChan")
 
-let exec_step ast frame =
+let exec_beta_step ast frame =
   match (frame,ast) with 
     | (_, InstrSeqNode(_,_)) -> ruleSeqInstr ast
     | (_,BinaryNode (_,a,Assign,CallNode (_,namef,expr))) -> ruleCallFuncWithReturn a namef expr
@@ -219,36 +213,3 @@ let exec_step ast frame =
     | (Some(FuncCallVoidFrame(_)), NoopNode) -> ReturnNode(Lexing.dummy_pos,None)
     | (_,_) -> raise (Unknown_error_reference_interpretor_ (frame,ast))
     
-let rec exec_prg ast =
-  if (is_empty (!e)) then
-    (match ast with
-      | ReturnNode (_,_) -> ruleFinalValue ast
-      | _ -> exec_prg (exec_step ast None))
-  else exec_prg (exec_step ast (Some(Stack.top (!e))))
-    
-let run_prg ast env_type start = 
-  (* Assignment of the type environment to the global variable envType *)
-  envType := env_type;
-  g := Hashtbl.create 100;
-  s := Hashtbl.create 100;
-  e := Stack.create (); 
-  (* Filling of the hash table with all the variables and functions *)
-  let rec aux tree =
-    match tree with
-        | ProgramNode (p1,p2) -> aux p1; aux p2
-        | FunctionNode (_,_,n,p,b) -> add (!g) n (ref (FuncVal(p,b)))
-        | GlobalVarDeclaNode(_,_,n,vnode) -> add (!g) n (ref (ruleValue vnode))
-        | GlobalChanDeclaNode(_,_,n) -> add (!g) n (ref (ChannelVal(Channel.create_chan_id ())))
-        | _ -> ()
-    in aux ast;
-    (* Launch of the execution with the start function *)
-    match start with
-      | Some(_,name,expr) -> 
-        let f = !(Hashtbl.find !g name) in
-        let ve = value_of_expr expr (!g,!s) in
-        (match f with 
-          | FuncVal(param,BodyNode(_,decla,instr)) -> 
-            s := create_state param decla ve;
-            exec_prg instr
-          | _ -> raise (Unknown_error_reference_interpretor "run_prg2"))
-      | _ -> raise (Unknown_error_reference_interpretor "run_prg1")

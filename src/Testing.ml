@@ -1,8 +1,8 @@
 open Lexing
 open Resolve
 open TypeChecking
-open BetaRedInterpretor
 open ExpressionInterpretor
+open SingleThreadInterpretor
 
 let report_error filename lexbuf msg =
  let (b,e) = (lexeme_start_p lexbuf, lexeme_end_p lexbuf) in
@@ -276,9 +276,9 @@ let%expect_test _ = print_string (main "../../examples/test_type_checker/test-18
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-190.mml"); [%expect{| You cannot assign a value to the global variable globalchan |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-191.mml"); [%expect{| unit |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-192.mml"); [%expect{| Wrong type: The type integer was found but the type channel integer was expected |}]
-let%expect_test _ = print_string (main "../../examples/test_type_checker/test-193.mml"); [%expect{| Chan@4 |}]
-let%expect_test _ = print_string (main "../../examples/test_type_checker/test-194.mml"); [%expect{| Chan@7 |}]
-let%expect_test _ = print_string (main "../../examples/test_type_checker/test-195.mml"); [%expect{| Chan@18 |}]
+let%expect_test _ = print_string (main "../../examples/test_type_checker/test-193.mml"); [%expect{| Chan@7 |}]
+let%expect_test _ = print_string (main "../../examples/test_type_checker/test-194.mml"); [%expect{| Chan@10 |}]
+let%expect_test _ = print_string (main "../../examples/test_type_checker/test-195.mml"); [%expect{| Chan@21 |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-196.mml"); [%expect{| The name test196 is already used by another function/variable |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-197.mml"); [%expect{| true |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-198.mml"); [%expect{| false |}]

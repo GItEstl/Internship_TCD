@@ -1,11 +1,10 @@
-func int test1000 (string s) {
+func void test1000 (string s) {
 def
-    (string,string) t;
-    int i
+    channel int chan
 in
-    t = ("odd","");
-    i = 5/0;
-    return i
+    chan = newChan();
+    chan = newChan();
+    send(chan,123)
 }
 
 start test1000("")
