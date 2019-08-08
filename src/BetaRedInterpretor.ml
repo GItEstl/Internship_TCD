@@ -65,7 +65,7 @@ let extend_state_with_params paramsnode state vparams =
 (* extend_state_with_local_declas: ast -> (string, valueType ref) Hashtbl.t -> unit
 Function adding the local variable of a function to the state 
 Parameters:
-  - body: the abstract syntax tree representing the function body
+  - decla: the abstract syntax tree representing the local declarations
   - state: hash table representing the state of all the variables
 *)  
 let extend_state_with_local_declas decla state =
@@ -81,12 +81,11 @@ let extend_state_with_local_declas decla state =
       in aux d
 
 
-(* create_local_state: ast -> ast -> (string, valueType ref) Hashtbl.t -> valueType -> (string, valueType ref) Hashtbl.t
+(* create_local_state: ast -> ast -> valueType -> (string, valueType ref) Hashtbl.t
 Function creating a new local state containing the parameters, the global and local variables 
 Parameters:
   - params: the abstract syntax tree representing the paramerers
-  - body: the abstract syntax tree representing the function body
-  - state: hash table representing the state of all the variables
+  - decla: the abstract syntax tree representing the local declarations
   - vparams: the value of the parameters
 Return: the new local state
 *)  
@@ -198,8 +197,8 @@ let ruleNewChan ast =
 let exec_beta_step ast frame =
   match (frame,ast) with 
     | (_, InstrSeqNode(_,_)) -> ruleSeqInstr ast
-    | (_,BinaryNode (_,a,Assign,CallNode (_,namef,expr))) -> ruleCallFuncWithReturn a namef expr
-    | (_, BinaryNode (_,a,Assign,expr)) -> ruleAssignInstr a expr
+    | (_,BinaryNode (_,a,_,CallNode (_,namef,expr))) -> ruleCallFuncWithReturn a namef expr
+    | (_, BinaryNode (_,a,_,expr)) -> ruleAssignInstr a expr
     | (_, CallNode (_,namef,expr)) -> ruleCallFuncVoid namef expr
     | (_, IfthenelseInstrNode (_,cond,i1,i2)) -> ruleIfThenElseInstr cond i1 i2
     | (_, WhileNode (pos,expr,i)) -> ruleWhile pos expr i

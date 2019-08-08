@@ -10,4 +10,5 @@
  (name myML)
  (inline_tests)
  (preprocess (pps ppx_expect))
+ (libraries threads)
 )

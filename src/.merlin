@@ -3,6 +3,8 @@ B /Users/estelle/.opam/ocaml-base-compiler.4.07.1/lib/base
 B /Users/estelle/.opam/ocaml-base-compiler.4.07.1/lib/base/caml
 B /Users/estelle/.opam/ocaml-base-compiler.4.07.1/lib/base/shadow_stdlib
 B /Users/estelle/.opam/ocaml-base-compiler.4.07.1/lib/fieldslib
+B /Users/estelle/.opam/ocaml-base-compiler.4.07.1/lib/ocaml
+B /Users/estelle/.opam/ocaml-base-compiler.4.07.1/lib/ocaml/threads
 B /Users/estelle/.opam/ocaml-base-compiler.4.07.1/lib/ppx_compare/runtime-lib
 B /Users/estelle/.opam/ocaml-base-compiler.4.07.1/lib/ppx_expect/collector
 B /Users/estelle/.opam/ocaml-base-compiler.4.07.1/lib/ppx_expect/common
@@ -16,6 +18,8 @@ S /Users/estelle/.opam/ocaml-base-compiler.4.07.1/lib/base
 S /Users/estelle/.opam/ocaml-base-compiler.4.07.1/lib/base/caml
 S /Users/estelle/.opam/ocaml-base-compiler.4.07.1/lib/base/shadow_stdlib
 S /Users/estelle/.opam/ocaml-base-compiler.4.07.1/lib/fieldslib
+S /Users/estelle/.opam/ocaml-base-compiler.4.07.1/lib/ocaml
+S /Users/estelle/.opam/ocaml-base-compiler.4.07.1/lib/ocaml/threads
 S /Users/estelle/.opam/ocaml-base-compiler.4.07.1/lib/ppx_compare/runtime-lib
 S /Users/estelle/.opam/ocaml-base-compiler.4.07.1/lib/ppx_expect/collector
 S /Users/estelle/.opam/ocaml-base-compiler.4.07.1/lib/ppx_expect/common

@@ -467,30 +467,30 @@ Finally, we have to check that the function used in the start function is declar
 
 \tabto{0cm} {\large \textbf{Condition Instruction}}
 \begin{prooftree}
-\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_1 : bool $}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e : bool $}
 \AxiomC{$\Gamma_t ; \ \ \Gamma_v \vdash i_1 : OK $}
 \AxiomC{$\Gamma_t ; \ \Gamma_v \vdash i_2 : OK $}
-\TrinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash if \ (e_1) \ then \ \{i_1\} \ else \ \{i_2\} : OK $}
+\TrinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash if \ (e) \ then \ \{i_1\} \ else \ \{i_2\} : OK $}
 \end{prooftree}
 \vspace*{1pt}
 \begin{prooftree}
-\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_1 : bool $}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e : bool $}
 \AxiomC{$\Gamma_t ; \ \ \Gamma_v \vdash i_1 : OK_t(\tau) $}
 \AxiomC{$\Gamma_t ; \ \Gamma_v \vdash i_2 : OK_t(\tau) $}
-\TrinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash if \ (e_1) \ then \ \{i_1\} \ else \ \{i_2\} : OK_t(\tau) $}
+\TrinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash if \ (e) \ then \ \{i_1\} \ else \ \{i_2\} : OK_t(\tau) $}
 \end{prooftree}
 
 \tabto{0cm} {\large \textbf{While Instruction}}
 \begin{prooftree}
-\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_1 : bool$}
-\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_2 : OK $}
-\BinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash while(e_1) \ \{ e_2 \} : OK $}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e : bool$}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash i : OK $}
+\BinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash while(e) \ \{ i \} : OK $}
 \end{prooftree}
 \vspace*{1pt}
 \begin{prooftree}
-\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_1 : bool$}
-\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_2 : OK_t(\tau) $}
-\BinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash while(e_1) \ \{ e_2 \} : OK_t(\tau) $}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e : bool$}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash i : OK_t(\tau) $}
+\BinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash while(e) \ \{ i \} : OK_t(\tau) $}
 \end{prooftree}
 
 \tabto{0cm} {\large \textbf{Choose Instruction}}
@@ -553,11 +553,176 @@ Finally, we have to check that the function used in the start function is declar
 \BinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash func \ void \ n  (\overrightarrow{\tau \ \ x}) \ \{def \  \overrightarrow{\tau^\prime \ \ y}\} \ in \ i \} \ : OK $}
 \end{prooftree}
 
+
 \newpage
-\centerline{\textbf{\Huge Semantic Rules}}
+\centerline{\textbf{\Huge Semantic Rules (Small-step semantics)}}
 \vspace*{3pt}
 \vspace*{20pt}
 
+\tabto{1cm} {\Large \textsc{Semantics rules for expressions}}
+\vspace*{20pt}
+
+\tabto{0cm} {\large \textbf{Binary Operator}}
+\begin{prooftree}
+\AxiomC{$G;S \vdash e_1 \Downarrow  v_1 $}
+\AxiomC{$G;S \vdash e_2 \Downarrow  v_2$}
+\BinaryInfC{$G;S \vdash e_1 \ op \ e_2 \Downarrow v_1 \ op \ v_2 $}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Unary Operator}}
+\begin{prooftree}
+\AxiomC{$G;S \vdash e \Downarrow  v $}
+\UnaryInfC{$G;S \vdash op \ e \Downarrow v $}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Condition Expression}}
+\begin{prooftree}
+\AxiomC{$G;S \vdash e_1 \Downarrow true $}
+\AxiomC{$G;S \vdash e_2 \Downarrow v $}
+\BinaryInfC{$G;S \vdash if \ e_1 \ then \ e_2 \ else \ e_3  \Downarrow v $}
+\end{prooftree}
+\vspace*{1pt}
+\begin{prooftree}
+\AxiomC{$G;S \vdash e_1 \Downarrow false $}
+\AxiomC{$G;S \vdash e_3 \Downarrow v $}
+\BinaryInfC{$G;S \vdash if \ e_1 \ then \ e_2 \ else \ e_3  \Downarrow v $}
+\end{prooftree}
+
+
+\tabto{0cm} {\large \textbf{Tuple}}
+\begin{prooftree}
+\AxiomC{$G;S \vdash e_1 \Downarrow v_1 $}
+\AxiomC{$G;S \vdash e_2 \Downarrow v_2 $}
+\AxiomC{$\ldots$}
+\AxiomC{$G;S \vdash e_n \Downarrow v_n $}
+\QuaternaryInfC{$G;S \vdash (e_1,e_2,\ldots,e_n) \Downarrow (v_1, v_2, \ldots, v_n)$}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Value}}
+\begin{prooftree}
+\AxiomC{ }
+\UnaryInfC{$G;S \vdash v \Downarrow v $}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Identifier}}
+\begin{prooftree}
+\AxiomC{ }
+\UnaryInfC{$G;S \vdash n \Downarrow lookup \ n \ in \ S $}
+\end{prooftree}
+
+\newpage
+\tabto{1cm} {\Large \textsc{Semantics rules for instructions}}
+\vspace*{20pt}
+
+\tabto{0cm} {\large \textbf{Assignment}}
+\begin{prooftree}
+\AxiomC{$G;S \vdash e \Downarrow v $}
+\UnaryInfC{$G;S;E \vdash a = e \rightarrow_{\beta} G;S::[a \mapsto v];E \vdash noop$}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Condition Instruction}}
+\begin{prooftree}
+\AxiomC{$G;S \vdash e \Downarrow true $}
+\UnaryInfC{$G;S;E \vdash  if \ e \ then \ i_1 \ else \ i_2 \rightarrow_{\beta} G;S;E \vdash i_1$}
+\end{prooftree}
+\vspace*{1pt}
+\begin{prooftree}
+\AxiomC{$G;S \vdash e \Downarrow false $}
+\UnaryInfC{$G;S;E \vdash  if \ e \ then \ i_1 \ else \ i_2 \rightarrow_{\beta} G;S;E \vdash i_2$}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Function Call with return}}
+\begin{prooftree}
+\AxiomC{$G;S \vdash \overrightarrow{e} \Downarrow \overrightarrow{v}$}
+\AxiomC{$ G(f) = (\lambda \overrightarrow{x}.i,S_f)$}
+\BinaryInfC{$G;S;E \vdash a = f (\overrightarrow{e}) \rightarrow_{\beta} G;G::[\overrightarrow{x} \mapsto \overrightarrow{v}]::S_f;(S;a=[.])::E \vdash i$}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Function Call without return}}
+\begin{prooftree}
+\AxiomC{$G;S \vdash \overrightarrow{e} \Downarrow \overrightarrow{v}$}
+\AxiomC{$ G(f) = (\lambda \overrightarrow{x}.i,S_f)$}
+\BinaryInfC{$G;S;E \vdash f (\overrightarrow{e}) \rightarrow_{\beta} G;G::[\overrightarrow{x} \mapsto \overrightarrow{v}]::S_f;(S;void)::E \vdash i$}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{While Instruction}}
+\begin{prooftree}
+\AxiomC{$G;S \vdash e \Downarrow true $}
+\UnaryInfC{$G;S;E \vdash  while(e) \ \{i\} \rightarrow_{\beta} G;S;E \vdash i; while(e) \ \{i\}$}
+\end{prooftree}
+\vspace*{1pt}
+\begin{prooftree}
+\AxiomC{$G;S \vdash e \Downarrow false $}
+\UnaryInfC{$G;S;E \vdash  while(e) \ \{i\} \rightarrow_{\beta} G;S;E \vdash noop$}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Return void}}
+\begin{prooftree}
+\AxiomC{$ $}
+\UnaryInfC{$G;S;(S';void)::E \vdash return \rightarrow_{\beta} G;S';E \vdash noop$}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Return Function ?}}
+
+
+\tabto{0cm} {\large \textbf{Assign of a function return}}
+\begin{prooftree}
+\AxiomC{$ $}
+\UnaryInfC{$G;S;(S';a=[.])::E \vdash return \ v \rightarrow_{\beta} G;S';[a \mapsto v]::E \vdash noop$}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Return Break}}
+\begin{prooftree}
+\AxiomC{$ $}
+\UnaryInfC{$G;S;(noop;seqi)::E \vdash return \ e \rightarrow_{\beta} G;S;E \vdash return \ e$}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Sequence of Instructions}}
+\begin{prooftree}
+\AxiomC{$ $}
+\UnaryInfC{$G;S;E \vdash i ; seqi \rightarrow_{\beta} G;S;(noop;seqi)::E \vdash i$}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Noop}}
+\begin{prooftree}
+\AxiomC{$ $}
+\UnaryInfC{$G;S;(noop;seqi)::E \vdash noop \rightarrow_{\beta} G;S;E \vdash seqi$}
+\end{prooftree}
+
+\tabto{0cm} $\Delta = G;S;E$
+
+\tabto{0cm} {\large \textbf{NewChan Instruction}}
+\begin{prooftree}
+\AxiomC{$ $}
+\UnaryInfC{$ N;\Delta \vdash a = newChan() \rightarrow_{\beta} N \oplus {n};\Delta[a \mapsto n] \vdash noop $}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Receive Instruction}}
+\begin{prooftree}
+\AxiomC{$N;S \vdash ch \Downarrow n$}
+\UnaryInfC{$N;\Delta \vdash a = receive(ch) \underset{n?v}{\longrightarrow} N;\Delta[a \mapsto v] \vdash noop $}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Send Instruction}}
+\begin{prooftree}
+\AxiomC{$N;S \vdash ch \Downarrow n$}
+\AxiomC{$N;S \vdash e \Downarrow v$}
+\BinaryInfC{$N;\Delta \vdash send(ch,e) \underset{n!v}{\longrightarrow} N;\Delta \vdash noop$}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Choose Instruction}}
+\begin{prooftree}
+\AxiomC{$ $}
+\UnaryInfC{$N;\Delta \vdash choose \{ \overrightarrow{ \ p \longrightarrow i \ } \} \rightarrow N;G;S;(noop;i_k)::E \vdash p_k $}
+\end{prooftree}
+
+\newpage
+\centerline{\textbf{\Huge Semantic Rules (Big-Step Semantics)}}
+\vspace*{3pt}
+\vspace*{20pt}
+
+\tabto{1cm} {\Large \textsc{Semantics rules for expressions}}
+\vspace*{20pt}
 
 \tabto{0cm} {\large \textbf{Binary Operator}}
 \begin{prooftree}
@@ -607,6 +772,10 @@ Finally, we have to check that the function used in the start function is declar
 \UnaryInfC{$s \vdash n \Downarrow lookup \ n \ in \ s $}
 \end{prooftree}
 
+\newpage
+\tabto{1cm} {\Large \textsc{Semantics rules for instructions}}
+\vspace*{20pt}
+
 \tabto{0cm} {\large \textbf{Assignment}}
 \begin{prooftree}
 \AxiomC{$s \vdash e \Downarrow v $}
@@ -615,27 +784,27 @@ Finally, we have to check that the function used in the start function is declar
 
 \tabto{0cm} {\large \textbf{Condition Instruction}}
 \begin{prooftree}
-\AxiomC{$s_1 \vdash e_1 \Downarrow true $}
+\AxiomC{$s_1 \vdash e \Downarrow true $}
 \AxiomC{$s_1 \vdash i_1 \Downarrow \emptyset, s_2$}
-\BinaryInfC{$s_1 \vdash if \ e_1 \ then \ i_1 \ else \ i_2  \Downarrow \emptyset, s_2 $}
+\BinaryInfC{$s_1 \vdash if \ e \ then \ i_1 \ else \ i_2  \Downarrow \emptyset, s_2 $}
 \end{prooftree}
 \vspace*{1pt}
 \begin{prooftree}
-\AxiomC{$s_1 \vdash e_1 \Downarrow true $}
+\AxiomC{$s_1 \vdash e \Downarrow true $}
 \AxiomC{$s_1 \vdash i_1 \Downarrow v, s_2$}
-\BinaryInfC{$s_1 \vdash if \ e_1 \ then \ i_1 \ else \ i_2  \Downarrow v, s_2 $}
+\BinaryInfC{$s_1 \vdash if \ e \ then \ i_1 \ else \ i_2  \Downarrow v, s_2 $}
 \end{prooftree}
 \vspace*{1pt}
 \begin{prooftree}
-\AxiomC{$s_1 \vdash e_1 \Downarrow false $}
+\AxiomC{$s_1 \vdash e \Downarrow false $}
 \AxiomC{$s_1 \vdash i_2 \Downarrow \emptyset, s_2$}
-\BinaryInfC{$s_1 \vdash if \ e_1 \ then \ i_1 \ else \ i_2  \Downarrow \emptyset, s_2 $}
+\BinaryInfC{$s_1 \vdash if \ e \ then \ i_1 \ else \ i_2  \Downarrow \emptyset, s_2 $}
 \end{prooftree}
 \vspace*{1pt}
 \begin{prooftree}
-\AxiomC{$s_1 \vdash e_1 \Downarrow false $}
+\AxiomC{$s_1 \vdash e \Downarrow false $}
 \AxiomC{$s_1 \vdash i_2 \Downarrow v, s_2$}
-\BinaryInfC{$s_1 \vdash if \ e_1 \ then \ i_1 \ else \ i_2  \Downarrow v, s_2 $}
+\BinaryInfC{$s_1 \vdash if \ e \ then \ i_1 \ else \ i_2  \Downarrow v, s_2 $}
 \end{prooftree}
 
 

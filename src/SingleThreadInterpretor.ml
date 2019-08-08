@@ -3,6 +3,7 @@ open ExpressionInterpretor
 open BetaRedInterpretor
 open Stack
 open Hashtbl
+open Random
 
 let ruleFinalValue ast =
   match ast with
@@ -35,7 +36,7 @@ let ruleReceive ast =
 
 let ruleChoice ast =
   match ast with 
-    | (PrefixNode(pos,None,Tau,None),i) -> (i,-1,None)
+    | (PrefixNode(_,None,Tau,None),i) -> push (InstrSeqFrame(i)) (!e); (NoopNode,-1,None)
     | (PrefixNode(pos,Some(expr),Send,Some(n)),i) -> push (InstrSeqFrame(i)) (!e); ((SendNode(pos,n,expr)),-1,None) 
     | (PrefixNode(pos,Some(a),Receive,Some(n)),i) -> push (InstrSeqFrame(i)) (!e); ((ReceiveNode(pos,a,n)),-1,None)
     | _ -> raise (Unknown_error_reference_interpretor "ruleChoice")
@@ -50,8 +51,9 @@ let ruleChoose ast =
         | _ -> raise (Unknown_error_reference_interpretor "ruleChoose2")) in
       let choiceList = aux c [] in
       let size = List.length choiceList in
-      print_string ("Choose instruction line " ^ (string_of_int pos.pos_lnum) ^ ": Please select a number between 0 and " ^ (string_of_int (size - 1)) ^"! \n");
-      let n = read_int () in
+      (* print_string ("Choose instruction line " ^ (string_of_int pos.pos_lnum) ^ ": Please select a number between 0 and " ^ (string_of_int (size - 1)) ^"! \n");
+      let n = read_int () in *)
+      let n = (Random.bits ()) mod size in
       let choice = List.nth choiceList n in
       ruleChoice choice   
     | _ -> raise (Unknown_error_reference_interpretor "ruleChoose1")
@@ -96,3 +98,17 @@ let run_prg ast env_type start =
             exec_step instr
           | _ -> raise (Unknown_error_reference_interpretor "run_prg2"))
       | _ -> raise (Unknown_error_reference_interpretor "run_prg1")
+
+
+let init () =
+  print_string("Do you want to initialise the execution with a seed? Y or N\n");
+  let answer = read_line () in
+  let seed = 
+    (match answer with
+      | "Y" | "y" -> print_string("Please enter the seed :"); read_int ()
+      | "N" | "n" -> self_init (); bits ()
+      | _ -> print_string("Wrong input! The seed has been chosen randomly \n"); self_init (); bits ()
+    ) in Random.init seed;
+  print_string("The program will be excuted with the seed " ^ (string_of_int seed) ^ "\n");
+  
+  
