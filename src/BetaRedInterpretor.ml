@@ -14,8 +14,6 @@ exception Unknown_error_reference_interpretor_ of (frame option * ast)
 
 let envType = ref([(Lexing.dummy_pos,"",NoopNode,false)])
 let g = ref (Hashtbl.create 100)
-let s = ref (Hashtbl.create 100)
-let e = ref (Stack.create ()) 
 
 (* def_value: ast -> valueType
 Function returning the default value for a type
@@ -96,14 +94,14 @@ let create_state params decla vparams =
   local
 
 (* Numero 8 *)
-let ruleSeqInstr ast =
+let ruleSeqInstr ast e =
   match ast with 
     | InstrSeqNode(i,None) -> i
     | InstrSeqNode(i,Some(iseq)) -> push (InstrSeqFrame(iseq)) (!e); i
     | _ -> raise (Unknown_error_reference_interpretor "ruleSeqInstr")
 
 (* Numero 10 *)
-let ruleAssignInstr a expr =
+let ruleAssignInstr a expr s =
   match a with 
     | AssignNode (_,name) ->
       let ve = value_of_expr expr (!g,!s) in
@@ -113,7 +111,7 @@ let ruleAssignInstr a expr =
     | _ -> raise (Unknown_error_reference_interpretor "ruleAssignInstr")
 
 (* Numero 1 *)
-let ruleCallFuncWithReturn a namef expr = 
+let ruleCallFuncWithReturn a namef expr s e = 
   let f = !(find !g namef) in
   let ve = value_of_expr expr (!g,!s) in
   match (f,a) with 
@@ -124,7 +122,7 @@ let ruleCallFuncWithReturn a namef expr =
     | _ -> raise (Unknown_error_reference_interpretor "ruleCallFuncWithReturn") 
 
 (* Numero 2 *)
-let ruleCallFuncVoid namef expr = 
+let ruleCallFuncVoid namef expr s e = 
   let f = !(Hashtbl.find !g namef) in
   let ve = value_of_expr expr (!g,!s) in
   match f with 
@@ -135,7 +133,7 @@ let ruleCallFuncVoid namef expr =
     | _ -> raise (Unknown_error_reference_interpretor "ruleCallFuncVoid")
 
 (* Numero / *)
-let ruleIfThenElseInstr cond i1 i2 =
+let ruleIfThenElseInstr cond i1 i2 s =
   let vcond = value_of_expr cond (!g,!s) in
   match vcond with
   | BooleanVal(true) -> i1
@@ -143,7 +141,7 @@ let ruleIfThenElseInstr cond i1 i2 =
   | _ -> raise (Unknown_error_reference_interpretor "ruleIfThenElseInstr")
 
 (* Numero 11 et 12 *)
-let ruleWhile pos cond instr =
+let ruleWhile pos cond instr s =
   let vcond = value_of_expr cond (!g,!s) in
   match vcond with
   | BooleanVal(true) -> InstrSeqNode(instr,Some(WhileNode(pos,cond,instr)))
@@ -151,18 +149,18 @@ let ruleWhile pos cond instr =
   | _ -> raise (Unknown_error_reference_interpretor "ruleWhile")
 
 (* Numero 13 et 14 *)
-let ruleReturnBreak ast = 
+let ruleReturnBreak ast e = 
   let _ = pop (!e) in ast
 
 (* Numero 9 *)
-let ruleNoop () =
+let ruleNoop e =
   let frame = pop (!e) in
   match frame with
     | InstrSeqFrame(i) -> i
     | _ -> raise (Unknown_error_reference_interpretor "ruleNoop")
 
 (* Numero 3 *)
-let ruleAssignReturn ast =
+let ruleAssignReturn ast s e =
   match ast with
   | ReturnNode (_,Some(expr)) -> 
     let ve = value_of_expr expr (!g,!s) in
@@ -177,7 +175,7 @@ let ruleAssignReturn ast =
   | _ -> raise (Unknown_error_reference_interpretor "ruleAssignReturn1")
 
 (* Numero 4 *)
-let ruleVoid () =
+let ruleVoid s e =
   let frame = pop (!e) in
   match frame with 
     | FuncCallVoidFrame(old_s) -> 
@@ -185,7 +183,7 @@ let ruleVoid () =
       NoopNode
     | _ -> raise (Unknown_error_reference_interpretor "ruleVoid")
 
-let ruleNewChan ast = 
+let ruleNewChan ast s = 
   match ast with 
   | AssignNode (_,name) ->
     let ch = ChannelVal(Channel.create_chan_id ()) in
@@ -194,21 +192,20 @@ let ruleNewChan ast =
     NoopNode
   | _ -> raise (Unknown_error_reference_interpretor "ruleNewChan")
 
-let exec_beta_step ast frame =
+let exec_beta_step ast frame s e =
   match (frame,ast) with 
-    | (_, InstrSeqNode(_,_)) -> ruleSeqInstr ast
-    | (_,BinaryNode (_,a,_,CallNode (_,namef,expr))) -> ruleCallFuncWithReturn a namef expr
-    | (_, BinaryNode (_,a,_,expr)) -> ruleAssignInstr a expr
-    | (_, CallNode (_,namef,expr)) -> ruleCallFuncVoid namef expr
-    | (_, IfthenelseInstrNode (_,cond,i1,i2)) -> ruleIfThenElseInstr cond i1 i2
-    | (_, WhileNode (pos,expr,i)) -> ruleWhile pos expr i
+    | (_, InstrSeqNode(_,_)) -> ruleSeqInstr ast e
+    | (_,BinaryNode (_,a,_,CallNode (_,namef,expr))) -> ruleCallFuncWithReturn a namef expr s e
+    | (_, BinaryNode (_,a,_,expr)) -> ruleAssignInstr a expr s
+    | (_, CallNode (_,namef,expr)) -> ruleCallFuncVoid namef expr s e
+    | (_, IfthenelseInstrNode (_,cond,i1,i2)) -> ruleIfThenElseInstr cond i1 i2 s
+    | (_, WhileNode (pos,expr,i)) -> ruleWhile pos expr i s
     | (_, ReturnNode (_,Some (CallNode (_,_,_)))) -> raise (Unknown_error_reference_interpretor "notImplemented")
-    | (Some(InstrSeqFrame(_)), ReturnNode (_,_)) -> ruleReturnBreak ast
-    | (Some(InstrSeqFrame(_)), NoopNode) -> ruleNoop ()
-    | (Some(FuncCallReturnFrame(_,_)), ReturnNode (_,_)) -> ruleAssignReturn ast
-    | (Some(FuncCallVoidFrame(_)), ReturnNode (_,_)) -> ruleVoid ()
-    | (_, NewNode(_,ast)) -> ruleNewChan ast
+    | (Some(InstrSeqFrame(_)), ReturnNode (_,_)) -> ruleReturnBreak ast e
+    | (Some(InstrSeqFrame(_)), NoopNode) -> ruleNoop e
+    | (Some(FuncCallReturnFrame(_,_)), ReturnNode (_,_)) -> ruleAssignReturn ast s e
+    | (Some(FuncCallVoidFrame(_)), ReturnNode (_,_)) -> ruleVoid s e
+    | (_, NewNode(_,ast)) -> ruleNewChan ast s
     | (None,NoopNode) -> ReturnNode(Lexing.dummy_pos,None)
     | (Some(FuncCallVoidFrame(_)), NoopNode) -> ReturnNode(Lexing.dummy_pos,None)
     | (_,_) -> raise (Unknown_error_reference_interpretor_ (frame,ast))
-    

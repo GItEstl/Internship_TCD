@@ -5,13 +5,13 @@ open Stack
 open Hashtbl
 open Random
 
-let ruleFinalValue ast =
+let ruleFinalValue ast s =
   match ast with
     | ReturnNode (_, None) -> (NoopNode,1,None)
     | ReturnNode (_,Some(expr)) -> (NoopNode,1,Some(value_of_expr expr (!g,!s)))
     | _ -> raise (Unknown_error_reference_interpretor "ruleFinalValue")
 
-let ruleSend ast = 
+let ruleSend ast s = 
   match ast with
     | SendNode(_,n,expr) -> 
       let ve = value_of_expr expr (!g,!s) in
@@ -22,7 +22,7 @@ let ruleSend ast =
       (NoopNode,id,Some(ve))
     | _ -> raise (Unknown_error_reference_interpretor "ruleSend")
 
-let ruleReceive ast = 
+let ruleReceive ast s = 
   match ast with
     | ReceiveNode(_,AssignNode(_,assign),n) ->
       let pa = find (!s) assign in  
@@ -34,16 +34,16 @@ let ruleReceive ast =
       (NoopNode,-1,None)
     | _ -> raise (Unknown_error_reference_interpretor "ruleReceive2")
 
-let ruleChoice ast =
+let ruleChoice ast e =
   match ast with 
     | (PrefixNode(_,None,Tau,None),i) -> push (InstrSeqFrame(i)) (!e); (NoopNode,-1,None)
     | (PrefixNode(pos,Some(expr),Send,Some(n)),i) -> push (InstrSeqFrame(i)) (!e); ((SendNode(pos,n,expr)),-1,None) 
     | (PrefixNode(pos,Some(a),Receive,Some(n)),i) -> push (InstrSeqFrame(i)) (!e); ((ReceiveNode(pos,a,n)),-1,None)
     | _ -> raise (Unknown_error_reference_interpretor "ruleChoice")
 
-let ruleChoose ast =
+let ruleChoose ast e =
   match ast with 
-    | ChooseNode(pos,c) ->
+    | ChooseNode(_,c) ->
       let rec aux ast choices = 
       (match ast with
         | ChoicesNode(_,p,i,None) -> List.rev ((p,i)::choices)
@@ -51,33 +51,31 @@ let ruleChoose ast =
         | _ -> raise (Unknown_error_reference_interpretor "ruleChoose2")) in
       let choiceList = aux c [] in
       let size = List.length choiceList in
-      (* print_string ("Choose instruction line " ^ (string_of_int pos.pos_lnum) ^ ": Please select a number between 0 and " ^ (string_of_int (size - 1)) ^"! \n");
-      let n = read_int () in *)
       let n = (Random.bits ()) mod size in
       let choice = List.nth choiceList n in
-      ruleChoice choice   
+      ruleChoice choice e   
     | _ -> raise (Unknown_error_reference_interpretor "ruleChoose1")
 
-let rec exec_step ast =
+let rec exec_step ast s e =
   let (i,outchan,vout) = (
     match ast with
-      | SendNode(_,_,_) -> ruleSend ast
-      | ReceiveNode(_,_,_) -> ruleReceive ast
-      | ChooseNode(_,_) -> ruleChoose ast
-      | ReturnNode (_,_) -> if (is_empty (!e)) then ruleFinalValue ast else ((exec_beta_step ast (Some(Stack.top (!e)))),-1,None)
-      | _ -> if (is_empty (!e)) then ((exec_beta_step ast None),-1,None) else ((exec_beta_step ast (Some(Stack.top (!e)))),-1,None)  
+      | SendNode(_,_,_) -> ruleSend ast s
+      | ReceiveNode(_,_,_) -> ruleReceive ast s
+      | ChooseNode(_,_) -> ruleChoose ast e
+      | ReturnNode (_,_) -> if (is_empty (!e)) then ruleFinalValue ast s else ((exec_beta_step ast (Some(Stack.top (!e))) s e),-1,None)
+      | _ -> if (is_empty (!e)) then ((exec_beta_step ast None s e),-1,None) else ((exec_beta_step ast (Some(Stack.top (!e))) s e),-1,None)  
   ) in
   match outchan with
     | 1 -> vout
-    | -1 -> exec_step i
-    | _ -> print_string("Communication output on channel " ^ (string_of_int outchan) ^ ": " ^ (string_of_val vout) ^ "\n"); exec_step i
+    | -1 -> exec_step i s e
+    | _ -> print_string("Communication output on channel " ^ (string_of_int outchan) ^ ": " ^ (string_of_val vout) ^ "\n"); exec_step i s e
 
 let run_prg ast env_type start = 
   (* Assignment of the type environment to the global variable envType *)
   envType := env_type;
   g := Hashtbl.create 100;
-  s := Hashtbl.create 100;
-  e := Stack.create (); 
+  let s = ref(Hashtbl.create 100) in
+  let e =  ref(Stack.create ()) in
   (* Filling of the hash table with all the variables and functions *)
   let rec aux tree =
     match tree with
@@ -95,7 +93,7 @@ let run_prg ast env_type start =
         (match f with 
           | FuncVal(param,BodyNode(_,decla,instr)) -> 
             s := create_state param decla ve;
-            exec_step instr
+            exec_step instr s e
           | _ -> raise (Unknown_error_reference_interpretor "run_prg2"))
       | _ -> raise (Unknown_error_reference_interpretor "run_prg1")
 
@@ -109,6 +107,4 @@ let init () =
       | "N" | "n" -> self_init (); bits ()
       | _ -> print_string("Wrong input! The seed has been chosen randomly \n"); self_init (); bits ()
     ) in Random.init seed;
-  print_string("The program will be excuted with the seed " ^ (string_of_int seed) ^ "\n");
-  
-  
+  print_string("The program will be excuted with the seed " ^ (string_of_int seed) ^ "\n"); 
