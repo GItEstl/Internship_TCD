@@ -27,8 +27,9 @@ let report_error filename lexbuf msg =
   print_string ("Environment well-formed \n");
   let _ = type_check_prg envVar envType nameListType ast in
   print_string ("Program type-checked \n");
-  init();
-  let result = string_of_val (run_prg ast envType start) in
+  init_seed ();
+  init_prg ast envType start;
+  let result = string_of_val (run_prg ()) in
   print_string ("Program executed \n");
   print_string("Result: " ^ result ^ "\n")
   with

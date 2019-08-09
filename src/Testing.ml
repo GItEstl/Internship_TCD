@@ -22,7 +22,8 @@ let report_error filename lexbuf msg =
   let _ = well_formed_start start envVar in
   let _ = type_check_prg envVar envType nameListType ast in
   Random.init 0;
-  string_of_val (run_prg ast envType start)
+  init_prg ast envType start;
+  string_of_val (run_prg ())
   with
   | Lexer.Error _ -> "lexical error (unexpected character)"
   | Parser.Error -> "syntax error"

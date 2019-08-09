@@ -208,4 +208,5 @@ let exec_beta_step ast frame s e =
     | (_, NewNode(_,ast)) -> ruleNewChan ast s
     | (None,NoopNode) -> ReturnNode(Lexing.dummy_pos,None)
     | (Some(FuncCallVoidFrame(_)), NoopNode) -> ReturnNode(Lexing.dummy_pos,None)
+    | (None,ReturnNode(_,e)) -> Terminated(e)
     | (_,_) -> raise (Unknown_error_reference_interpretor_ (frame,ast))

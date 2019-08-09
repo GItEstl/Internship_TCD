@@ -5,7 +5,6 @@ def
 in
     chan = newChan();
     choose {
-        | tau -> {return 10}
         | i = receive(chan) -> {return 20}
         | send(chan,123) -> {return 30}
     }

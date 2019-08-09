@@ -11,6 +11,7 @@ type valueType =
   | FuncVal of ast * ast
   | ChannelVal of channel
   | ErrorVal
+  | Deadlock
 
 exception Unknown_error_reference_interpretor of string
 exception Run_time_error of string
@@ -35,6 +36,7 @@ let string_of_val v =
         | ListVal(l) -> "[" ^ (List.fold_left (fun s e ->  s ^ ", " ^ (aux e)) (aux (List.nth l 0)) (List.tl l)) ^ "]"
         | TupleVal(t) -> "(" ^ (List.fold_left (fun s e ->  s ^ ", " ^ (aux e)) (aux (List.nth t 0)) (List.tl t)) ^ ")"
         | ChannelVal(id) -> "Chan@" ^ (string_of_int id)
+        | Deadlock -> "Deadlock reached"
         | _ -> "ERROR"
       in aux vs 
 

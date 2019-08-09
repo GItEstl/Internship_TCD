@@ -90,6 +90,7 @@ type ast =
   | ReturnNode of Lexing.position * ast option
   | NamedTypeNode of Lexing.position * string
   | TypeDeclaNode of Lexing.position * string * ast
+  | Terminated of ast option
 ;;
 
 (* Convert an AST into a string *)
