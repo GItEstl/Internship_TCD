@@ -1,0 +1,27 @@
+func int funcreceive (channel int chi) {
+def
+    int i
+in
+    i = receive(chi);
+    return i
+}
+
+func void funcsend (channel int chi) {
+def
+    int i
+in
+    i = 3;
+    send(chi,i)
+}
+
+func boolean main (string s) {
+def
+    channel int chi;
+    int i
+in
+    spawn funcsend(chi);
+    i = funcreceive(chi);
+    if (i == 3) { return true} else {return false}
+}
+
+start main("")

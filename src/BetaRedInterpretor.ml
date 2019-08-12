@@ -11,6 +11,7 @@ type frame =
   | InstrSeqFrame of ast
 
 exception Unknown_error_reference_interpretor_ of (frame option * ast)
+exception Test of ast
 
 let envType = ref([(Lexing.dummy_pos,"",NoopNode,false)])
 let g = ref (Hashtbl.create 100)
@@ -97,8 +98,11 @@ let create_state params decla vparams =
 let ruleSeqInstr ast e =
   match ast with 
     | InstrSeqNode(i,None) -> i
-    | InstrSeqNode(i,Some(iseq)) -> push (InstrSeqFrame(iseq)) (!e); i
-    | _ -> raise (Unknown_error_reference_interpretor "ruleSeqInstr")
+    | InstrSeqNode(i,Some(iseq)) -> 
+      (match iseq with 
+        | InstrSeqNode(bi,None) -> push (InstrSeqFrame(bi)) (!e); i
+        | _ -> push (InstrSeqFrame(iseq)) (!e); i)
+    | _ -> raise (Unknown_error_reference_interpretor "ruleSeqInstr1") 
 
 (* Numero 10 *)
 let ruleAssignInstr a expr s =

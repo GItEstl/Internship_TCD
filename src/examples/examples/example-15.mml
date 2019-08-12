@@ -74,5 +74,5 @@ in
     }
 }
 
-start main ("ItIsRaining",10)
+start main ("ItIsRaining",2)
 

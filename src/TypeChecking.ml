@@ -43,6 +43,7 @@ exception Different_type_of_return_func of Lexing.position * string
 exception Illegal_type_argument of Lexing.position
 exception Get_tuple_too_short of Lexing.position
 exception Assignment_to_global_var of Lexing.position * string
+exception Multiple_assignments of Lexing.position
 exception Unknown_error_type_checking of string
 
 (* string_of_type: typeType -> string
@@ -222,11 +223,11 @@ let rec type_of_expr expr envVar envType =
 
 and 
 
-type_of_assignable assign envVar envType =
+type_of_assignable pos assign envVar envType =
   match assign with
-    | ExprNode (_,a) -> type_of_assignable a envVar envType
-    | ExprsNode (a,None) -> type_of_assignable a envVar envType
-    | ExprsNode (a1,Some(a2)) -> ruleAssignable (ExprsNode (a1,Some(a2))) envVar envType
+    | ExprNode (_,a) -> type_of_assignable pos a envVar envType
+    | ExprsNode (a,None) -> type_of_assignable pos a envVar envType
+    | ExprsNode (_,Some(_)) -> raise (Multiple_assignments pos)
     | AssignNode (pos,a) -> ruleIdentifier a envVar envType true pos
     | _ -> raise (Unknown_error_type_checking "type_of_assignable")
 
@@ -381,19 +382,6 @@ ruleValue v envType =
 
 and
 
-(* Rule for assignable *)
-
-ruleAssignable assigns envVar envType = 
-TupleType (
-  let rec aux exs l =
-    (match exs with
-      | ExprsNode (a,None) -> List.rev ((type_of_assignable a envVar envType)::l)
-      | ExprsNode (a1,Some(a2)) -> aux a2 ((type_of_assignable a1 envVar envType)::l)
-      | _ -> raise (Unknown_error_type_checking ("ruleAssignable")))
-  in aux assigns [])
-
-and
-
 (* Rule for Identifier *)
 
 ruleIdentifier a envVar envType checkStatus pos = 
@@ -471,7 +459,7 @@ and
 (* Rule for assignement instructions *)
 
 ruleAssignInstr assign expr envVar envType pos =
-  let tassign = (type_of_assignable assign envVar envType) in
+  let tassign = (type_of_assignable pos assign envVar envType) in
   let texpr = (type_of_expr expr envVar envType) in
   try
     let be,_ = compare envType tassign texpr in
@@ -487,7 +475,7 @@ and
 ruleCallFuncWithReturn a namef e envVar envType pos posf =
   let tf,pnode = type_of_func namef envVar envType posf in
   if (tf != VoidType) then
-    let ta = type_of_assignable a envVar envType in
+    let ta = type_of_assignable pos a envVar envType in
     try
       let br,_ = compare envType ta tf in
       if (br) then
@@ -527,7 +515,7 @@ and
 (* Rule for a receive instruction *)
 
 ruleReceive a namechan envVar envType pos = 
-  let ta = type_of_assignable a envVar envType in
+  let ta = type_of_assignable pos a envVar envType in
   let tchan,_ = type_of_var namechan envVar envType pos in
   (match tchan with
     | ChannelType(st) -> (try 
@@ -615,7 +603,12 @@ and
 
 (* Rule for a spawn instruction *)
 
-ruleSpawn namef e envVar envType pos = ruleCallFuncVoid namef e envVar envType pos
+ruleSpawn namef e envVar envType pos = 
+  let _,pnode = type_of_func namef envVar envType pos in
+  let tp = type_of_params pnode envType in
+  let te = type_of_expr e envVar envType in
+  let b,_ = compare envType tp te in
+  if (b) then OK else raise (Not_type_of_the_params (pos,te,tp,namef))
 
 and
 
@@ -623,7 +616,7 @@ and
 (* Rule for a newChan instruction *)
 
 ruleNew a envVar envType pos = 
-  let ta = type_of_assignable a envVar envType in
+  let ta = type_of_assignable pos a envVar envType in
   try
     let bc,_ = compare envType ta ChannelGenType in
     if (bc) then OK else raise (Wrong_type (pos,ta,ChannelGenType))

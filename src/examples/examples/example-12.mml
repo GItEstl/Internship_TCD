@@ -62,7 +62,7 @@ in
     }
 }
 
-start main(100)
+start main(3)
 
 
 

@@ -1,0 +1,15 @@
+func void func1 (string s) {
+def
+    int i;
+    channel int ch
+in
+    i = 5;
+    spawn func2(3,ch);
+    i = receive(ch)
+}
+
+func void func2 (int x, channel int cha) {
+    send(cha,x)
+}
+
+start func1("")

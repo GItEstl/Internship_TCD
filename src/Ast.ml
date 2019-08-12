@@ -212,10 +212,6 @@ match tree with
   "true"
     | FalseNode (_) ->
   "false"
-    | ValueNode (ValueSeqNode (v,None)) ->
-  "[" ^ (string_of_ast v) ^ "]"
-    | ValueNode(ValueSeqNode(v,Some(vs))) ->
-  "[" ^ (string_of_ast v) ^ ", " ^ (string_of_ast vs) ^ "]"
     | ValueSeqNode (v,None) ->
   (string_of_ast v)
     | ValueSeqNode (v,Some(vs)) ->
@@ -249,5 +245,107 @@ match tree with
     | TypeDeclaNode (_,n,t) ->
   "type " ^ n ^ " = " ^ (string_of_ast t) 
     | _ -> 
-  "unknownPrinting"
+  "unknownPrinting" 
 
+let rec string_of_instr ast =
+  match ast with 
+    | InstrSeqNode (NoopNode,Some(i)) ->
+  "; " ^ (string_of_instr i)
+    | InstrSeqNode (NoopNode,None) ->
+  "Noop"
+    | InstrSeqNode (bi,None) ->
+  (string_of_instr bi) ^ "6465461651"
+    | InstrSeqNode (bi,Some(i)) ->
+  (string_of_instr bi) ^ "; " ^ (string_of_instr i)
+    | BinaryNode (_,a,Assign,e) -> 
+  (string_of_instr a) ^ " = " ^ (string_of_instr e)
+    | CallNode (_,f,e) ->
+  "call " ^ f ^ "(" ^ (string_of_instr e) ^ ")" 
+    | ReceiveNode (_,a,n) ->
+  (string_of_instr a) ^ " = receive(" ^ n ^ ")"
+    | SendNode (_,n,e) ->
+  "send(" ^ n ^ ", " ^ (string_of_instr e) ^ ")"
+    | IfthenelseInstrNode (_,cond,_,_) ->
+  "if (" ^ (string_of_instr cond) ^ ") {i1} else {i2}"
+    | WhileNode (_,e,_) ->
+  "while (" ^ (string_of_instr e) ^ ") {i}"
+    | ChooseNode (_,_) ->
+  "choose { | p -> c ...}"
+    | SpawnNode (_,f,e) ->
+  "spawn " ^ f ^ "(" ^ (string_of_instr e) ^ ")" 
+    | NewNode (_,a) ->
+  (string_of_instr a) ^ " = newChan()" 
+    | ReturnNode (_,Some (e)) ->
+  "return " ^ (string_of_instr e)
+    | ReturnNode (_,None) ->
+  "return "   
+    | UnaryNode (_,NegateInt,e) ->
+  "(-" ^ (string_of_instr e) ^ ")"
+    | UnaryNode (_,NegateBool,e) ->
+  "(not" ^ (string_of_instr e) ^ ")"
+    | UnaryNode (_,Head,e) ->
+  "head(" ^ (string_of_instr e) ^ ")"
+    | UnaryNode (_,Tail,e) ->
+  "tail(" ^ (string_of_instr e) ^ ")"
+    | UnaryNode (_,Odd,e) ->
+  "odd(" ^ (string_of_instr e) ^ ")"
+    | UnaryNode (_,Even,e) ->
+  "even(" ^ (string_of_instr e) ^ ")"
+    | UnaryNode (_,Fst,e) ->
+  "fst(" ^ (string_of_instr e) ^ ")"
+    | UnaryNode (_,Snd,e) ->
+  "snd(" ^ (string_of_instr e) ^ ")"
+    | BinaryNode (_,e1,Add,e2) ->
+  "(" ^ (string_of_instr e1) ^ " + " ^ (string_of_instr e2) ^ ")"
+    | BinaryNode (_,e1,Substract,e2) ->
+  "(" ^ (string_of_instr e1) ^ " - " ^ (string_of_instr e2) ^ ")"
+    | BinaryNode (_,e1,Or,e2) ->
+  "(" ^ (string_of_instr e1) ^ " || " ^ (string_of_instr e2) ^ ")"
+    | BinaryNode (_,e1,Multiply,e2) ->
+  "(" ^ (string_of_instr e1) ^ " * " ^ (string_of_instr e2) ^ ")"
+    | BinaryNode (_,e1,Divide,e2) ->
+  "(" ^ (string_of_instr e1) ^ " / " ^ (string_of_instr e2) ^ ")"
+    | BinaryNode (_,e1,And,e2) ->
+  "(" ^ (string_of_instr e1) ^ " && " ^ (string_of_instr e2) ^ ")"
+    | BinaryNode (_,e1,Equal,e2) ->
+  "(" ^ (string_of_instr e1) ^ " == " ^ (string_of_instr e2) ^ ")"
+    | BinaryNode (_,e1,Different,e2) ->
+  "(" ^ (string_of_instr e1) ^ " != " ^ (string_of_instr e2) ^ ")"
+    | BinaryNode (_,e1,Lesser,e2) ->
+  "(" ^ (string_of_instr e1) ^ " < " ^ (string_of_instr e2) ^ ")"
+    | BinaryNode (_,e1,Greater,e2) ->
+  "(" ^ (string_of_instr e1) ^ " > " ^ (string_of_instr e2) ^ ")"
+    | IfthenelseExprNode (_,cond,e1,e2) ->
+  "if (" ^ (string_of_instr cond) ^ ") {" ^ (string_of_instr e1) ^ "} else {" ^ (string_of_instr e2) ^ "}"
+    | ExprNode (_,e) ->
+  "(" ^ (string_of_instr e) ^ ")"
+    | ExprsNode (e1,Some (e2)) ->
+  (string_of_instr e1) ^ ", " ^ (string_of_instr e2)
+    | ExprsNode (e1,None) ->
+  (string_of_instr e1)
+    | ValueNode (EmptyList) ->
+  "[]"
+    | ValueNode (v) ->
+  (string_of_instr v)
+    | IntegerNode (_,c) ->
+  (string_of_int c)
+    | CharNode (_,c) ->
+  "'" ^ c ^ "'"
+    | StringNode (_,c) ->
+  "\"" ^ c ^ "\""
+    | TrueNode (_) ->
+  "true"
+    | FalseNode (_) ->
+  "false"
+    | ValueSeqNode (v,None) ->
+  (string_of_instr v)
+    | ValueSeqNode (v,Some(vs)) ->
+  (string_of_instr v) ^ ", " ^ (string_of_instr vs)
+    | AssignNode (_,n) ->
+  n
+    | NoopNode -> 
+  "noop"
+    | Terminated (_) -> 
+  "--"
+    | _ ->
+  "unknownPrinting"

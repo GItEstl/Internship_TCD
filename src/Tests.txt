@@ -56,10 +56,10 @@ Declaration and assignment of tuple, use of the tuple operators
    test-42: Without error: declaration of a tuple (int,char,bool) and use of the third value for the condition in a conditional instruction
    test-43: Without error: declaration of a couple (int,char,string,bool) and use of the fourth value for the condition of a while instruction
    test-44: Type error: declaration of a couple (int,bool) and assignment of couple (int,int)
-   test-45: Without error: declaration of a couple (int,bool) and assignment of the first value to a variable
+   test-45: Type error: declaration of a couple (int,bool) and multiple assignments
    test-46: Type error: declaration of a couple (int,bool) and assignment of a couple (int,int)
-   test-47: Without error: declaration of a couple (int,bool) and use of the second value for the condition in a conditional instruction
-   test-48: Without error: declaration of a couple (int,bool) and use of the second value for the condition of a while instruction
+   test-47: Type error: assignment of value tuple of the wrong size
+   test-48: Type error: comparaison of two tuples of different sizes
    
 Return instruction
    test-49: Without error : return of void

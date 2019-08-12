@@ -24,6 +24,12 @@ type execStatus =
 
 let configs = ref([])
 
+let nbSteps = ref(0)
+
+let vb1 = ref(false)
+let vb2 = ref(false)
+let vb3 = ref(false)
+
 let unfold_chan ch =
   match ch with 
     | ChannelVal(i) -> i
@@ -49,6 +55,8 @@ let ruleSend ch id =
   i := iNew;
   value_of_expr expr (!g,!s)
 
+exception Unk of ast
+
 let ruleReceive ch id v =
   let (i,s,_) = List.nth (!configs) id in
   let (assign,iNew) = (
@@ -57,13 +65,14 @@ let ruleReceive ch id v =
     | ChooseNode(_,c) ->
       let rec aux ast = 
       (match ast with
+        | ChoicesNode(_,PrefixNode(_,Some(AssignNode(_,name)),Receive,Some(_)),ipref,None) -> (name,ipref)
         | ChoicesNode(_,PrefixNode(_,Some(AssignNode(_,name)),Receive,Some(n)),ipref,Some(cs)) ->
           let idch = unfold_chan (ruleIdentifier n (!g,!s)) in  
           if (idch == ch) then (name,ipref) else aux cs
         | ChoicesNode(_,_,_,Some(cs)) -> aux cs 
         | _ -> raise (Unknown_error_reference_interpretor "ruleReceive2"))
       in aux c
-    | _ -> raise (Unknown_error_reference_interpretor "ruleReceive1")
+    | _ -> raise (Unk (!i))
   ) in 
   let pa = find (!s) assign in
   pa := v;
@@ -89,6 +98,7 @@ let ruleSpawn id =
       let ve = value_of_expr expr (!g,!s) in
       (match f with 
         | FuncVal(param,BodyNode(_,decla,instr)) -> 
+          i := NoopNode;
           (ref(instr),ref(create_state param decla ve),ref(Stack.create ()))
         | _ -> raise (Unknown_error_reference_interpretor "ruleSpawn2"))
     | _ -> raise (Unknown_error_reference_interpretor "ruleSpawn1") 
@@ -117,14 +127,24 @@ let check_possible_actions (i,s,_) =
     | Terminated(_) -> []
     | _ -> [BetaAction]
 
+let find_receive chan a idsender = 
+  match a with
+    | (id,ReceiveAction(ch)) -> (chan == ch) && (id != idsender)
+    | _ -> false
+
+let find_send chan a idreceiver = 
+  match a with
+    | (id,SendAction(ch)) -> (chan == ch) && (id != idreceiver)
+    | _ -> false
+
 let find_next_steps actions =
-  let flat_list_actions =  List.flatten (List.map (fun e -> List.mapi (fun i a -> (i,a)) e ) actions) in
+  let flat_list_actions =  List.flatten (List.mapi (fun i e -> List.map (fun a -> (i,a)) e ) actions) in
   let rec aux list_act steps =  
     match list_act with
       | (id,BetaAction)::q -> aux q ((BetaStep(id))::steps)
       | (id,TauAction)::q -> aux q ((TauStep(id))::steps)
-      | (id,SendAction(chan))::q -> aux q ((List.map (fun (idr,_) -> ComStep(chan,id,idr)) (List.find_all (fun (_,a) -> a == ReceiveAction(chan)) q))@steps)  
-      | (id,ReceiveAction(chan))::q -> aux q ((List.map (fun (ids,_) -> ComStep(chan,ids,id)) (List.find_all (fun (_,a) -> a == SendAction(chan)) q))@steps)
+      | (id,SendAction(chan))::q -> aux q ((List.map (fun (idr,_) -> ComStep(chan,id,idr)) (List.find_all (fun a -> find_receive chan a id) q))@steps)  
+      | (id,ReceiveAction(chan))::q -> aux q ((List.map (fun (ids,_) -> ComStep(chan,ids,id)) (List.find_all (fun a -> find_send chan a id) q))@steps)
       | (id,SpawnAction)::q -> aux q ((SpawnStep(id))::steps)
       | [] -> steps
   in aux flat_list_actions []
@@ -137,10 +157,24 @@ let exec_beta_steps id =
       | SendNode(_,_,_) | ReceiveNode(_,_,_) | ChooseNode(_,_) | SpawnNode(_,_,_) | Terminated(_) -> i := instr
       | _ -> aux (exec_beta_step instr frame s e)
   in aux (!i)
-    
-let exec_step () =
+
+let string_of_step step =
+  match step with
+  | ComStep(ch,ids,idr) -> "Com(ch: @" ^ (string_of_int ch) ^ ", s: " ^ (string_of_int ids) ^ ", r: " ^ (string_of_int idr) ^ ")" 
+  | BetaStep(id) -> "Beta(" ^ (string_of_int id) ^ ")"
+  | TauStep(id) -> "Tau(" ^ (string_of_int id) ^ ")"
+  | SpawnStep(id) -> "Spawn(" ^ (string_of_int id) ^ ")"  
+
+let print_exec_step all_steps step =
+  let s = List.fold_left (fun string_vs e -> string_vs ^ (string_of_step e) ^ "; ") "" all_steps in
+  print_string("Possible steps: " ^ s ^ "\n");
+  print_string("Chosen step: " ^ (string_of_step step) ^ "\n") 
+
+let exec_step ()=
   let all_actions = List.map (fun c -> check_possible_actions c) !configs in
   let all_steps = find_next_steps all_actions in
+  let s = List.fold_left (fun string_vs e -> string_vs ^ (string_of_step e) ^ "; ") "" all_steps in
+  print_string("Possible steps: " ^ s ^ "\n");
   let size = List.length all_steps in
   if (size > 0) then
     let n = (Random.bits ()) mod size in
@@ -150,9 +184,11 @@ let exec_step () =
       | BetaStep(id) -> exec_beta_steps id
       | TauStep(id) -> ruleTau id
       | SpawnStep(id) -> let newc = ruleSpawn id in configs := (!configs)@[newc]);
+    if (!vb2) then print_exec_step all_steps step else ();
     Running
   else
-    Executed
+    (if (!vb2) then print_string("Possible Steps: -- \nChosen Step: -- \n") else ();
+    Executed)
 
 let init_seed () =
   print_string("Do you want to initialise the execution with a seed? Y or N\n");
@@ -163,12 +199,21 @@ let init_seed () =
       | "N" | "n" -> self_init (); bits ()
       | _ -> print_string("Wrong input! The seed has been chosen randomly \n"); self_init (); bits ()
     ) in Random.init seed;
-  print_string("The program will be excuted with the seed " ^ (string_of_int seed) ^ "\n")
+  print_string("The program will be excuted with the seed " ^ (string_of_int seed) ^ "\n");
+  print_string("How much verbose do you want? 0, 1, 2 or 3 \n");
+  let vb = read_int () in
+  match vb with
+    | 0 -> vb1 := false; vb2:= false; vb3:= false
+    | 1 -> vb1 := true; vb2:= false; vb3:= false
+    | 2 -> vb1 := true; vb2:= true; vb3:= false
+    | 3 -> vb1 := true; vb2:= true; vb3:= true
+    | _ -> print_string("Incorrect value: the verbose has not been set up correctly \n")
 
 let init_prg ast env_type start = 
   (* Assignment of the type environment and creation of the global state *)
   envType := env_type;
   g := Hashtbl.create 100;
+  nbSteps:= 0;
   (* Filling of the hash table with all the variables and functions *)
   let rec aux tree =
     match tree with
@@ -189,13 +234,52 @@ let init_prg ast env_type start =
           | _ -> raise (Unknown_error_reference_interpretor "init_prg2"))
       | _ -> raise (Unknown_error_reference_interpretor "init_prg1")
 
+let string_of_eval_context e =
+  if (is_empty e) then "--"
+  else match (top e) with
+    | FuncCallReturnFrame(_,a) -> "(state, " ^ a ^ ") :: E" 
+    | FuncCallVoidFrame(_) -> "(state) :: E"
+    | InstrSeqFrame(i) -> "(" ^ (string_of_instr i) ^ ") :: E"
+
+let string_of_state s =
+  let seq = to_seq s in 
+  let str = Seq.fold_left (fun string_vs (name,value) -> string_vs ^ name ^ " = " ^ (string_of_val (Some(!value))) ^ "; ") "" seq in
+  if (String.equal str "") then "--" else str
+
+let print_config nb (i,s,e) =
+  print_string("  Config " ^ (string_of_int nb) ^ ": \n");
+  print_string("    Instruction: " ^ (string_of_instr (!i))^ "\n");
+  print_string("    State: " ^ (string_of_state (!s)) ^ "\n");
+  print_string("    Evaluation Context: " ^ (string_of_eval_context (!e)) ^ "\n\n")
+
+let print_configs () =
+    print_string("\nStep " ^ (string_of_int(!nbSteps)) ^ ":\n");
+    List.iteri (fun i c -> print_config i c) (!configs)
+
+let result_to_string i s = 
+  match (!i) with
+  | Terminated(None) -> string_of_val None
+  | Terminated(Some(expr)) -> string_of_val (Some(value_of_expr expr (!g,!s)))
+  | _ -> string_of_val (Some(Deadlock))
+
+let results_to_string () =
+  if (!vb1) then 
+    let strs = List.mapi (fun nb (i,s,_) -> "    Config " ^ (string_of_int nb) ^ ": "^ (result_to_string i s) ^ "\n")  (!configs) in
+    List.fold_left (fun str e -> str ^ e) "\n" strs
+  else let (i,s,_) = List.hd (!configs) in (result_to_string i s) ^ "\n"
+
 let rec run_prg () =
+  if (!vb3) then print_configs () else ();
+  nbSteps := (!nbSteps) + 1;
   let status = exec_step () in
-  if (status == Running) then 
+  if (status == Running) then
+  let _ = read_int () in
     run_prg ()
   else 
-    let (i,s,_) = List.hd (!configs) in
-    match (!i) with
-      | Terminated(None) -> None
-      | Terminated(Some(expr)) -> Some(value_of_expr expr (!g,!s))
-      | _ -> Some(Deadlock)
+    results_to_string ()
+
+let run_prg_test () =
+  vb1 := false;
+  vb2 := false;
+  vb3 := false;
+  run_prg();

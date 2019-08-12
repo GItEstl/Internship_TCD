@@ -2,21 +2,22 @@ type StringChan = channel string
 
 func void True(channel (StringChan,StringChan) l) {
 def
-    channel string t;
-    StringChan f
+    (StringChan, StringChan) b;
+    StringChan t
 
 in 
-        (t,f) = receive(l);
+        b = receive(l);
+        t = fst(b);
         send(t,"True")
 }
 
 func void False(channel (StringChan,StringChan) l) {
 def
-    StringChan t;
+    (StringChan, StringChan) b;
     StringChan f
-
 in 
-        (t,f) = receive(l);
+        b = receive(l);
+        f = snd(b);
         send(f,"False")
 }
 
@@ -35,17 +36,18 @@ in
     } 
 }
 
-func void test1(string s) {}
+func string test1(string s) {return "test1"}
 
-func void test2(string s) {}
+func string test2(string s) {return "test2"}
 
 func void main(string s) {
 def
     channel (StringChan,StringChan) l
 in
     l = newChan();
-    True(l);
+    spawn True(l);
     cond(l);
+
 }
 
 start main("test")

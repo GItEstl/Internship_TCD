@@ -1,8 +1,7 @@
 open Lexing
 open Resolve
 open TypeChecking
-open ExpressionInterpretor
-open SingleThreadInterpretor
+open MainInterpretor
 
 let report_error filename lexbuf msg =
  let (b,e) = (lexeme_start_p lexbuf, lexeme_end_p lexbuf) in
@@ -23,7 +22,7 @@ let report_error filename lexbuf msg =
   let _ = type_check_prg envVar envType nameListType ast in
   Random.init 0;
   init_prg ast envType start;
-  string_of_val (run_prg ())
+  run_prg_test ()
   with
   | Lexer.Error _ -> "lexical error (unexpected character)"
   | Parser.Error -> "syntax error"
@@ -79,6 +78,7 @@ let report_error filename lexbuf msg =
   | TypeChecking.Unknown_error_type_checking(m) -> "Unknown error during type checking: please check the function " ^ m ^ " in the file TypeChecking.ml"
   | TypeChecking.Get_tuple_too_short(_) -> "Incorrect use of get: index out of bound"
   | TypeChecking.Assignment_to_global_var(_,n) -> "You cannot assign a value to the global variable " ^ n
+  | TypeChecking.Multiple_assignments(_) -> "Incorrect assignment: you can assign an expression to only one variable"
   | ExpressionInterpretor.Run_time_error(_) -> "Runtime error"
   | ExpressionInterpretor.Unknown_error_reference_interpretor(m) -> "Unknown error during execution: please check the function " ^ m ^ " in the file ReferenceInterpretor.ml"
 
@@ -128,10 +128,10 @@ let%expect_test _ = print_string (main "../../examples/test_type_checker/test-41
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-42.mml"); [%expect{| unit |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-43.mml"); [%expect{| unit |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-44.mml"); [%expect{| Wrong type: The type (integer, integer) was found but the type (integer, boolean) was expected |}]
-let%expect_test _ = print_string (main "../../examples/test_type_checker/test-45.mml"); [%expect{| unit |}]
+let%expect_test _ = print_string (main "../../examples/test_type_checker/test-45.mml"); [%expect{| Incorrect assignment: you can assign an expression to only one variable |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-46.mml"); [%expect{| Wrong type: The type (integer, boolean) was found but the type (integer, integer) was expected |}]
-let%expect_test _ = print_string (main "../../examples/test_type_checker/test-47.mml"); [%expect{| unit |}]
-let%expect_test _ = print_string (main "../../examples/test_type_checker/test-48.mml"); [%expect{| unit |}]
+let%expect_test _ = print_string (main "../../examples/test_type_checker/test-47.mml"); [%expect{| Wrong type: The type (integer, boolean, boolean) was found but the type (integer, boolean) was expected |}]
+let%expect_test _ = print_string (main "../../examples/test_type_checker/test-48.mml"); [%expect{| Illegal type argument |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-49.mml"); [%expect{| unit |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-50.mml"); [%expect{| Wrong type of function return: The function test50 returns the type void but the type integer was found |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-51.mml"); [%expect{| Multiple return types found in the function test51 |}]
@@ -285,4 +285,4 @@ let%expect_test _ = print_string (main "../../examples/test_type_checker/test-19
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-197.mml"); [%expect{| true |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-198.mml"); [%expect{| false |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-199.mml"); [%expect{| Wrong type: The type string was found but the type channel string was expected |}]
-let%expect_test _ = print_string (main "../../examples/test_type_checker/test-200.mml"); [%expect{| "notOK" |}] 
+let%expect_test _ = print_string (main "../../examples/test_type_checker/test-200.mml"); [%expect{| "notOK" |}]  

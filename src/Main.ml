@@ -1,9 +1,8 @@
-open Ast 
 open Lexing
 open Resolve
 open TypeChecking
-open SingleThreadInterpretor
 open ExpressionInterpretor
+open MainInterpretor
 
 let report_error filename lexbuf msg =
  let (b,e) = (lexeme_start_p lexbuf, lexeme_end_p lexbuf) in
@@ -17,7 +16,6 @@ let report_error filename lexbuf msg =
   try
   let ast = Parser.main Lexer.token filebuf  in
   print_string ("File parsed \n");
-  (* print_string (string_of_ast ast); *)
   let (envType,envVar,start) = create_env ([],[],None) ast in
   let (envType,envVar) = (List.rev envType, List.rev envVar) in
   print_string ("Environment created \n");
@@ -29,9 +27,9 @@ let report_error filename lexbuf msg =
   print_string ("Program type-checked \n");
   init_seed ();
   init_prg ast envType start;
-  let result = string_of_val (run_prg ()) in
-  print_string ("Program executed \n");
-  print_string("Result: " ^ result ^ "\n")
+  let result = run_prg () in
+  print_string ("\nProgram executed \n");
+  print_string("Result: " ^ result)
   with
   | Lexer.Error _ ->
       report_error file filebuf "lexical error (unexpected character)";
@@ -66,10 +64,9 @@ let report_error filename lexbuf msg =
     let e = string_of_type texpec in
     Printf.eprintf "File \"%s\", line %d, character %d: Wrong type: The type %s was found but the type %s was expected\n" file pos.pos_lnum c f e;
  | TypeChecking.Inconsistent_types(pos,t1found,t2found) ->
-    let c = pos.pos_cnum - pos.pos_bol + 1 in
     let t_then = string_of_type t1found in
     let t_else = string_of_type t2found in
-    Printf.eprintf "File \"%s\", line %d, character %d: Inconsistent types: The return type %s and %s were found in the then and else branch\n" file pos.pos_lnum c t_then t_else;
+    Printf.eprintf "File \"%s\", line %d: Inconsistent types: The return type %s and %s were found in the then and else branch\n" file pos.pos_lnum t_then t_else;
  | TypeChecking.Unknown_variable(pos,name) ->
     let c = pos.pos_cnum - pos.pos_bol + 1 in
     Printf.eprintf "File \"%s\", line %d, character %d: Unknown variable: unbound value %s\n" file pos.pos_lnum c name;
@@ -77,15 +74,13 @@ let report_error filename lexbuf msg =
     let c = pos.pos_cnum - pos.pos_bol + 1 in
     Printf.eprintf "File \"%s\", line %d, character %d: Unknown function: unbound value %s\n" file pos.pos_lnum c namef;
  | TypeChecking.Not_type_of_the_params(pos,te,tp,namef) ->
-    let c = pos.pos_cnum - pos.pos_bol + 1 in
     let t_expr = string_of_type te in
     let t_decla = string_of_type tp in
-    Printf.eprintf "File \"%s\", line %d, character %d: Wrong type of argument in the function %s: the type %s was found but the type %s was expected\n" file pos.pos_lnum c namef t_expr t_decla;
+    Printf.eprintf "File \"%s\", line %d: Wrong type of argument in the function %s: the type %s was found but the type %s was expected\n" file pos.pos_lnum namef t_expr t_decla;
  | TypeChecking.Not_type_of_the_return(pos,ta,tf,namef) ->
-    let c = pos.pos_cnum - pos.pos_bol + 1 in
     let t_assign = string_of_type ta in
     let t_func = string_of_type tf in
-    Printf.eprintf "File \"%s\", line %d, character %d: Incorrect assignment of the function return: the function %s returns the type %s but the type %s was found\n" file pos.pos_lnum c namef t_func t_assign;
+    Printf.eprintf "File \"%s\", line %d: Incorrect assignment of the function return: the function %s returns the type %s but the type %s was found\n" file pos.pos_lnum namef t_func t_assign;
  | TypeChecking.Assignement_of_void(pos,namef) ->
     let c = pos.pos_cnum - pos.pos_bol + 1 in
     Printf.eprintf "File \"%s\", line %d, character %d: Incorrect assignment: the function %s does not have a return\n" file pos.pos_lnum c namef;
@@ -104,21 +99,17 @@ let report_error filename lexbuf msg =
     let t_chan = string_of_type st in
     Printf.eprintf "File \"%s\", line %d, character %d: Wrong type of element send: the elements passed along the channel have the type %s but the type %s was found\n" file pos.pos_lnum c t_elt t_chan;
  | TypeChecking.Different_type_of_return_if (pos,t1,t2) ->
-    let c = pos.pos_cnum - pos.pos_bol + 1 in
     let t_then = string_of_type t1 in
     let t_else = string_of_type t2 in
-    Printf.eprintf "File \"%s\", line %d, character %d: Inconsistent types: The return type %s and %s were found in the then and else branch\n" file pos.pos_lnum c t_then t_else;
+    Printf.eprintf "File \"%s\", line %d: Inconsistent types: The return type %s and %s were found in the then and else branch\n" file pos.pos_lnum t_then t_else;
  | TypeChecking.Return_not_match_with_decla (pos,rt,ft,namef) ->
-    let c = pos.pos_cnum - pos.pos_bol + 1 in
     let t_return = string_of_type rt in
     let t_func = string_of_type ft in
-    Printf.eprintf "File \"%s\", line %d, character %d: Wrong type of function return: The function %s returns the type %s but the type %s was found\n" file pos.pos_lnum c namef t_func t_return;
+    Printf.eprintf "File \"%s\", line %d: Wrong type of function return: The function %s returns the type %s but the type %s was found\n" file pos.pos_lnum namef t_func t_return;
  | TypeChecking.Different_type_of_return_func (pos,namef) ->
-    let c = pos.pos_cnum - pos.pos_bol + 1 in 
-    Printf.eprintf "File \"%s\", line %d, character %d: Multiple return types found in the function %s\n" file pos.pos_lnum c namef;
+    Printf.eprintf "File \"%s\", line %d: Multiple return types found in the function %s\n" file pos.pos_lnum namef;
  | TypeChecking.Illegal_type_argument(pos) ->
-    let c = pos.pos_cnum - pos.pos_bol + 1 in
-    Printf.eprintf "File \"%s\", line %d, character %d: Illegal type argument\n" file pos.pos_lnum c;
+    Printf.eprintf "File \"%s\", line %d: Illegal type argument\n" file pos.pos_lnum;
  | TypeChecking.Different_types_in_list ->
    Printf.eprintf "File \"%s\": A list containing different types has been found, a list can contain only elements of one type\n" file;
  | TypeChecking.Unknown_error_type_checking(m) ->
@@ -129,6 +120,8 @@ let report_error filename lexbuf msg =
  | TypeChecking.Assignment_to_global_var(pos,n) ->
    let c = pos.pos_cnum - pos.pos_bol + 1 in
    Printf.eprintf "File \"%s\", line %d, character %d: You cannot assign a value to the global variable %s \n" file pos.pos_lnum c n;
+ | TypeChecking.Multiple_assignments(pos) ->
+   Printf.eprintf "File \"%s\", line %d: Incorrect assignment: you can assign an expression to only one variable" file pos.pos_lnum
  | Run_time_error(m) -> 
     Printf.eprintf "File \"%s\": Runtime error: %s\n" file m;
  | Division_by_zero -> 
