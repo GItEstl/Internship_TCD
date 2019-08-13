@@ -1,7 +1,6 @@
 open Lexing
 open Resolve
 open TypeChecking
-open ExpressionInterpretor
 open MainInterpretor
 
 let report_error filename lexbuf msg =
@@ -122,10 +121,14 @@ let report_error filename lexbuf msg =
    Printf.eprintf "File \"%s\", line %d, character %d: You cannot assign a value to the global variable %s \n" file pos.pos_lnum c n;
  | TypeChecking.Multiple_assignments(pos) ->
    Printf.eprintf "File \"%s\", line %d: Incorrect assignment: you can assign an expression to only one variable" file pos.pos_lnum
- | Run_time_error(m) -> 
+ | ExpressionInterpretor.Run_time_error(m) -> 
     Printf.eprintf "File \"%s\": Runtime error: %s\n" file m;
+ | ExpressionInterpretor.Unknown_error_expression_interpretor(m) -> 
+    Printf.eprintf "File \"%s\": Unknown error during execution: please check the function %s in the file ExpressionInterpretor.ml\n" file m;
+ | BetaRedInterpretor.Unknown_error_betared_interpretor(m) ->
+    Printf.eprintf "File \"%s\": Unknown error during execution: please check the function %s in the file BetaRedInterpretor.ml\n" file m;
+ | MainInterpretor.Unknown_error_main_interpretor(m) ->
+    Printf.eprintf "File \"%s\": Unknown error during execution: please check the function %s in the file MainInterpretor.ml\n" file m;
  | Division_by_zero -> 
     Printf.eprintf "File \"%s\": Runtime error: Division by zero\n" file;
- | Unknown_error_reference_interpretor (m) -> 
-    Printf.eprintf "File \"%s\": Unknown error during execution: please check the function %s in the file ReferenceInterpretor.ml\n" file m;
    

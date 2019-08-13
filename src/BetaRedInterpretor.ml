@@ -10,8 +10,7 @@ type frame =
   | FuncCallVoidFrame of state
   | InstrSeqFrame of ast
 
-exception Unknown_error_reference_interpretor_ of (frame option * ast)
-exception Test of ast
+exception Unknown_error_betared_interpretor of string
 
 let envType = ref([(Lexing.dummy_pos,"",NoopNode,false)])
 let g = ref (Hashtbl.create 100)
@@ -34,11 +33,11 @@ let rec def_value t =
       let rec aux t l = match t with
         | TypeSeqNode (st,None) -> List.rev ((def_value st)::l) 
         | TypeSeqNode (st1, Some(st2)) -> aux st2 ((def_value st1)::l)
-        | _ -> raise (Unknown_error_reference_interpretor "def_value2")
+        | _ -> raise (Unknown_error_betared_interpretor "def_value2")
       in aux tSeq [])
     | NamedTypeNode (_,st) -> let _,_,t,_ = (List.find (fun (_,name,_,_) -> String.equal name st) !envType) in (def_value t)
     | ChanTNode(_,_) -> ChannelVal(Channel.create_chan_id ())
-    | _ -> raise (Unknown_error_reference_interpretor "def_value")
+    | _ -> raise (Unknown_error_betared_interpretor "def_value")
 
 
 (* extend_state_with_params: ast -> (string, valueType ref) Hashtbl.t -> valueType -> unit
@@ -57,7 +56,7 @@ let extend_state_with_params paramsnode state vparams =
     match (pnode,vpa) with
       | (ParamsNode (_,_,name,None), [e])-> Hashtbl.add state name (ref e)
       | (ParamsNode (_,_,name,Some(p)), t::q) -> Hashtbl.add state name (ref t); aux p q
-      | _ -> raise (Unknown_error_reference_interpretor "extend_state_with_params2")
+      | _ -> raise (Unknown_error_betared_interpretor "extend_state_with_params2")
   in aux paramsnode vp
 
 
@@ -75,7 +74,7 @@ let extend_state_with_local_declas decla state =
         (match d with
           | VariableDeclasNode (VariableDeclaNode (_,t,name),None) -> Hashtbl.add state name (ref(def_value t)) 
           | VariableDeclasNode (VariableDeclaNode (_,t,name),Some(vs)) -> Hashtbl.add state name (ref(def_value t)); aux vs
-          | _ -> raise (Unknown_error_reference_interpretor "extend_state_with_local_declas2")
+          | _ -> raise (Unknown_error_betared_interpretor "extend_state_with_local_declas2")
         )
       in aux d
 
@@ -102,7 +101,7 @@ let ruleSeqInstr ast e =
       (match iseq with 
         | InstrSeqNode(bi,None) -> push (InstrSeqFrame(bi)) (!e); i
         | _ -> push (InstrSeqFrame(iseq)) (!e); i)
-    | _ -> raise (Unknown_error_reference_interpretor "ruleSeqInstr1") 
+    | _ -> raise (Unknown_error_betared_interpretor "ruleSeqInstr1") 
 
 (* Numero 10 *)
 let ruleAssignInstr a expr s =
@@ -112,7 +111,7 @@ let ruleAssignInstr a expr s =
       let pa = find (!s) name in
       pa := ve;
       NoopNode
-    | _ -> raise (Unknown_error_reference_interpretor "ruleAssignInstr")
+    | _ -> raise (Unknown_error_betared_interpretor "ruleAssignInstr")
 
 (* Numero 1 *)
 let ruleCallFuncWithReturn a namef expr s e = 
@@ -123,7 +122,7 @@ let ruleCallFuncWithReturn a namef expr s e =
       push (FuncCallReturnFrame(copy (!s),name)) (!e);
       s := create_state param decla ve;
       instr 
-    | _ -> raise (Unknown_error_reference_interpretor "ruleCallFuncWithReturn") 
+    | _ -> raise (Unknown_error_betared_interpretor "ruleCallFuncWithReturn") 
 
 (* Numero 2 *)
 let ruleCallFuncVoid namef expr s e = 
@@ -134,7 +133,7 @@ let ruleCallFuncVoid namef expr s e =
       push (FuncCallVoidFrame(copy (!s))) (!e);
       s := create_state param decla ve;
       instr 
-    | _ -> raise (Unknown_error_reference_interpretor "ruleCallFuncVoid")
+    | _ -> raise (Unknown_error_betared_interpretor "ruleCallFuncVoid")
 
 (* Numero / *)
 let ruleIfThenElseInstr cond i1 i2 s =
@@ -142,7 +141,7 @@ let ruleIfThenElseInstr cond i1 i2 s =
   match vcond with
   | BooleanVal(true) -> i1
   | BooleanVal(false) -> i2
-  | _ -> raise (Unknown_error_reference_interpretor "ruleIfThenElseInstr")
+  | _ -> raise (Unknown_error_betared_interpretor "ruleIfThenElseInstr")
 
 (* Numero 11 et 12 *)
 let ruleWhile pos cond instr s =
@@ -150,7 +149,7 @@ let ruleWhile pos cond instr s =
   match vcond with
   | BooleanVal(true) -> InstrSeqNode(instr,Some(WhileNode(pos,cond,instr)))
   | BooleanVal(false) -> NoopNode
-  | _ -> raise (Unknown_error_reference_interpretor "ruleWhile")
+  | _ -> raise (Unknown_error_betared_interpretor "ruleWhile")
 
 (* Numero 13 et 14 *)
 let ruleReturnBreak ast e = 
@@ -161,7 +160,7 @@ let ruleNoop e =
   let frame = pop (!e) in
   match frame with
     | InstrSeqFrame(i) -> i
-    | _ -> raise (Unknown_error_reference_interpretor "ruleNoop")
+    | _ -> raise (Unknown_error_betared_interpretor "ruleNoop")
 
 (* Numero 3 *)
 let ruleAssignReturn ast s e =
@@ -175,8 +174,8 @@ let ruleAssignReturn ast s e =
         let pa = find (!s) name in
         pa := ve;
         NoopNode
-      | _ -> raise (Unknown_error_reference_interpretor "ruleAssignReturn2"))
-  | _ -> raise (Unknown_error_reference_interpretor "ruleAssignReturn1")
+      | _ -> raise (Unknown_error_betared_interpretor "ruleAssignReturn2"))
+  | _ -> raise (Unknown_error_betared_interpretor "ruleAssignReturn1")
 
 (* Numero 4 *)
 let ruleVoid s e =
@@ -185,7 +184,7 @@ let ruleVoid s e =
     | FuncCallVoidFrame(old_s) -> 
       s := old_s;
       NoopNode
-    | _ -> raise (Unknown_error_reference_interpretor "ruleVoid")
+    | _ -> raise (Unknown_error_betared_interpretor "ruleVoid")
 
 let ruleNewChan ast s = 
   match ast with 
@@ -194,7 +193,7 @@ let ruleNewChan ast s =
     let pa = find (!s) name in
     pa := ch;
     NoopNode
-  | _ -> raise (Unknown_error_reference_interpretor "ruleNewChan")
+  | _ -> raise (Unknown_error_betared_interpretor "ruleNewChan")
 
 let exec_beta_step ast frame s e =
   match (frame,ast) with 
@@ -204,7 +203,6 @@ let exec_beta_step ast frame s e =
     | (_, CallNode (_,namef,expr)) -> ruleCallFuncVoid namef expr s e
     | (_, IfthenelseInstrNode (_,cond,i1,i2)) -> ruleIfThenElseInstr cond i1 i2 s
     | (_, WhileNode (pos,expr,i)) -> ruleWhile pos expr i s
-    | (_, ReturnNode (_,Some (CallNode (_,_,_)))) -> raise (Unknown_error_reference_interpretor "notImplemented")
     | (Some(InstrSeqFrame(_)), ReturnNode (_,_)) -> ruleReturnBreak ast e
     | (Some(InstrSeqFrame(_)), NoopNode) -> ruleNoop e
     | (Some(FuncCallReturnFrame(_,_)), ReturnNode (_,_)) -> ruleAssignReturn ast s e
@@ -213,4 +211,4 @@ let exec_beta_step ast frame s e =
     | (None,NoopNode) -> ReturnNode(Lexing.dummy_pos,None)
     | (Some(FuncCallVoidFrame(_)), NoopNode) -> ReturnNode(Lexing.dummy_pos,None)
     | (None,ReturnNode(_,e)) -> Terminated(e)
-    | (_,_) -> raise (Unknown_error_reference_interpretor_ (frame,ast))
+    | (_,_) -> raise (Unknown_error_betared_interpretor "exec_beta_step")

@@ -22,6 +22,8 @@ type execStatus =
   | Running
   | Executed
 
+exception Unknown_error_main_interpretor of string
+
 let configs = ref([])
 
 let nbSteps = ref(0)
@@ -35,7 +37,7 @@ let max = ref(10000)
 let unfold_chan ch =
   match ch with 
     | ChannelVal(i) -> i
-    | _ -> raise (Unknown_error_reference_interpretor "not a channel in unfold_chan")
+    | _ -> raise (Unknown_error_main_interpretor "not a channel in unfold_chan")
 
 let ruleSend ch id =
   let (i,s,_) = List.nth (!configs) id in
@@ -50,9 +52,9 @@ let ruleSend ch id =
           let idch = unfold_chan (ruleIdentifier n (!g,!s)) in 
           if (idch == ch) then (exp,ipref) else aux cs
         | ChoicesNode(_,_,_,Some(cs)) -> aux cs 
-        | _ -> raise (Unknown_error_reference_interpretor "ruleSend2"))
+        | _ -> raise (Unknown_error_main_interpretor "ruleSend2"))
       in aux c
-    | _ -> raise (Unknown_error_reference_interpretor "ruleSend1")
+    | _ -> raise (Unknown_error_main_interpretor "ruleSend1")
   ) in 
   i := iNew;
   value_of_expr expr (!g,!s)
@@ -72,7 +74,7 @@ let ruleReceive ch id v =
           let idch = unfold_chan (ruleIdentifier n (!g,!s)) in  
           if (idch == ch) then (name,ipref) else aux cs
         | ChoicesNode(_,_,_,Some(cs)) -> aux cs 
-        | _ -> raise (Unknown_error_reference_interpretor "ruleReceive2"))
+        | _ -> raise (Unknown_error_main_interpretor "ruleReceive2"))
       in aux c
     | _ -> raise (Unk (!i))
   ) in 
@@ -88,9 +90,9 @@ let ruleTau id =
       (match ast with
         | ChoicesNode(_,PrefixNode(_,_,Tau,_),ipref,_) -> i := ipref
         | ChoicesNode(_,_,_,Some(cs)) -> aux cs 
-        | _ -> raise (Unknown_error_reference_interpretor "ruleTau2"))
+        | _ -> raise (Unknown_error_main_interpretor "ruleTau2"))
       in aux c
-    | _ -> raise (Unknown_error_reference_interpretor "ruleTau1")
+    | _ -> raise (Unknown_error_main_interpretor "ruleTau1")
 
 let ruleSpawn id =
   let (i,s,_) = List.nth (!configs) id in
@@ -102,15 +104,15 @@ let ruleSpawn id =
         | FuncVal(param,BodyNode(_,decla,instr)) -> 
           i := NoopNode;
           (ref(instr),ref(create_state param decla ve),ref(Stack.create ()))
-        | _ -> raise (Unknown_error_reference_interpretor "ruleSpawn2"))
-    | _ -> raise (Unknown_error_reference_interpretor "ruleSpawn1") 
+        | _ -> raise (Unknown_error_main_interpretor "ruleSpawn2"))
+    | _ -> raise (Unknown_error_main_interpretor "ruleSpawn1") 
      
 let prefix_to_action (_,_,action,ch) s =
   match action,ch with
     | Tau,_ -> TauAction
     | Send,Some(n) -> let id = ruleIdentifier n (!g,!s) in SendAction(unfold_chan id)
     | Receive,Some(n) -> let id = ruleIdentifier n (!g,!s) in ReceiveAction(unfold_chan id)
-    | _ -> raise (Unknown_error_reference_interpretor "prefix_to_actions")
+    | _ -> raise (Unknown_error_main_interpretor "prefix_to_actions")
 
 let check_possible_actions (i,s,_) =
   match (!i) with
@@ -122,7 +124,7 @@ let check_possible_actions (i,s,_) =
       (match ast with
         | ChoicesNode(_,PrefixNode(pos,arg,act,ch),_,None) -> List.rev ((pos,arg,act,ch)::choices)
         | ChoicesNode(_,PrefixNode(pos,arg,act,ch),_,Some(cs)) -> aux cs ((pos,arg,act,ch)::choices)
-        | _ -> raise (Unknown_error_reference_interpretor "check_possible_actions")
+        | _ -> raise (Unknown_error_main_interpretor "check_possible_actions")
       ) in 
       let list_acts = aux c [] in
       List.map (fun p -> prefix_to_action p s) list_acts
@@ -227,8 +229,8 @@ let init_prg ast env_type start verbosity seed maxstep =
         (match f with 
           | FuncVal(param,BodyNode(_,decla,instr)) -> 
             configs := [(ref(instr),ref(create_state param decla ve),ref(Stack.create ()))] 
-          | _ -> raise (Unknown_error_reference_interpretor "init_prg2"))
-      | _ -> raise (Unknown_error_reference_interpretor "init_prg1")
+          | _ -> raise (Unknown_error_main_interpretor "init_prg2"))
+      | _ -> raise (Unknown_error_main_interpretor "init_prg1")
 
 let string_of_eval_context e =
   if (is_empty e) then "--"

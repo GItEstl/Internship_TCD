@@ -1,6 +1,11 @@
 open Ast
 open Channel
 
+(* For all the function using as parameters state:
+    state: ((string, valueType ref) Hashtbl.t, (string, valueType ref) Hashtbl.t)
+*)
+
+(* Type of the values *)
 type valueType =
   | IntegerVal of int
   | BooleanVal of bool
@@ -13,8 +18,8 @@ type valueType =
   | ErrorVal
   | Deadlock
 
-exception Unknown_error_reference_interpretor of string
 exception Run_time_error of string
+exception Unknown_error_expression_interpretor of string
 
 (* string_of_val: valueType option -> string
 Function converting a value into a string
@@ -40,11 +45,11 @@ let string_of_val v =
         | _ -> "ERROR"
       in aux vs 
 
-(* value_of_expr: (string, valueType ref) Hashtbl.t -> valueType
+(* value_of_expr: ast -> state -> valueType
 Function calculating the value of an expression
 Parameters:
   - expr: abstract syntax tree representing the expression
-  - state: hash table representing the state of all the variables  
+  - state: hash tables representing the state of all the variables  
 Return: a string corresponding to the expression
 *)
 let rec value_of_expr expr state =
@@ -57,17 +62,16 @@ let rec value_of_expr expr state =
     | ExprsNode (e1,Some(e2)) -> ruleTupleExpr (ExprsNode (e1,Some(e2))) state
     | ValueNode (v) -> ruleValue v
     | AssignNode (_,a) -> ruleIdentifier a state
-    | _ -> raise (Unknown_error_reference_interpretor "value_of_expr")
+    | _ -> raise (Unknown_error_expression_interpretor "value_of_expr")
 
 and
 
-
-(* ruleUnary: unary -> ast -> (string, valueType ref) Hashtbl.t -> valueType
+(* ruleUnary: unary -> ast -> state -> valueType
 Function calculating the value of an unary operation
 Parameters:
   - op: unary operator
   - expr: abstract syntax tree representing the expression
-  - state: hash table representing the state of all the variables  
+  - state: hash tables representing the state of all the variables  
 Return: the result corresponding to the unary operation
 *)
 ruleUnary op expr state = 
@@ -78,12 +82,12 @@ ruleUnary op expr state =
         | NegateInt -> IntegerVal(- i)
         | Odd -> if ((i mod 2) == 1) then BooleanVal(true) else BooleanVal(false)
         | Even -> if ((i mod 2) == 0) then BooleanVal(true) else BooleanVal(false)
-        | _ -> raise (Unknown_error_reference_interpretor "ruleUnary1")
+        | _ -> raise (Unknown_error_expression_interpretor "ruleUnary1")
       ) 
     | BooleanVal(b) ->
       (match op with
         | NegateBool -> BooleanVal((not b))
-        | _ -> raise (Unknown_error_reference_interpretor "ruleUnary2")
+        | _ -> raise (Unknown_error_expression_interpretor "ruleUnary2")
       )
     | ListVal([]) -> 
       raise (Run_time_error "You cannot apply an operator to an empty list") 
@@ -91,27 +95,26 @@ ruleUnary op expr state =
       (match op with
         | Head -> t
         | Tail -> ListVal(q)
-        | _ -> raise (Unknown_error_reference_interpretor "ruleUnary3")
+        | _ -> raise (Unknown_error_expression_interpretor "ruleUnary3")
       )
     | TupleVal(l) -> 
       (match op with
         | Fst -> List.nth l 0
         | Snd -> List.nth l 1 
-        | _ -> raise (Unknown_error_reference_interpretor "ruleUnary4")
+        | _ -> raise (Unknown_error_expression_interpretor "ruleUnary4")
       )
-    | _ -> raise (Unknown_error_reference_interpretor "ruleUnary")
+    | _ -> raise (Unknown_error_expression_interpretor "ruleUnary")
   )
 
 and
 
-
-(* ruleBinary: binary -> ast -> ast -> (string, valueType ref) Hashtbl.t -> valueType
+(* ruleBinary: binary -> ast -> ast -> state -> valueType
 Function calculating the value of an binary operation
 Parameters:
   - op: unary operator
   - lexpr: abstract syntax tree representing the left expression
   _ rexpr: abstract syntax tree representing the right expression
-  - state: hash table representing the state of all the variables  
+  - state: hash tables representing the state of all the variables  
 Return: the result corresponding to the binary operation
 *)
 ruleBinary op lexpr rexpr state = 
@@ -128,7 +131,7 @@ ruleBinary op lexpr rexpr state =
         | Substract -> IntegerVal(il - ir)
         | Multiply -> IntegerVal(il * ir)
         | Divide -> IntegerVal(il / ir)
-        | _ -> raise (Unknown_error_reference_interpretor "ruleBinary1")
+        | _ -> raise (Unknown_error_expression_interpretor "ruleBinary1")
       )
     | (BooleanVal(bl),BooleanVal(br)) ->
       (match op with
@@ -136,29 +139,28 @@ ruleBinary op lexpr rexpr state =
         | Different -> BooleanVal(bl != br)
         | Or -> BooleanVal(bl || br)
         | And -> BooleanVal(bl && br)
-        | _ -> raise (Unknown_error_reference_interpretor "ruleBinary2")
+        | _ -> raise (Unknown_error_expression_interpretor "ruleBinary2")
       ) 
     | ((StringVal(sl),StringVal(sr)) | (CharVal(sl),CharVal(sr)))-> 
       (match op with
         | Equal -> BooleanVal(String.equal sl sr)
         | Different -> BooleanVal(not (String.equal sl sr))
-        | _ -> raise (Unknown_error_reference_interpretor "ruleBinary3")
+        | _ -> raise (Unknown_error_expression_interpretor "ruleBinary3")
       )
     | (IntegerVal(i),TupleVal(t)) -> List.nth t i
     | (ChannelVal(ch1),ChannelVal(ch2)) -> BooleanVal(Channel.equal ch1 ch2) 
-    | _ -> raise (Unknown_error_reference_interpretor "ruleBinary")
+    | _ -> raise (Unknown_error_expression_interpretor "ruleBinary")
   )
 
 and 
 
-
-(* ruleIfThenElseExpr: ast -> ast -> ast -> (string, valueType ref) Hashtbl.t -> valueType
+(* ruleIfThenElseExpr: ast -> ast -> ast -> state -> valueType
 Function calculating the value of an binary operation
 Parameters:
   - cond_expr: abstract syntax tree representing the expression for the condition
   - then_expr: abstract syntax tree representing the expression in the then branch
   - else_expr: abstract syntax tree representing the expression in the else branch
-  - state: hash table representing the state of all the variables  
+  - state: hash tables representing the state of all the variables  
 Return: the result corresponding to the conditional expression
 *)
 ruleIfThenElseExpr cond_expr then_expr else_expr state =
@@ -166,16 +168,15 @@ ruleIfThenElseExpr cond_expr then_expr else_expr state =
   match vcond with
     | BooleanVal(true) -> value_of_expr then_expr state
     | BooleanVal(false) -> value_of_expr else_expr state
-    | _ -> raise (Unknown_error_reference_interpretor "ruleIfThenElseExpr")
+    | _ -> raise (Unknown_error_expression_interpretor "ruleIfThenElseExpr")
     
 and
 
-
-(* ruleTupleExpr: ast -> (string, valueType ref) Hashtbl.t -> valueType
+(* ruleTupleExpr: ast -> state -> valueType
 Function calculating the value of an expression tuple
 Parameters:
   - exprs: abstract syntax tree representing the tuple of expressions
-  - state: hash table representing the state of all the variables  
+  - state: hash tables representing the state of all the variables  
 Return: the result corresponding to the expression tuple
 *)
 ruleTupleExpr exprs state =
@@ -184,17 +185,15 @@ ruleTupleExpr exprs state =
     match exs with
       | ExprsNode (e,None) -> List.rev ((value_of_expr e state)::l)
       | ExprsNode (e1,Some(e2)) -> aux e2 ((value_of_expr e1 state)::l)
-      | _ -> raise (Unknown_error_reference_interpretor "ruleTupleExpr")
+      | _ -> raise (Unknown_error_expression_interpretor "ruleTupleExpr")
   in aux exprs [])
 
 and
 
-
-(* ruleValue: ast -> (string, valueType ref) Hashtbl.t -> valueType
+(* ruleValue: ast -> valueType
 Function converting a value node into a valueType
 Parameters:
-  - v: the abstract syntax tree representing the value
-  - state: hash table representing the state of all the variables  
+  - v: the abstract syntax tree representing the value 
 Return: the result corresponding to the value node
 *)
 ruleValue v =
@@ -202,7 +201,7 @@ ruleValue v =
     (match vs with
       | ValueSeqNode (val1,None) -> List.rev ((ruleValue val1)::l)
       | ValueSeqNode (val1,Some(val2)) -> aux val2 ((ruleValue val1)::l)
-      | _ -> raise (Unknown_error_reference_interpretor "ruleValue2")) in
+      | _ -> raise (Unknown_error_expression_interpretor "ruleValue2")) in
   match v with
     | ValueNode (IntegerNode (_,i)) -> IntegerVal(i)
     | ValueNode (CharNode (_,c)) -> CharVal(c)
@@ -212,15 +211,15 @@ ruleValue v =
     | ValueNode (EmptyList) -> ListVal([])
     | ValueNode (ValueSeqNode (v1,v2)) -> ListVal (aux (ValueSeqNode(v1,v2)) [])
     | ValueSeqNode (_,_) -> TupleVal (aux v [])
-    | _ -> raise (Unknown_error_reference_interpretor "ruleValue")
+    | _ -> raise (Unknown_error_expression_interpretor "ruleValue")
 and
 
 
-(* ruleIdentifier: ast -> (string, valueType ref) Hashtbl.t -> valueType
+(* ruleIdentifier: ast -> state -> valueType
 Function finding the value associated to an identifier
 Parameters:
   - a: the abstract syntax tree representing the assignable
-  - state: hash table representing the state of all the variables  
+  - (global,local): hash tables representing the state of all the global and local variables  
 Return: the result corresponding to the assignable
 *)
 ruleIdentifier a (global,local) = 

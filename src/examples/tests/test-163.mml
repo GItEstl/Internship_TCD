@@ -1,18 +1,26 @@
 // Type error: crossed recursivity: different types of return
 
 func boolean evenfunc (int n) {
+def
+    int v
+in
     if (n==0) {
         return true
     } else {
-        return oddfunc(n-1)
+        v = oddfunc(n-1);
+        return v
     }
 }
 
 func int oddfunc (int n) {
+def
+    boolean b
+in
     if (n == 0) {
         return 1
     } else {
-        return evenfunc(n-1)
+        b = evenfunc(n-1);
+        return b
     }
 }
 

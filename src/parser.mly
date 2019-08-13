@@ -107,7 +107,6 @@ binstruction :
  | a = expr pos = AssignToken NewToken LeftParenthesisToken RightParenthesisToken                                         {NewNode (pos,a)}
  | pos = ReturnToken                                                                                                          {ReturnNode (pos,None)}
  | pos = ReturnToken e = expr                                                                                                 {ReturnNode (pos,Some (e))}
- | pos = ReturnToken f = IdentToken LeftParenthesisToken e = exprs RightParenthesisToken                                      {ReturnNode (pos,Some (CallNode (fst(f),snd(f),e)))}
 
 choices : 
  | p = prefix pos = ArrowToken LeftBracketToken i = instruction RightBracketToken cs = choices                                  {ChoicesNode(pos,p,i,Some(cs))}

@@ -6,6 +6,7 @@ open Resolve
     - TenvVar: (position * ast * string * ast option * bool) list
 *)
 
+(* Type of the epxressions *)
 type typeType =
   | IntegerType
   | BooleanType
@@ -21,9 +22,10 @@ type typeType =
   | NamedType of string
   | ErrorType
 
+(* Type of the instruction *)
 type instrType = 
-  | OK
-  | OKt of typeType
+  | OK (* Type of well_typed instruction other than a return instruction *)
+  | OKt of typeType (* Type of return instruction *)
 
 exception Different_types_in_list
 exception Impossible_unify_instr of typeType * typeType
@@ -52,7 +54,6 @@ Parameter:
   - t: type to convert
 Return: string corresponding to the type
 *)
-
 let rec string_of_type t =
   match t with
     | IntegerType -> "integer"
@@ -69,7 +70,6 @@ let rec string_of_type t =
     | NamedType(s) -> s 
     | ErrorType -> "ERROR"
 
-
 (* type_of_tree_aux: ast -> TenvType -> typeType
 Function converting an abstract syntax tree into a typeType but if it is a recursive named type the function
 does not replace it with its real type instead it just leave its name
@@ -77,8 +77,7 @@ Parameters:
   - tree: abstract syntax tree representing the type
   - envType: list of the type declarations
 Return: typeType corresponding to the ast
-*)
-    
+*) 
 let rec type_of_tree_aux tree envType =
   match tree with
     | TypeNode (_,IntegerT) -> IntegerType
@@ -99,7 +98,6 @@ let rec type_of_tree_aux tree envType =
     | FuncTNode (Some(t)) -> type_of_tree_aux t envType        
     | _ -> raise (Unknown_error_type_checking "type_of_tree")
 
-
 (* type_of_tree: ast -> TenvType -> typeType
 Function converting an abstract syntax tree into a typeType
 Parameters:
@@ -107,12 +105,10 @@ Parameters:
   - envType: list of the type declarations
 Return: typeType corresponding to the ast
 *)
-
 let type_of_tree tree envType = 
   match tree with 
     | NamedTypeNode(_,st) -> let _,_,t,_ = (List.find (fun (_,name,_,_) -> String.equal name st) envType) in (type_of_tree_aux t envType)
     | _ -> type_of_tree_aux tree envType
-
 
 (* type_of_var: string -> TenvVar -> TenvType -> position -> typeType
 Function finding the type of a variable thanks to its name
@@ -123,14 +119,12 @@ Parameters:
   - pos: the position in the file of the variable
 Return: typeType corresponding to the variable
 *)
-
 let type_of_var namevar envVar envType pos =
   try 
     let _,tnode,_,_,g = List.find (fun (_,_,name,p,_) -> (String.equal name namevar) && (p == None)) envVar in
     (type_of_tree tnode envType,g)
   with
     | Not_found -> raise (Unknown_variable (pos,namevar))
-
 
 (* type_of_func: string -> TenvVar -> TenvType -> position -> typeType
 Function finding the type of a function thanks to its name
@@ -141,14 +135,12 @@ Parameters:
   - pos: the position in the file of the function
 Return: typeType corresponding to the function
 *)
-
 let type_of_func namef envVar envType pos =
   try 
     let _,tnode,_,pnode,_ = List.find (fun (_,_,name,p,_) -> (String.equal name namef) && (p != None)) envVar in
     (type_of_tree tnode envType,pnode)
   with
     | Not_found -> raise (Unknown_variable (pos,namef))
-
 
 (* compare: TenvType -> typeType -> typeType -> bool * typeType
 Function comparing two types
@@ -160,7 +152,6 @@ Return: a pair of:
           - a boolean which means if the two type are equals or not
           - a type : the type of the two types if they are equals, ErrorType if not
 *)
-
 let rec compare envType type1 type2 =
   match (type1,type2) with
     | (IntegerType,IntegerType) -> (true,IntegerType)
@@ -178,7 +169,6 @@ let rec compare envType type1 type2 =
     | (VoidType,VoidType) -> (true,VoidType)
     | _ -> (false,ErrorType)
 
-
 (* unify_instr: typeType -> typeType -> TenvType -> instrType
 Function trying to determine the type of the instructions sequence i1;i2
 Parameters:
@@ -187,7 +177,6 @@ Parameters:
   - envType: list of the type declarations
 Return: the instrType corresponding to the instructions sequence
 *)
-
 let unify_instr ti1 ti2 envType = 
   match (ti2,ti1) with
     | (OK,t) -> t
@@ -199,7 +188,6 @@ let unify_instr ti1 ti2 envType =
     with 
       | Invalid_argument _ -> raise (Impossible_unify_instr (t1,t2))
 
-
 (* type_of_expr: ast -> TenvVar -> TenvType -> typeType
 Function determining the type of an expression
 Parameters:
@@ -208,7 +196,6 @@ Parameters:
   - envType: list of the type declarations
 Return: the typeType of the expression
 *)
-
 let rec type_of_expr expr envVar envType =
   match expr with
     | BinaryNode (pos,left,op,right) -> ruleBinary op left right envVar envType pos
@@ -223,18 +210,16 @@ let rec type_of_expr expr envVar envType =
 
 and 
 
-type_of_assignable pos assign envVar envType =
-  match assign with
-    | ExprNode (_,a) -> type_of_assignable pos a envVar envType
-    | ExprsNode (a,None) -> type_of_assignable pos a envVar envType
-    | ExprsNode (_,Some(_)) -> raise (Multiple_assignments pos)
-    | AssignNode (pos,a) -> ruleIdentifier a envVar envType true pos
-    | _ -> raise (Unknown_error_type_checking "type_of_assignable")
-
-and
-
-(* Rule for unary operators *)
-
+(* ruleUnary: unary -> ast -> TenvVar -> TenvType -> position -> typeType
+Function determining the type of an unary expression
+Parameters:
+  - op: unary operator to apply
+  - expr: abstract syntax tree representing the expression on which the operator is applied
+  - envVar: list of the variable/function declarations 
+  - envType: list of the type declarations
+  - pos: position of the operator (in case of error)
+Return: the typeType of the unary expression
+*)
 ruleUnary op expr envVar envType pos = 
   try
     let texpr = (type_of_expr expr envVar envType) in
@@ -271,11 +256,20 @@ ruleUnary op expr envVar envType pos =
     )
   with
     | Invalid_argument _ -> raise (Illegal_type_argument pos)
+
 and
 
-
-(* Rule for binary operators *)
-
+(* ruleBinary: binary -> ast -> ast -> TenvVar -> TenvType -> position -> typeType
+Function determining the type of a binary expression
+Parameters:
+  - op: binary operator to apply
+  - left: abstract syntax tree representing the expression to the left of the operator
+  - right: abstract syntax tree representing the expression to the right of the operator
+  - envVar: list of the variable/function declarations 
+  - envType: list of the type declarations
+  - pos: position of the operator (in case of error)
+Return: the typeType of the binary expression
+*)
 ruleBinary op left right envVar envType pos =
   try
     let tleft = (type_of_expr left envVar envType) in
@@ -309,7 +303,7 @@ ruleBinary op left right envVar envType pos =
             if (b2) then
               match (left,t2) with
                 | ValueNode(ValueNode(IntegerNode(_,i))),TupleType(t) -> List.nth t i 
-                | _ -> raise (Unknown_error_type_checking "ruleBinary2") 
+                | _ -> raise (Unknown_error_type_checking "ruleBinary") 
             else raise (Wrong_type (pos,t2,TupleGenType))) 
           else raise (Wrong_type (pos,t1,IntegerType)))
       | _ -> raise (Unknown_error_type_checking "ruleBinary"))
@@ -319,9 +313,17 @@ ruleBinary op left right envVar envType pos =
 
 and
 
-
-(* Rule for conditional expression *)
-
+(* ruleIfThenElseExpr: ast -> ast -> ast -> TenvVar -> TenvType -> position -> typeType
+Function determining the type of a conditional expression
+Parameters:
+  - cond_expr: abstract syntax tree representing the expression inside the condition
+  - then_expr: abstract syntax tree representing the expression inside the then branch
+  - else_expr: abstract syntax tree representing the expression inside the else branch
+  - envVar: list of the variable/function declarations 
+  - envType: list of the type declarations
+  - pos: position of the if symbol (in case of error)
+Return: the typeType of the conditional expression
+*)
 ruleIfThenElseExpr cond_expr then_expr else_expr envVar envType pos =
   let tcond_expr = (type_of_expr cond_expr envVar envType) in
   let tthen_expr = (type_of_expr then_expr envVar envType) in
@@ -333,9 +335,14 @@ ruleIfThenElseExpr cond_expr then_expr else_expr envVar envType pos =
 
 and
 
-
-(* Rule for tuples of expressions *)
-
+(* ruleTupleExpr: ast -> TenvVar -> TenvType -> typeType
+Function determining the type of an expression tuple
+Parameters:
+  - exprs: abstract syntax tree representing the tuple of expressions
+  - envVar: list of the variable/function declarations 
+  - envType: list of the type declarations
+Return: the typeType of the expression tuple
+*)
 ruleTupleExpr exprs envVar envType =
   TupleType (
   let rec aux exs l =
@@ -347,9 +354,13 @@ ruleTupleExpr exprs envVar envType =
 
 and
 
-
-(* Rule for values *)
-
+(* ruleValue: ast -> TenvType -> typeType
+Function determining the type of a value
+Parameters:
+  - v: abstract syntax tree representing the value
+  - envType: list of the type declarations
+Return: the typeType of the value
+*)
 ruleValue v envType =
   match v with
     | ValueNode (IntegerNode (_,_)) -> IntegerType
@@ -368,7 +379,7 @@ ruleValue v envType =
             | ValueSeqNode (v2,Some(vs2)) ->
               let bv,_ = compare envType (ruleValue v1 envType) (ruleValue v2 envType) in
               if (bv) then (aux v2 vs2) else raise (Different_types_in_list)
-            | _ -> raise (Unknown_error_type_checking ("ruleValue1")))
+            | _ -> raise (Unknown_error_type_checking ("ruleValue")))
         in aux v vs)
     | ValueSeqNode (v,None) -> ruleValue v envType
     | ValueSeqNode (_,Some(_)) -> TupleType (
@@ -376,21 +387,55 @@ ruleValue v envType =
           (match vals with
             | ValueSeqNode (v1,None) -> List.rev ((ruleValue v1 envType)::l)
             | ValueSeqNode (v1,Some(v2)) -> aux v2 ((ruleValue v1 envType)::l)
-            | _ -> raise (Unknown_error_type_checking ("ruleValue2")))
+            | _ -> raise (Unknown_error_type_checking ("ruleValue")))
         in aux v [])  
     | _ -> raise (Unknown_error_type_checking "ruleValue")
 
 and
 
-(* Rule for Identifier *)
+(* ruleAssignable: position -> ast -> TenvVar -> TenvType -> typeType
+Function determining the type of an assignable
+Parameters:
+  - pos: position of the assignable (in case of error)
+  - assign: abstract syntax tree representing the assignable
+  - envVar: list of the variable/function declarations 
+  - envType: list of the type declarations
+Return: the typeType of the assignable
+*)
+ruleAssignable pos assign envVar envType =
+  match assign with
+    | ExprNode (_,a) -> ruleAssignable pos a envVar envType
+    | ExprsNode (a,None) -> ruleAssignable pos a envVar envType
+    | ExprsNode (_,Some(_)) -> raise (Multiple_assignments pos)
+    | AssignNode (pos,a) -> ruleIdentifier a envVar envType true pos
+    | _ -> raise (Unknown_error_type_checking "ruleAssignable")
 
+and
+
+(* ruleIdentifier: ast -> TenvVar -> TenvType -> boolean -> position -> typeType
+Function determining the type of an assignable and verifying that the identifier can be used
+(no global variable on the left side of an assignment)
+Parameters:
+  - a: abstract syntax tree representing the identifier
+  - envVar: list of the variable/function declarations 
+  - envType: list of the type declarations
+  - checkStatus: true if the identifier corresponds to a global variable 
+  - pos: position of the identifier (in case of error)
+Return: the typeType of the identifier
+*)
 ruleIdentifier a envVar envType checkStatus pos = 
   let t,b = type_of_var a envVar envType pos in
   if (checkStatus) then (if b then raise (Assignment_to_global_var (pos,a)) else t)
   else t
 
-(* Rule for instructions *)
-
+(* ruleInstr: ast -> TenvVar -> TenvType -> typeType
+Function determining the type of a sequence of instructions
+Parameters:
+  - i: abstract syntax tree representing the sequence
+  - envVar: list of the variable/function declarations 
+  - envType: list of the type declarations
+Return: the instrType of the instruction sequence
+*)
 let rec ruleInstr i  envVar envType =
   let rec aux i tInstr =
     match i with
@@ -403,7 +448,6 @@ let rec ruleInstr i  envVar envType =
     
 and
 
-
 (* type_of_instr: ast -> TenvVar -> TenvType -> instrType
 Function determining the type of a basic instruction
 Parameters:
@@ -412,7 +456,6 @@ Parameters:
   - envType: list of the type declarations
 Return: the instrType corresponding to the basic instruction
 *)
-
 type_of_binstr binstr envVar envType =
   match binstr with
     | BinaryNode (pos,a,Assign,CallNode (posf,namef,e)) -> ruleCallFuncWithReturn a namef e envVar envType pos posf
@@ -432,7 +475,6 @@ type_of_binstr binstr envVar envType =
 
 and
 
-
 (* type_of_params: ast -> TenvType -> typeType
 Function determining the types of the function parameters
 Parameters:
@@ -440,7 +482,6 @@ Parameters:
   - envType: list of the type declarations
 Return: the typeType of the parameters (in the form of a TupleType)
 *)
-
 type_of_params paramNode envType =
   match paramNode with 
     | Some(ParamsNode (_,t,_,None)) -> type_of_tree t envType
@@ -455,11 +496,18 @@ type_of_params paramNode envType =
 
 and
 
-
-(* Rule for assignement instructions *)
-
+(* ruleAssignInstr: ast -> ast -> TenvVar -> TenvType -> position -> instrType
+Function determining the type of an assignment instruction
+Parameters:
+  - assign: abstract syntax tree representing the assignable
+  - expr: abstract syntax tree representing the assigned expression
+  - envVar: list of the variable/function declarations 
+  - envType: list of the type declarations
+  - pos: position of the assign symbol (in case of error)
+Return: the instrType corresponding to the assignment instruction
+*)
 ruleAssignInstr assign expr envVar envType pos =
-  let tassign = (type_of_assignable pos assign envVar envType) in
+  let tassign = (ruleAssignable pos assign envVar envType) in
   let texpr = (type_of_expr expr envVar envType) in
   try
     let be,_ = compare envType tassign texpr in
@@ -469,13 +517,22 @@ ruleAssignInstr assign expr envVar envType pos =
 
 and
 
-
-(* Rule for calls of functions with a return *)
-
+(* ruleCallFuncWithReturn: ast -> string -> ast -> TenvVar -> TenvType -> position -> position -> instrType
+Function determining the type of a function call with a function having return
+Parameters:
+  - assign: abstract syntax tree representing the assignable
+  - namef: name of the called function
+  - e: abstract syntax tree representing the expression used as parameter for the function
+  - envVar: list of the variable/function declarations 
+  - envType: list of the type declarations
+  - pos: position of the assign symbol (in case of error)
+  - posf: position of the function name (in case of error)
+Return: the instrType corresponding to the function call
+*)
 ruleCallFuncWithReturn a namef e envVar envType pos posf =
   let tf,pnode = type_of_func namef envVar envType posf in
   if (tf != VoidType) then
-    let ta = type_of_assignable pos a envVar envType in
+    let ta = ruleAssignable pos a envVar envType in
     try
       let br,_ = compare envType ta tf in
       if (br) then
@@ -493,9 +550,16 @@ ruleCallFuncWithReturn a namef e envVar envType pos posf =
 
 and
 
-
-(* Rule for calls of functions without a return *)
-
+(* ruleCallFuncVoid: string -> ast -> TenvVar -> TenvType -> position -> instrType
+Function determining the type of a function call with a function having void return or no return
+Parameters:
+  - namef: name of the called function
+  - e: abstract syntax tree representing the expression used as parameter for the function
+  - envVar: list of the variable/function declarations 
+  - envType: list of the type declarations
+  - pos: position of the function name (in case of error)
+Return: the instrType corresponding to the function call
+*)
 ruleCallFuncVoid namef e envVar envType pos =
   let tf,pnode = type_of_func namef envVar envType pos in
   let br,_ = compare envType tf VoidType in
@@ -511,11 +575,18 @@ ruleCallFuncVoid namef e envVar envType pos =
 
 and
 
-
-(* Rule for a receive instruction *)
-
+(* ruleReceive: ast -> string -> TenvVar -> TenvType -> position -> instrType
+Function determining the type of a receive instruction
+Parameters:
+  - a: abstract syntax tree representing the assignable
+  - namechan: the name of the channel on which to send  
+  - envVar: list of the variable/function declarations 
+  - envType: list of the type declarations
+  - pos: position of the assign symbol (in case of error)
+Return: the instrType corresponding to the receive instruction
+*)
 ruleReceive a namechan envVar envType pos = 
-  let ta = type_of_assignable pos a envVar envType in
+  let ta = ruleAssignable pos a envVar envType in
   let tchan,_ = type_of_var namechan envVar envType pos in
   (match tchan with
     | ChannelType(st) -> (try 
@@ -527,9 +598,16 @@ ruleReceive a namechan envVar envType pos =
 
 and
 
-
-(* Rule for a send instruction *)
-
+(* ruleSend: string -> ast -> TenvVar -> TenvType -> position -> instrType
+Function determining the type of a receive instruction
+Parameters:
+  - namechan: the name of the channel on which to send
+  - e: abstract syntax tree representing the expression to send  
+  - envVar: list of the variable/function declarations 
+  - envType: list of the type declarations
+  - pos: position of the send symbol (in case of error)
+Return: the instrType corresponding to the send instruction
+*)
 ruleSend namechan e envVar envType pos = 
   let te = type_of_expr e envVar envType in
   let tchan,_ = type_of_var namechan envVar envType pos in
@@ -543,9 +621,17 @@ ruleSend namechan e envVar envType pos =
 
 and
 
-
-(* Rule for conditional instructions *)
-
+(* ruleIfThenElseInstr: ast -> ast -> ast -> TenvVar -> TenvType -> position -> typeType
+Function determining the type of a conditional instruction
+Parameters:
+  - cond_expr: abstract syntax tree representing the expression inside the condition
+  - then_expr: abstract syntax tree representing the instruction inside the then branch
+  - else_expr: abstract syntax tree representing the instruction inside the else branch
+  - envVar: list of the variable/function declarations 
+  - envType: list of the type declarations
+  - pos: position of the if symbol (in case of error)
+Return: the instrType of the conditional instruction
+*)
 ruleIfThenElseInstr cond_expr then_instr else_instr envVar envType pos =
   let tcond_expr = (type_of_expr cond_expr envVar envType) in
   let tthen_instr = (ruleInstr then_instr envVar envType) in
@@ -560,9 +646,16 @@ ruleIfThenElseInstr cond_expr then_instr else_instr envVar envType pos =
 
 and
 
-
-(* Rule for while instructions *)
-
+(* ruleWhile: ast -> ast -> TenvVar -> TenvType -> position -> typeType
+Function determining the type of a conditional instruction
+Parameters:
+  - cond_expr: abstract syntax tree representing the expression inside the condition
+  - i: abstract syntax tree representing the instruction inside the body
+  - envVar: list of the variable/function declarations 
+  - envType: list of the type declarations
+  - pos: position of the while symbol (in case of error)
+Return: the instrType of the while instruction
+*)
 ruleWhile cond_expr i envVar envType pos =
   let tcond = (type_of_expr cond_expr envVar envType) in
   let ti = (ruleInstr i envVar envType) in
@@ -575,9 +668,14 @@ ruleWhile cond_expr i envVar envType pos =
 
 and
 
-
-(* Rule for the prefixes used inside the choose instruction *)
-
+(* rulePrefix: ast -> TenvVar -> TenvType -> typeType
+Function determining the type of a prefix
+Parameters:
+  - p: abstract syntax tree representing the prefix
+  - envVar: list of the variable/function declarations 
+  - envType: list of the type declarations
+Return: the instrType of the prefix
+*)
 rulePrefix p envVar envType = 
     match p with 
       | PrefixNode(_,_,Tau,_) -> OK
@@ -587,9 +685,14 @@ rulePrefix p envVar envType =
 
 and
 
-
-(* Rule for the choose instructions *)
-
+(* rulePrefix: ast -> TenvVar -> TenvType -> typeType
+Function determining the type of a choose instruction
+Parameters:
+  - c: abstract syntax tree representing the choices
+  - envVar: list of the variable/function declarations 
+  - envType: list of the type declarations
+Return: the instrType of the choose instruction
+*)
 ruleChoose c envVar envType =
   let rec aux choice typeInstr = 
     match choice with 
@@ -600,9 +703,16 @@ ruleChoose c envVar envType =
 
 and
 
-
-(* Rule for a spawn instruction *)
-
+(* ruleSpawn: string -> ast -> TenvVar -> TenvType -> position -> instrType
+Function determining the type of a spawn instruction
+Parameters:
+  - namef: name of the function to use in the new thread
+  - e: abstract syntax tree representing the expression used as parameter for the function
+  - envVar: list of the variable/function declarations 
+  - envType: list of the type declarations
+  - pos: position of the spawn symbol (in case of error)
+Return: the instrType corresponding to the spawn instruction
+*)
 ruleSpawn namef e envVar envType pos = 
   let _,pnode = type_of_func namef envVar envType pos in
   let tp = type_of_params pnode envType in
@@ -612,11 +722,17 @@ ruleSpawn namef e envVar envType pos =
 
 and
 
-
-(* Rule for a newChan instruction *)
-
+(* ruleNewChan: string -> ast -> TenvVar -> TenvType -> position -> instrType
+Function determining the type of a newChan instruction
+Parameters:
+  - a: abstract syntax tree representing the assignable receiving the new channel
+  - envVar: list of the variable/function declarations 
+  - envType: list of the type declarations
+  - pos: position of the spawn symbol (in case of error)
+Return: the instrType corresponding to the newChan instruction
+*)
 ruleNew a envVar envType pos = 
-  let ta = type_of_assignable pos a envVar envType in
+  let ta = ruleAssignable pos a envVar envType in
   try
     let bc,_ = compare envType ta ChannelGenType in
     if (bc) then OK else raise (Wrong_type (pos,ta,ChannelGenType))
@@ -625,33 +741,23 @@ ruleNew a envVar envType pos =
 
 and
 
-
-(* Rule for a void return *)
-
+(* ruleReturnVoid: instrType
+Function determining the type of a void return
+Return: the instrType corresponding to a return void
+*)
 ruleReturnVoid = OKt(VoidType)
 
 and
 
-
-(* Rule for returns of an expression *)
-
+((* ruleReturnExpr: ast -> TenvVar -> TenvType -> instrType
+Function determining the type of a newChan instruction
+Parameters:
+  - e: abstract syntax tree representing the expression to return
+  - envVar: list of the variable/function declarations 
+  - envType: list of the type declarations
+Return: the instrType corresponding to the return of the expression
+*)
 ruleReturnExpr e envVar envType = OKt(type_of_expr e envVar envType)
-
-and
-
-
-(* Rule for returns containing a function call *)
-
-ruleReturnFunc namef e envVar envType pos =
-  let tf,pnode = type_of_func namef envVar envType pos in
-  let tp = type_of_params pnode envType in
-  let te = type_of_expr e envVar envType in
-  try
-    let b,_ = compare envType tp te in
-    if (b) then OKt(tf) else raise (Not_type_of_the_params (pos,te,tp,namef))
-  with
-    | Invalid_argument _ -> raise (Not_type_of_the_params (pos,te,tp,namef))
-
 
 (* extend_envVar_with_params: ast -> TenvVar -> TenvVar
 Function extending the variable environment with the declared parameters of a function
@@ -659,14 +765,14 @@ Parameters:
   - params: abstract syntax tree representing the parameters of a function
   - envVar: list of variable/function declarations 
 Return: the envVar passed in argument extended with the parameters
+Insight: The List.filter is used to remove the variable of the same name if it exists,
+this is useful in the case of shadowing
 *)
-
 let rec extend_envVar_with_params params envVar =
     match params with
       | ParamsNode (pos,t,name,None) -> (pos,t,name,None,false)::(List.filter (fun (_,_,namevar,_,_) -> not (String.equal name namevar)) envVar)
       | ParamsNode (pos,t,name,Some(p)) -> extend_envVar_with_params p ((pos,t,name,None,false)::(List.filter (fun (_,_,namevar,_,_) -> not (String.equal name namevar)) envVar))
       | _ -> raise (Unknown_error_type_checking ("extend_params"))
-
 
 (* extend_envVar_with_local_declas: ast -> TenvVar -> string list -> TenvVar
 Function checking the well-formedness of the local declarations inside a function and extending
@@ -677,18 +783,20 @@ Parameters:
   - nameListType: list of names of declared types 
 Return: the envVar passed in argument extended with the local declarations
 *)
-
 let extend_envVar_with_local_declas declas envVar nameListType =
+  (* Creation of a list containing the local delcaration *)
   let addedDecla = (let rec aux d l = 
     match d with
       | VariableDeclasNode (VariableDeclaNode (pos,t,name),None) -> ((pos,t,name,None,false)::l)
       | VariableDeclasNode (VariableDeclaNode (pos,t,name),Some(vs)) -> aux vs ((pos,t,name,None,false)::l)
       | _ -> raise (Unknown_error_type_checking ("extend_ldecla"))
     in aux declas []) in
+  (* Checking of the well-formedness of those declarations *)
   let _ = well_formed_envVar addedDecla nameListType in
+  (* Removing of the variable already declared with a name found in the local declarations *)
   let restricted_envVar = List.filter (fun (_,_,name,_,_) -> not (List.exists (fun (_,_,lname,_,_) -> String.equal name lname) addedDecla)) envVar in
+  (* Concatenation of the declarations *)
   restricted_envVar @ addedDecla
-
 
 (* extend_envVar: ast -> ast -> TenvVar -> string list -> TenvVar
 Function extending the variable environment with the parameters and local
@@ -700,7 +808,6 @@ Parameters:
   - nameListType: list of names of declared types 
 Return: the envVar passed in argument extended with the local declarations and parameters
 *)
-
 let extend_envVar params b envVar nameListType = 
   let copy_envVar = envVar in
   let extended_envVar = extend_envVar_with_params params copy_envVar in
@@ -708,7 +815,6 @@ let extend_envVar params b envVar nameListType =
     | BodyNode (_,None,_) -> extended_envVar
     | BodyNode (_,Some(declas),_) -> extend_envVar_with_local_declas declas extended_envVar nameListType
     | _ -> raise (Unknown_error_type_checking ("extend_envVar")) 
-
 
 (* ruleFunction: ast -> TenvVar -> TenvType -> string list -> bool
 Function type checking the body of a function thanks to a local variable environment
@@ -719,11 +825,12 @@ Parameters:
   - nameListType: list of names of declared types 
 Return: true if the function body is well-typed, false if not
 *)
-
 let ruleFunction f envVar envType nameListType =
   (match f with
     | FunctionNode (pos,ftnode,namef,params,b) ->
+        (* Creation of the local environment *)
         let local_envVar = extend_envVar params b envVar nameListType in
+        (* Determining of the type of the function body *)
         let ti = (match b with
           | BodyNode (posb,_,i) ->
             (try
@@ -731,7 +838,9 @@ let ruleFunction f envVar envType nameListType =
             with
               | Impossible_unify_instr (_,_) -> raise (Different_type_of_return_func (posb,namef))) 
           | _ -> raise (Unknown_error_type_checking ("ruleFunction"))) in
+        (* Determining the declared return type of the function *)
         let ft = type_of_tree ftnode envType in
+        (* Comparing the real type of return and the declared type *)
         (match ti with
           | OK -> (try
                     if (fst(compare envType ft VoidType)) then true 
@@ -745,7 +854,6 @@ let ruleFunction f envVar envType nameListType =
                          | Invalid_argument _ -> raise (Return_not_match_with_decla (pos,rt,ft,namef))))
     | _ -> raise (Unknown_error_type_checking ("ruleFunction")))
 
-
 (* type_check_prg: TenvVar -> TenvType -> string list -> ast -> bool
 Function type checking a program
 Parameters:
@@ -755,21 +863,26 @@ Parameters:
   - prg: abstract syntax tree representing a program 
 Return: true if the program is well-typed, false if not
 *)
-
 let type_check_prg envVar envType nameListType prg = 
+  (* Creation of list containing all the functions of the file*)
   let all_func = List.rev (let rec aux l tree =
     match tree with
+        (* Broswing through the abstract syntax tree *)
         | ProgramNode (p1,p2) -> aux (aux l p1) p2
+        (* Adding of the function to the list *)
         | FunctionNode (_,_,_,_,_) -> (tree::l)
+        (* Type checking of a global variable (except channels) *)
         | GlobalVarDeclaNode(pos,t,_,vnode) -> 
           let tdecla = type_of_tree t envType in
           let tval = ruleValue vnode envType in
           let b,_ = compare envType tdecla tval in
           if (b) then l else raise (Wrong_type (pos,tval,tdecla))
+        (* Type checking of a global channel variable *)
         | GlobalChanDeclaNode(pos,t,_) ->
           let tdecla = type_of_tree t envType in
           let b,_ = compare envType tdecla ChannelGenType in
-          if (b) then l else raise (Wrong_type (pos,tdecla,ChannelGenType))   
+          if (b) then l else raise (Wrong_type (pos,tdecla,ChannelGenType))
+        (* Type checking of the main call *)   
         | CallNode(pos,namef,expr) ->   
           (let _,pnode = type_of_func namef envVar envType pos in
           let tp = type_of_params pnode envType in
@@ -780,5 +893,6 @@ let type_check_prg envVar envType nameListType prg =
           with
             | Invalid_argument _ -> raise (Not_type_of_the_params (pos,te,tp,namef)))
         | _ -> l 
-    in aux [] prg) in 
+    in aux [] prg) in
+  (* Type checking of all the functions *) 
   List.for_all (fun f -> ruleFunction f envVar envType nameListType) all_func
