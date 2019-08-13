@@ -9,44 +9,19 @@
 \usepackage{stmaryrd}
 \usepackage{titlesec}
 \usepackage{rotating}
-\usepackage{alltt}
 \usepackage{fancyvrb}
 \usepackage{verbatimbox}
-\usepackage{lipsum}
-\usepackage{setspace}
 \usepackage{tabto}
 \usepackage{bussproofs}
 \usepackage{caption}
 \usepackage{subcaption}
+\usepackage{hyperref}
 \onehalfspacing
-\titleformat{\chapter}[hang]{\bf\huge}{\thechapter}{2pc}{}
-
-%-------------------------------------------------------
-\let\oldabstract\abstract
-\let\oldendabstract\endabstract
-\makeatletter
-\renewenvironment{abstract}
-{\renewenvironment{quotation}%
-               {\list{}{\addtolength{\leftmargin}{3em} % change this value to add or remove length to the the default
-                        \listparindent 1.5em%
-                        \itemindent    \listparindent%
-                        \rightmargin   \leftmargin%
-                        \parsep        \z@ \@plus\p@}%
-                \item\relax}%
-               {\endlist}%
-\oldabstract}
-{\oldendabstract}
-\makeatother
-
-\makeatletter
-\newcommand{\verbatimfont}[1]{\renewcommand{\verbatim@font}{\normalfont#1}}
-\makeatother
-
+\usepackage{fancyhdr}
 \begin{document}
 \begin{center}
 \includegraphics[scale = 1]{index.png}
 \end{center}
-
 \pagestyle{empty}
 \vspace*{\stretch{8}}
 
@@ -60,20 +35,22 @@
 \centerline{ {\Large  Chervin Amirkaveh}}
 
 
- \vfill
- \vspace*{\stretch{10}}
-\centerline{\large June 2019}
+\vfill
+\vspace*{\stretch{10}}
+\centerline{\large June-August 2019}
 \vspace*{\stretch{1}}
-
-
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 \newpage
+\setlength{\voffset}{-2.35cm}
+\setcounter{tocdepth}{4}
+\tableofcontents
+\setlength{\headheight}{52pt}
+\renewcommand{\headrulewidth}{0pt}
+
+\addtocontents{toc}{\protect\thispagestyle{empty}}
+\newpage
+\pagestyle{fancy}
+\phantomsection
+\addcontentsline{toc}{chapter}{Context} 
 \centerline{\textbf{\Huge Context}}
 \vspace*{3pt}
 \vspace*{20pt}
@@ -86,7 +63,119 @@ most powerful techniques for program equivalence in a concurrent setting, which 
 \tabto{1cm}It is in this context that we have started the project to create a language that could be use as an intermediate language for a tool using a “bisimulation engine” back-end to prove the equivalence of programs.
 
 \newpage
-\centerline{\textbf{\Huge Description of the language}}
+\phantomsection
+\addcontentsline{toc}{chapter}{Description of the package src} 
+\centerline{\textbf{\Huge Description of the package src}}
+\vspace*{3pt}
+\vspace*{20pt}
+
+\tabto{1cm} The main "src" package is comprised of 14 main files. Here is the explanation of the content for each of them.
+
+\vspace*{10pt}
+\phantomsection
+\addcontentsline{toc}{section}{Parser} 
+\tabto{0cm} {\LARGE \textbf{Parser}}
+\\ \\
+For the parsing step the files concerned are:
+\begin{itemize}
+\item lexer.mll: The lexical analyzer -> It converts the source code into a list of tokens and transmits this to the parser
+\item parser.mly: The syntaxic analyzer -> The analyzer checks what it receives from the lexer. To do this, it builds the corresponding abstract syntax tree thanks to the Ast file and if the construction is possible, the source code is well written (according to the defined grammar)
+\item Ast.ml: The abstract syntax tree corresponding to the language
+\end{itemize}
+
+\phantomsection
+\addcontentsline{toc}{section}{Type Checker} 
+\tabto{0cm} {\LARGE \textbf{Type Checker}}
+\\ \\
+For the type checker step the files concerned are:
+\begin{itemize}
+\item Resolve.ml: Creates the types environment (all the named types declared) and the variables environment (all functions and variables declared at top level) and for each element of these two environments checks if it is well-formed
+\item TypeChecking.ml: Checks the consistency of all the expressions and instructions types
+\end{itemize}
+
+\phantomsection
+\addcontentsline{toc}{section}{Interpretor} 
+\tabto{0cm} {\LARGE \textbf{Interpretor}}
+\\ \\
+For the interpretation step there are 4 files concerned. For this step, it is important to differentiate the functional part and the concurrent part because they are not treated by the same files. In addition, in this part we have defined in the file Channel.ml what channels are. (Channels are defined by an id and so two channels are equal if they have the same id)
+\vspace*{10pt}
+\phantomsection
+\addcontentsline{toc}{subsection}{Functional}
+\tabto{1cm} {\Large \textsc{Functional}}
+\\
+For this part, there are 2 useful files:
+\begin{itemize}
+\item ExpressionInterpretor.ml: Interpretor for the expressions using big-step semantics
+\item BetaRedInterpretor.ml: Interpretor for the functional instructions using Beta reductions (small-step semantics)
+\end{itemize}
+
+\phantomsection
+\addcontentsline{toc}{subsection}{Concurrent} 
+\tabto{1cm} {\Large \textsc{Concurrent}}
+\\
+For this part, there is only 1 useful file:
+\begin{itemize}
+\item MainInterpretor.ml: Main file for the interpretation step. In this file, all expressions and instructions (functional or concurrent) are treated. Concurrent instructions are treated using small-step semantic.
+\end{itemize}
+
+
+\phantomsection
+\addcontentsline{toc}{section}{Run the package}
+\tabto{0cm} {\LARGE \textbf{Run the package}}
+\\ \\
+To run the package only one file is useful: Main.ml: \\ 
+
+In this file, all the previous stages are executed in the order in which they were presented. If an error occurs, it appears on the terminal as an exception giving as much detail as possible to allow the error to be corrected. 
+To execute an example 3 things are to be chosen:
+\begin{itemize}
+\item the seed: a number that will make the execution deterministic (meaning that each seed will always lead to the same result).
+\item verbosity, it concerns the detail of elements to be displayed. There are 4 different levels of verbosity:
+    \begin{itemize}
+        \item Level 0: the result displayed corresponds to the result of the main thread. 
+        \item Level 1: the result is displayed for each thread at the end of the execution. 
+        \item Level 2: at each step are displayed the possible actions and the one chosen + Level 1
+        \item Level 3: the most detailed level. It displays  the next instruction to be processed, the evaluation environment and the state for each thread + Level 2
+        \end{itemize}
+\item the maximum number of steps: this is useful for programs that are not destined to end
+\end{itemize}
+
+
+\phantomsection
+\addcontentsline{toc}{section}{Test the package}
+\tabto{0cm} {\LARGE \textbf{Test the package}}
+\\ \\
+To test the package two files are concerned:
+\begin{itemize}
+\item Testing.ml: This file corresponds to the Main.ml file presented above without all the displays. Also, it is implemented to run the tests with the following set-up:
+\begin{itemize}
+    \item the level used for verbocity is 0 (only the result of the main thread matters)
+    \item the seed used is 0
+    \item the maximum number of steps used is 10000
+\end{itemize}
+In this file, all test results are converted into a string to be compared to an expected result. When an error occurs, it also works because exceptions return a string.
+\item Tests.txt: This file corresponds to a catalogue of the different tests. They are classified by category and for each one a sentence explains the interest of the test.
+\end{itemize}
+
+\phantomsection
+\addcontentsline{toc}{section}{Others}
+\tabto{0cm} {\LARGE \textbf{Others}}
+\\ \\
+The last two important files are the following:
+
+\begin{itemize}
+\item dune: In this file, the name of the library corresponding to our language and the package ppx\_expect test which allows to check the tests is imported
+\item dune-project: This file defines the versions used for dune and menhir and so if a version is not supported by a system it is easy to modify it.
+\end{itemize}
+
+
+\newpage
+\phantomsection
+\addcontentsline{toc}{chapter}{Parser}
+\centerline{\textbf{\Huge Parser}}
+\vspace*{15pt}
+\phantomsection
+\addcontentsline{toc}{section}{Description of the language}
+\tabto{0cm}{\textbf{\LARGE Description of the language}}
 \vspace*{3pt}
 \vspace*{20pt}
 \tabto{1cm}First of all, this language is procedural meaning that procedures/functions are declared at top-level and can then be called anywhere in the program. This language contains basic and convenient features that you can find in most programming languages : basic types (integer, boolean, char, string), lists, 
@@ -106,7 +195,9 @@ tuples, local and global variables, functions declaration and call, different bi
 \tabto{1cm} You will find below the grammar describing the language and a section about technical decisions that have impacted the language.
 
 \newpage
-\centerline{\textbf{\Huge Grammar : Backus-Naur form (BNF)}}
+\phantomsection
+\addcontentsline{toc}{section}{Grammar : Backus-Naur form (BNF)} 
+\tabto{0cm}{\textbf{\LARGE Grammar : Backus-Naur form (BNF)}}
 \vspace*{20 pt}
 \vspace*{3pt}
 \begin{Verbatim}[fontfamily=textsf]
@@ -189,8 +280,6 @@ Choices ::= Prefix -> { Instruction } Choices | Prefix -> { Instruction }
 Prefix ::= | tau
          | | send ( identifier , Expression )
          | | Expression = receive ( identifier )
-         | | Expression = newChan()
-         | | spawn name ( ExpressionSeq )
 \end{verbnobox}
 \vspace*{3pt}
 
@@ -274,14 +363,21 @@ CallMain ::= start name ( ExpressionSeq )
 \vspace*{3pt}
 
 \newpage
-\centerline{\textbf{\Huge Technical choices for the parser}}
+\phantomsection
+\tabto{0cm}{\textbf{\LARGE Technical choices for the parser}}
+\addcontentsline{toc}{section}{Technical choices for the parser} 
 \vspace*{3pt}
 \vspace*{10pt}
-\tabto{0cm} {\Large \textbf{Conflicts resolution}}
+\vspace*{10pt}
+\phantomsection
+\addcontentsline{toc}{subsection}{Conflicts resolution} 
+\tabto{1cm} {\Large \textsc{Conflicts resolution}}
 \\ \\ 
 \tabto{1cm} In order to remove ambiguities in our grammar and so resolve shift/reduce conflicts we have added some rules. It is important to note that in our grammar the majority of our conflicts refer to binary operators.  \\ \\
 By declaring precedence and associative rules for all tokens involved in the conflicts, this force derivations to be done in a particular way.
 \\ \\ 
+\phantomsection
+\addcontentsline{toc}{subsubsection}{Associativity} 
 \tabto{2cm} \textbf{Associativity}
 \\ \\
 \tabto{1cm} The first way to make unambiguous our grammar is by establishing associative rules for an operator "op". Theses rules determines how to interpret the operator's repetition: if "x op y op z" must be considered as "(x op y) op z" or "x op (y op z)". \\ \\
@@ -293,12 +389,16 @@ There are three different ways to specify them.
 \end{itemize}
 We have decided that the operators: $*$, $+$, $-$, $/$, $=$, $\ne$, $\&\&$ and $||$ are left-associative and that for the operators $>$ and $<$ the association is incorrect.
 \\ \\ \\
+\phantomsection
+\addcontentsline{toc}{subsubsection}{Precedence} 
 \tabto{2cm} \textbf{Precedence}
 \\ \\
 \tabto{1cm} The second way to make unambiguous our grammar is by imposing the precedence of one operator over the other. The relative precedence between the different operators is defined by the order in which they are declared. The first declared has the lowest precedence and so the last declared has the highest precedence. We have chosen the order of the precedence in way that the different operators respect the arithmetic logic.
 \\ \\
 \newpage
 We have also used semi-colons to resolve conflicts. \\ \\
+\phantomsection
+\addcontentsline{toc}{subsubsection}{Semi-colon} 
 \tabto{2cm} \textbf{Semi-colon} \\ \\
 \tabto{1cm}Semi-colons allow to separate instructions from each other and so that avoid shift-reduce conflicts at the level of the assign and return operators. It also makes our grammar more resistant and so easier for someone to add new instructions without causing conflicts. \\ \\
 \tabto{1cm} In our grammar, the semicolon should not be interpreted as an end of line indication but simply as a separator between variable declarations or instructions:
@@ -308,12 +408,24 @@ We have also used semi-colons to resolve conflicts. \\ \\
 \end{itemize}
 
 \newpage
-\centerline{\textbf{\Huge Type Grammar}}
-\vspace*{3pt}
-\vspace*{20pt}
-We have created types that simplify our grammar and so allow us to perform a more efficient type checking. We have separated the types for expressions and instructions.
 
-\tabto{0cm} {\Large \textbf{Simplified type for Expressions}}
+
+\phantomsection
+\addcontentsline{toc}{chapter}{Type Checker}
+\centerline{\textbf{\Huge Type Checker}}
+\vspace*{15pt}
+
+\phantomsection
+\addcontentsline{toc}{section}{Type Grammar}
+\tabto{0cm}{\textbf{\LARGE Type Grammar}}
+\vspace*{3pt}
+\vspace*{10pt}
+\tabto{0.5cm}We have created types that simplify our grammar and so allow us to perform a more efficient type checking. We have separated the types for expressions and instructions.
+\vspace*{10pt}
+\phantomsection
+\addcontentsline{toc}{subsection}{Simplified type for Expressions}
+\tabto{1cm} {\Large \textsc{Simplified type for Expressions}}
+
 
 \tabto{0cm}The possible types for an expression of this language are described by the following syntax:
 \\ \\
@@ -324,13 +436,19 @@ We have created types that simplify our grammar and so allow us to perform a mor
 \tabto{6,6cm}$ namedtype(string)$ \\
 \tabto{6,6cm}$ Error $
 
-\tabto{0cm} {\Large \textbf{Simplified type for Instructions}}
+\vspace*{10pt}
+\phantomsection
+\addcontentsline{toc}{subsection}{Simplified type for Instructions}
+\tabto{1cm} {\Large \textsc{Simplified type for Instructions}}
 
 \tabto{0cm}The possible types for an instruction of this language are described by the following syntax:
 \\ \\
 \centerline{$OK \ | \ OK_t(\tau)$}
 
-\tabto{0cm} {\Large \textbf{Environments}}
+\vspace*{10pt}
+\phantomsection
+\addcontentsline{toc}{subsection}{Environments}
+\tabto{1cm} {\Large \textsc{ Environments}}
 
 \tabto{0cm} Before checking the types of the expressions and instructions, we create 2 environments:
 \begin{itemize}
@@ -350,9 +468,15 @@ Concerning the variable environment, first it is  necessary to distinguish funct
 Finally, we have to check that the function used in the start function is declared.
 
 \newpage
-\centerline{\textbf{\Huge Type Rules}}
-\vspace*{35pt}
+\phantomsection
+\addcontentsline{toc}{section}{Type Rules}
+\tabto{0cm}{\textbf{\LARGE Type Rules}}
+\vspace*{3pt}
+\vspace*{10pt}
+\vspace*{10pt}
 
+\phantomsection
+\addcontentsline{toc}{subsection}{Type rules for expressions}
 \tabto{1cm} {\Large \textsc{Type rules for expressions}}
 
 \vspace*{20pt}
@@ -406,6 +530,8 @@ Finally, we have to check that the function used in the start function is declar
 
 \newpage
 
+\phantomsection
+\addcontentsline{toc}{subsection}{Type rules for instructions}
 \tabto{1cm} {\Large \textsc{Type rules for instructions}}
 \vspace*{20pt}
 
@@ -531,15 +657,6 @@ Finally, we have to check that the function used in the start function is declar
 \UnaryInfC{$\Gamma_t ; \ \Gamma_v \vdash return \ e \ : OK_t(\tau) $}
 \end{prooftree}
 
-\tabto{0cm} {\large \textbf{Return Function }}
-\begin{prooftree}
-\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_1 : \tau_1 \rightarrow \tau_2$}
-\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_2 : \tau_1 $}
-\BinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash return \ e_1(e_2) : OK_t\{\tau_2\} $}
-\end{prooftree}
-
-\newpage
-
 \tabto{0cm} {\large \textbf{Function Declaration}}
 \begin{prooftree}
 \AxiomC{$wf(\Gamma_{extended} = \{\Gamma_t ; \ \Gamma_v; \ \overrightarrow{\tau \ \ x} ; \ \overrightarrow{\tau^\prime \ \ y})$}
@@ -555,10 +672,21 @@ Finally, we have to check that the function used in the start function is declar
 
 
 \newpage
-\centerline{\textbf{\Huge Semantic Rules (Small-step semantics)}}
-\vspace*{3pt}
-\vspace*{20pt}
 
+\phantomsection
+\addcontentsline{toc}{chapter}{Interpretor}
+\centerline{\textbf{\Huge Interpretor}}
+\vspace*{15pt}
+
+\phantomsection
+\addcontentsline{toc}{section}{Semantic Rules}
+\tabto{0cm}{\textbf{\LARGE Semantic Rules}}
+\vspace*{3pt}
+\vspace*{10pt}
+\vspace*{10pt}
+
+\phantomsection
+\addcontentsline{toc}{subsection}{Semantic rules for expressions}
 \tabto{1cm} {\Large \textsc{Semantics rules for expressions}}
 \vspace*{20pt}
 
@@ -611,6 +739,9 @@ Finally, we have to check that the function used in the start function is declar
 \end{prooftree}
 
 \newpage
+
+\phantomsection
+\addcontentsline{toc}{subsection}{Semantic rules for instructions}
 \tabto{1cm} {\Large \textsc{Semantics rules for instructions}}
 \vspace*{20pt}
 
@@ -662,8 +793,6 @@ Finally, we have to check that the function used in the start function is declar
 \UnaryInfC{$G;S;(S';void)::E \vdash return \rightarrow_{\beta} G;S';E \vdash noop$}
 \end{prooftree}
 
-\tabto{0cm} {\large \textbf{Return Function ?}}
-
 
 \tabto{0cm} {\large \textbf{Assign of a function return}}
 \begin{prooftree}
@@ -680,13 +809,13 @@ Finally, we have to check that the function used in the start function is declar
 \tabto{0cm} {\large \textbf{Sequence of Instructions}}
 \begin{prooftree}
 \AxiomC{$ $}
-\UnaryInfC{$G;S;E \vdash i ; seqi \rightarrow_{\beta} G;S;(noop;seqi)::E \vdash i$}
+\UnaryInfC{$G;S;E \vdash i ; seqi \rightarrow_{\beta} G;S;(seqi)::E \vdash i$}
 \end{prooftree}
 
 \tabto{0cm} {\large \textbf{Noop}}
 \begin{prooftree}
 \AxiomC{$ $}
-\UnaryInfC{$G;S;(noop;seqi)::E \vdash noop \rightarrow_{\beta} G;S;E \vdash seqi$}
+\UnaryInfC{$G;S;(seqi)::E \vdash noop \rightarrow_{\beta} G;S;E \vdash seqi$}
 \end{prooftree}
 
 \tabto{0cm} $\Delta = G;S;E$
@@ -713,202 +842,45 @@ Finally, we have to check that the function used in the start function is declar
 \tabto{0cm} {\large \textbf{Choose Instruction}}
 \begin{prooftree}
 \AxiomC{$ $}
-\UnaryInfC{$N;\Delta \vdash choose \{ \overrightarrow{ \ p \longrightarrow i \ } \} \rightarrow N;G;S;(noop;i_k)::E \vdash p_k $}
+\UnaryInfC{$N;\Delta \vdash choose \{ \overrightarrow{ \ p \longrightarrow i \ } \} \rightarrow N;G;S;(i_k)::E \vdash p_k $}
+\end{prooftree}
+
+\tabto{0cm} {\large \textbf{Spawn Instruction}}
+\begin{prooftree}
+\AxiomC{$G;S \vdash \overrightarrow{e} \Downarrow \overrightarrow{v}$}
+\AxiomC{$ G(f) = (\lambda \overrightarrow{x}.i,S_f)$}
+\BinaryInfC{$\Delta \vdash spawn f (\overrightarrow{e})
+ \xrightarrow[\text{ spawn(G;S; . ) $\vdash$ i}]{} \Delta \vdash noop$}
 \end{prooftree}
 
 \newpage
-\centerline{\textbf{\Huge Semantic Rules (Big-Step Semantics)}}
-\vspace*{3pt}
-\vspace*{20pt}
 
-\tabto{1cm} {\Large \textsc{Semantics rules for expressions}}
-\vspace*{20pt}
-
-\tabto{0cm} {\large \textbf{Binary Operator}}
-\begin{prooftree}
-\AxiomC{$s \vdash e_1 \Downarrow  v_1 $}
-\AxiomC{$s \vdash e_2 \Downarrow  v_2$}
-\BinaryInfC{$s \vdash e_1 \ op \ e_2 \Downarrow v_1 \ op \ v_2 $}
-\end{prooftree}
-
-\tabto{0cm} {\large \textbf{Unary Operator}}
-\begin{prooftree}
-\AxiomC{$s \vdash e \Downarrow  v $}
-\UnaryInfC{$s \vdash op \ e \Downarrow v $}
-\end{prooftree}
-
-\tabto{0cm} {\large \textbf{Condition Expression}}
-\begin{prooftree}
-\AxiomC{$s \vdash e_1 \Downarrow true $}
-\AxiomC{$s \vdash e_2 \Downarrow v $}
-\BinaryInfC{$s \vdash if \ e_1 \ then \ e_2 \ else \ e_3  \Downarrow v $}
-\end{prooftree}
-\vspace*{1pt}
-\begin{prooftree}
-\AxiomC{$s \vdash e_1 \Downarrow false $}
-\AxiomC{$s \vdash e_3 \Downarrow v $}
-\BinaryInfC{$s \vdash if \ e_1 \ then \ e_2 \ else \ e_3  \Downarrow v $}
-\end{prooftree}
-
-
-\tabto{0cm} {\large \textbf{Tuple}}
-\begin{prooftree}
-\AxiomC{$s \vdash e_1 \Downarrow v_1 $}
-\AxiomC{$s \vdash e_2 \Downarrow v_2 $}
-\AxiomC{$\ldots$}
-\AxiomC{$s \vdash e_n \Downarrow v_n $}
-\QuaternaryInfC{$s \vdash (e_1,e_2,\ldots,e_n) \Downarrow (v_1, v_2, \ldots, v_n)$}
-\end{prooftree}
-
-\tabto{0cm} {\large \textbf{Value}}
-\begin{prooftree}
-\AxiomC{ }
-\UnaryInfC{$s \vdash v \Downarrow v $}
-\end{prooftree}
-
-\tabto{0cm} {\large \textbf{Identifier}}
-\begin{prooftree}
-\AxiomC{ }
-\UnaryInfC{$s \vdash n \Downarrow lookup \ n \ in \ s $}
-\end{prooftree}
-
-\newpage
-\tabto{1cm} {\Large \textsc{Semantics rules for instructions}}
-\vspace*{20pt}
-
-\tabto{0cm} {\large \textbf{Assignment}}
-\begin{prooftree}
-\AxiomC{$s \vdash e \Downarrow v $}
-\UnaryInfC{$s \vdash a = e \Downarrow \emptyset, s[a \mapsto v] $}
-\end{prooftree}
-
-\tabto{0cm} {\large \textbf{Condition Instruction}}
-\begin{prooftree}
-\AxiomC{$s_1 \vdash e \Downarrow true $}
-\AxiomC{$s_1 \vdash i_1 \Downarrow \emptyset, s_2$}
-\BinaryInfC{$s_1 \vdash if \ e \ then \ i_1 \ else \ i_2  \Downarrow \emptyset, s_2 $}
-\end{prooftree}
-\vspace*{1pt}
-\begin{prooftree}
-\AxiomC{$s_1 \vdash e \Downarrow true $}
-\AxiomC{$s_1 \vdash i_1 \Downarrow v, s_2$}
-\BinaryInfC{$s_1 \vdash if \ e \ then \ i_1 \ else \ i_2  \Downarrow v, s_2 $}
-\end{prooftree}
-\vspace*{1pt}
-\begin{prooftree}
-\AxiomC{$s_1 \vdash e \Downarrow false $}
-\AxiomC{$s_1 \vdash i_2 \Downarrow \emptyset, s_2$}
-\BinaryInfC{$s_1 \vdash if \ e \ then \ i_1 \ else \ i_2  \Downarrow \emptyset, s_2 $}
-\end{prooftree}
-\vspace*{1pt}
-\begin{prooftree}
-\AxiomC{$s_1 \vdash e \Downarrow false $}
-\AxiomC{$s_1 \vdash i_2 \Downarrow v, s_2$}
-\BinaryInfC{$s_1 \vdash if \ e \ then \ i_1 \ else \ i_2  \Downarrow v, s_2 $}
-\end{prooftree}
-
-
-\tabto{0cm} {\large \textbf{Function Call with return}}
-\begin{prooftree}
-\AxiomC{$s \vdash f \Downarrow (\lambda x.i),(s::s_l) $}
-\AxiomC{$s \vdash e \Downarrow v_1 $}
-\AxiomC{$(s::s_l)::[x \mapsto v_1] \vdash i \Downarrow v_2, s$}
-\TrinaryInfC{$s \vdash a = f (e) \Downarrow s[a \mapsto v_2]$}
-\end{prooftree}
-
-\tabto{0cm} {\large \textbf{Function Call without return}}
-\begin{prooftree}
-\AxiomC{$s \vdash f \Downarrow (\lambda x.i),(s::s_l) $}
-\AxiomC{$s \vdash e \Downarrow v $}
-\AxiomC{$(s::s_l)::[x \mapsto v] \vdash i \Downarrow \emptyset, s$}
-\TrinaryInfC{$s_1 \vdash f (e) \Downarrow \emptyset, s$}
-\end{prooftree}
-
-\tabto{0cm} {\large \textbf{While Instruction}}
-\begin{prooftree}
-\AxiomC{$s_1 \vdash e \Downarrow true $}
-\AxiomC{$s_1 \vdash i \Downarrow \emptyset, s_2$}
-\BinaryInfC{$s_1 \vdash while(e) \ \{i\} \Downarrow  while(e) \ \{i\},s_2 $}
-\end{prooftree}
-\vspace*{1pt}
-\begin{prooftree}
-\AxiomC{$s \vdash e \Downarrow false $}
-\UnaryInfC{$s \vdash while(e) \ \{i\} \Downarrow \emptyset, s $}
-\end{prooftree}
-\vspace*{1pt}
-\begin{prooftree}
-\AxiomC{$s_1 \vdash e \Downarrow true $}
-\AxiomC{$s_1 \vdash i \Downarrow v,s_2 $}
-\BinaryInfC{$s_1 \vdash while(e) \ \{i\} \Downarrow  v,s_2 $}
-\end{prooftree}
-
-
-\tabto{0cm} {\large \textbf{Return void}}
-\begin{prooftree}
-\AxiomC{$ $}
-\UnaryInfC{$s \vdash return \Downarrow \emptyset $}
-\end{prooftree}
-
-\tabto{0cm} {\large \textbf{Return Function }}
-\begin{prooftree}
-\AxiomC{$s_1 \vdash e \Downarrow v,s_2 $}
-\UnaryInfC{$s_1 \vdash return \ e \Downarrow v,s_2 $}
-\end{prooftree}
-
-\tabto{0cm} {\large \textbf{Return Expression }}
-\begin{prooftree}
-\AxiomC{$s_1 \vdash e \Downarrow v,s_2 $}
-\UnaryInfC{$s_1 \vdash return \ e \Downarrow v,s_2 $}
-\end{prooftree}
-
-\tabto{0cm} {\large \textbf{Sequence of Instructions}}
-\begin{prooftree}
-\AxiomC{$s_1 \vdash i_1 \Downarrow \emptyset, s_2$}
-\AxiomC{$s_2 \vdash i_2 \Downarrow \emptyset, s_3 $}
-\BinaryInfC{$s_1 \vdash i_1 \ ; \ i_2 \Downarrow \emptyset, s_3 $}
-\end{prooftree}
-\vspace*{1pt}
-\begin{prooftree}
-\AxiomC{$s_1 \vdash i_1 \Downarrow \emptyset, s_2$}
-\AxiomC{$s_2 \vdash i_2 \Downarrow v, s_3 $}
-\BinaryInfC{$s_1 \vdash i_1 \ ; \ i_2 \Downarrow v,s_3 $}
-\end{prooftree}
-\vspace*{1pt}
-\begin{prooftree}
-\AxiomC{$s_1 \vdash i_1 \Downarrow v,s_2$}
-\UnaryInfC{$s_1 \vdash i_1 \ ; \ i_2 \Downarrow v,s_2 $}
-\end{prooftree}
-
-\tabto{0cm} {\large \textbf{Local Variable Declaration}}
-\begin{prooftree}
-\AxiomC{$x \notin dom(s)$}
-\UnaryInfC{$s \vdash type \ x \Downarrow s::[x \mapsto v_{type}]$}
-\end{prooftree}
-
-\tabto{0cm} {\large \textbf{Global Variable Declaration}}
-\begin{prooftree}
-\AxiomC{$x \notin dom(s)$}
-\UnaryInfC{$s \vdash type \ x = v \Downarrow s::[x \mapsto v]$}
-\end{prooftree}
-
-\newpage
+\phantomsection
+\addcontentsline{toc}{chapter}{Examples}
 \centerline{\textbf{\Huge Examples}}
+
+\vspace*{15pt}
+
+\phantomsection
+\addcontentsline{toc}{section}{Mobiles phones (example-00)}
+\tabto{0cm}{\textbf{\LARGE Mobiles phones (example-00)}}
 \vspace*{3pt}
-\vspace*{20pt}
-\tabto{0cm} {\Large \textbf{Mobiles phones (example-10)}}
-\vspace*{3pt}
+\vspace*{10pt}
 \\
 This example is highly inspired by the "mobile phones system" example - page 82 - of the book: \\
 \textit{Communicating and mobile systems: the $\pi$-calculus} by Robin Milner 
 
 \begin{center}
-\includegraphics[scale = 0.5]{mobile-phone-system.jpg}
+\includegraphics[scale = 0.45]{mobile-phone-system.jpg}
 \end{center}
 In our example, we made some modifications compared to the original example from the book. To allow the control to know when it needs to act we add an other channel between Control and Trans named transmit1. This channel transmit the message received by Trans from Car. This message is an integer which represents the position of the car. We arbitrarily decide at which position the links between the Trans and the car must be switched to the other trans : Idtrans. So, when the position is greater than the threshold the Control tells to Trans to lose the car and to IdTrans to gain the car.
 
 \vspace*{15pt}
-\tabto{0cm} {\Large \textbf{Buffer of size n (example-11)}}
+\phantomsection
+\addcontentsline{toc}{section}{Buffer of size n (example-01)}
+\tabto{0cm} {\LARGE \textbf{Buffer of size n (example-01)}}
 \vspace*{3pt}
+\vspace*{10pt}
 \\
 In this example, we consider a buffer of n cells. First, in $\pi$-calculus the definition of a buffer cell by :
 $B(l,r) = l(x).C \langle x,l,r \rangle$ and $C(x,l,r) = \bar{r} \langle x \rangle .B \langle l,r \rangle$
@@ -925,8 +897,11 @@ $B^{(n)} = \overbrace{B^{ \frown} \ldots ^{\frown} B}^{\text{n times}}$
 
 \newpage
 
-\tabto{0cm} {\Large \textbf{Chemical reaction (example-12)}}
+\phantomsection
+\addcontentsline{toc}{section}{Chemical reaction (example-02)}
+\tabto{0cm} {\LARGE \textbf{Chemical reaction (example-02)}}
 \vspace*{3pt}
+\vspace*{10pt}
 \\
 In this example we are trying to simulate the following chemical reaction : \\
 $K + Na + 2Cl = K^+ + Na^+ + 2Cl^-$ \\
@@ -945,7 +920,9 @@ For each type of atoms, there are dedicated channels on which they liberate or c
     \end{subfigure}
 \end{figure}
 
-\tabto{0cm} {\Large \textbf{Condition with channels (example-13)}}
+\phantomsection
+\addcontentsline{toc}{section}{Condition with channels (example-03)}
+\tabto{0cm} {\LARGE \textbf{Condition with channels (example-03)}}
 \vspace*{3pt}
 \\
 In this example, we use a condition of type if then else based on channels. First, we created the true and false value thanks to channels. We can defined those values in $\pi$-calculus : \\
@@ -956,8 +933,11 @@ $ Cond(P,Q)(l) = (new (t,f)) \bar{l} \langle t,f \rangle .(t.P + f.Q)$
 \\Depending on that the condition process will launch a different process. The processes P and Q are represented in our grammar by function which has to be spawned by the process condition. 
 \newpage
 
-\tabto{0cm} {\Large \textbf{Dining philosophers problem (example-14)}}
+\phantomsection
+\addcontentsline{toc}{section}{Dining philosophers problem (example-04)}
+\tabto{0cm} {\LARGE \textbf{Dining philosophers problem (example-04)}}
 \vspace*{3pt}
+\vspace*{10pt}
 \\
 In this example, we have chosen to represent the dining philosophers problem, a recurring concurrent problem.
 \begin{center}
@@ -967,8 +947,11 @@ In this example, we have chosen to represent the dining philosophers problem, a 
 N philosophers sit at a round table with meal plates. Forks are placed between each pair of adjacent philosophers.
 \\ Each philosopher must alternately think and eat. However, a philosopher can only eat the meal when they have both left and right forks. Each fork can be held by only one philosopher and so a philosopher can use the fork only if it is not being used by another philosopher. After an individual philosopher finishes eating, they need to put down both forks so that the forks become available to others. A philosopher can take the fork on their right or the one on their left as they become available, but cannot start eating before getting both forks.
 
-\tabto{0cm} {\Large \textbf{Whispering problem (example-15)}}
+\phantomsection
+\addcontentsline{toc}{section}{Whispering problem (example-05)}
+\tabto{0cm} {\LARGE \textbf{Whispering problem (example-05)}}
 \vspace*{3pt}
+\vspace*{10pt}
 \\
 In this example, we have represented a situation in a bar. In this one there is a barman, customers who don't know the secret and a customer who knows the secret (There is only one secret). The barman can install 2 people at a table.  One of the 2 people will speak first, the other will listen and then both will leave the table. So, several situations are possible: \\
 - the 2 people don't know the secret: they discuss and leave the table without knowing the secret \\
