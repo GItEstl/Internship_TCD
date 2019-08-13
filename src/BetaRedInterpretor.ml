@@ -21,6 +21,8 @@ let g = ref (Hashtbl.create 100)
 
 (* def_value: ast -> valueType
 Function returning the default value for a type
+Global variable: 
+  - envType: the type environment of the program
 Parameter:
   - t: the abstract syntax tree representing the type
 Return: the default value for the type passed in parameter

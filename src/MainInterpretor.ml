@@ -5,34 +5,141 @@ open Stack
 open Hashtbl
 open Random
 
+(* Type of the possible actions for a thread *)
 type actions =
   | BetaAction
   | TauAction
-  | SendAction of int
-  | ReceiveAction of int
+  | SendAction of int (* the interger is the id of the channel *)
+  | ReceiveAction of int (* the interger is the id of the channel *)
   | SpawnAction
 
-type steps =
-  | ComStep of int * int * int
-  | BetaStep of int
-  | TauStep of int
-  | SpawnStep of int
+(* Type of the possible steps for a set of threads *)
+type step =
+  | ComStep of int * int * int (* the 3 intergers represent the id of the channel, the sender and the receiver respectively *)
+  | BetaStep of int (* the integer represents the id of the tread *)
+  | TauStep of int (* the integer represents the id of the tread *)
+  | SpawnStep of int (* the integer represents the id of the tread *)
 
+(* Type of the execution status *)
 type execStatus =
-  | Running
-  | Executed
+  | Running (* Meaning a steo has been chosen and we can try to run a new step *)
+  | Executed (* Meaning there is no more step to run and the execution has to end *)
 
 exception Unknown_error_main_interpretor of string
 
+(* Variable representing the configs of the threads *)
 let configs = ref([])
 
+(* Variable representing the number of executed steps *)
 let nbSteps = ref(0)
 
+(* Boolean defining how much verbose the user wants *)
 let vb1 = ref(false)
 let vb2 = ref(false)
 let vb3 = ref(false)
 
+(* Variable representing the maximum number of steps *)
 let max = ref(10000)
+
+(* string_of_step: step -> string
+Function converting a step into a string
+Parameter:
+  - step: the step to convert
+Return: string representing the step
+*)
+let string_of_step step =
+  match step with
+  | ComStep(ch,ids,idr) -> "Com(ch: @" ^ (string_of_int ch) ^ ", s: " ^ (string_of_int ids) ^ ", r: " ^ (string_of_int idr) ^ ")" 
+  | BetaStep(id) -> "Beta(" ^ (string_of_int id) ^ ")"
+  | TauStep(id) -> "Tau(" ^ (string_of_int id) ^ ")"
+  | SpawnStep(id) -> "Spawn(" ^ (string_of_int id) ^ ")" 
+
+(* print_config: step list -> step -> unit
+Function printing the configuration of a thread
+Parameter:
+    - all_steps: list of all the possible next steps
+    - step: the chosen next step
+*)
+let print_exec_step all_steps step =
+  let s = List.fold_left (fun string_vs e -> string_vs ^ (string_of_step e) ^ "; ") "" all_steps in
+  print_string("Possible steps: " ^ s ^ "\n");
+  print_string("Chosen step: " ^ (string_of_step step) ^ "\n")
+
+(* string_of_eval_context: frame Stack.t -> string
+Function converting the top frame of the evaluation stack into a string
+Parameter:
+  - e: stack of frames representing the evaluation contexts
+Return: string representing the stack
+*)
+let string_of_eval_context e =
+  if (is_empty e) then "--"
+  else match (top e) with
+    | FuncCallReturnFrame(_,a) -> "(state, " ^ a ^ ") :: E" 
+    | FuncCallVoidFrame(_) -> "(state) :: E"
+    | InstrSeqFrame(i) -> "(" ^ (string_of_instr i) ^ ") :: E"
+
+(* string_of_state: state -> string
+Function converting a state into a string
+Parameter:
+  - s: local state containing all the local variables
+Return: string representing the state
+*)
+let string_of_state s =
+  let seq = to_seq s in 
+  let str = Seq.fold_left (fun string_vs (name,value) -> string_vs ^ name ^ " = " ^ (string_of_val (Some(!value))) ^ "; ") "" seq in
+  if (String.equal str "") then "--" else str
+
+(* print_config: int -> (ast ref * state ref * frame Stack.t ref) -> unit
+Function printing the configuration of a thread
+Parameter:
+  - nb: id of the thread
+  - i: the instruction to execute in the tread
+  - s: the local state containing all the local variables for the thread 
+  - e: the stack of frames representing the evaluation contexts for the thread
+*)
+let print_config nb (i,s,e) =
+  print_string("  Thread " ^ (string_of_int nb) ^ ": \n");
+  print_string("    Instruction: " ^ (string_of_instr (!i))^ "\n");
+  print_string("    State: " ^ (string_of_state (!s)) ^ "\n");
+  print_string("    Evaluation Context: " ^ (string_of_eval_context (!e)) ^ "\n\n")
+
+(* print_configs : unit
+Function printing the configuration of a thread
+Global variables: 
+  - configs: list of configs for all the threads
+  - nbSteps: number of steps executed
+*)
+let print_configs () =
+    print_string("\nStep " ^ (string_of_int(!nbSteps)) ^ ":\n");
+    List.iteri (fun i c -> print_config i c) (!configs)
+
+(* string_of_state: ast -> state -> string
+Function converting the result of a thread into a string
+Global variable: 
+  - g: the global state containing all the global variables
+Parameter:
+  - abstract syntax tree representing the last instruction of the thread
+  - s: local state containing all the local variables for the thread
+Return: string representing the result of the thread
+*)
+let result_to_string i s = 
+  match (!i) with
+  | Terminated(None) -> string_of_val None
+  | Terminated(Some(expr)) -> string_of_val (Some(value_of_expr expr (!g,!s)))
+  | _ -> string_of_val (Some(Deadlock))
+
+(* string_of_state: string
+Function converting the result of all the threads into a string
+Global variable: 
+  - configs: list of configs for all the threads
+Return: string representing the result of all the threads
+*)
+let results_to_string () =
+  if (!vb1) then 
+    let strs = List.mapi (fun nb (i,s,_) -> "    Thread " ^ (string_of_int nb) ^ ": "^ (result_to_string i s) ^ "\n")  (!configs) in
+    List.fold_left (fun str e -> str ^ e) "\n" strs
+  else let (i,s,_) = List.hd (!configs) in (result_to_string i s) ^ "\n"
+
 
 let unfold_chan ch =
   match ch with 
@@ -52,14 +159,12 @@ let ruleSend ch id =
           let idch = unfold_chan (ruleIdentifier n (!g,!s)) in 
           if (idch == ch) then (exp,ipref) else aux cs
         | ChoicesNode(_,_,_,Some(cs)) -> aux cs 
-        | _ -> raise (Unknown_error_main_interpretor "ruleSend2"))
+        | _ -> raise (Unknown_error_main_interpretor "ruleSend"))
       in aux c
-    | _ -> raise (Unknown_error_main_interpretor "ruleSend1")
+    | _ -> raise (Unknown_error_main_interpretor "ruleSend")
   ) in 
   i := iNew;
   value_of_expr expr (!g,!s)
-
-exception Unk of ast
 
 let ruleReceive ch id v =
   let (i,s,_) = List.nth (!configs) id in
@@ -74,9 +179,9 @@ let ruleReceive ch id v =
           let idch = unfold_chan (ruleIdentifier n (!g,!s)) in  
           if (idch == ch) then (name,ipref) else aux cs
         | ChoicesNode(_,_,_,Some(cs)) -> aux cs 
-        | _ -> raise (Unknown_error_main_interpretor "ruleReceive2"))
+        | _ -> raise (Unknown_error_main_interpretor "ruleReceive"))
       in aux c
-    | _ -> raise (Unk (!i))
+    | _ -> raise (Unknown_error_main_interpretor "ruleReceive")
   ) in 
   let pa = find (!s) assign in
   pa := v;
@@ -90,9 +195,9 @@ let ruleTau id =
       (match ast with
         | ChoicesNode(_,PrefixNode(_,_,Tau,_),ipref,_) -> i := ipref
         | ChoicesNode(_,_,_,Some(cs)) -> aux cs 
-        | _ -> raise (Unknown_error_main_interpretor "ruleTau2"))
+        | _ -> raise (Unknown_error_main_interpretor "ruleTau"))
       in aux c
-    | _ -> raise (Unknown_error_main_interpretor "ruleTau1")
+    | _ -> raise (Unknown_error_main_interpretor "ruleTau")
 
 let ruleSpawn id =
   let (i,s,_) = List.nth (!configs) id in
@@ -104,8 +209,8 @@ let ruleSpawn id =
         | FuncVal(param,BodyNode(_,decla,instr)) -> 
           i := NoopNode;
           (ref(instr),ref(create_state param decla ve),ref(Stack.create ()))
-        | _ -> raise (Unknown_error_main_interpretor "ruleSpawn2"))
-    | _ -> raise (Unknown_error_main_interpretor "ruleSpawn1") 
+        | _ -> raise (Unknown_error_main_interpretor "ruleSpawn"))
+    | _ -> raise (Unknown_error_main_interpretor "ruleSpawn") 
      
 let prefix_to_action (_,_,action,ch) s =
   match action,ch with
@@ -160,19 +265,7 @@ let exec_beta_steps id =
     match instr with
       | SendNode(_,_,_) | ReceiveNode(_,_,_) | ChooseNode(_,_) | SpawnNode(_,_,_) | Terminated(_) -> i := instr
       | _ -> aux (exec_beta_step instr frame s e)
-  in aux (!i)
-
-let string_of_step step =
-  match step with
-  | ComStep(ch,ids,idr) -> "Com(ch: @" ^ (string_of_int ch) ^ ", s: " ^ (string_of_int ids) ^ ", r: " ^ (string_of_int idr) ^ ")" 
-  | BetaStep(id) -> "Beta(" ^ (string_of_int id) ^ ")"
-  | TauStep(id) -> "Tau(" ^ (string_of_int id) ^ ")"
-  | SpawnStep(id) -> "Spawn(" ^ (string_of_int id) ^ ")"  
-
-let print_exec_step all_steps step =
-  let s = List.fold_left (fun string_vs e -> string_vs ^ (string_of_step e) ^ "; ") "" all_steps in
-  print_string("Possible steps: " ^ s ^ "\n");
-  print_string("Chosen step: " ^ (string_of_step step) ^ "\n") 
+  in aux (!i) 
 
 let exec_step ()=
   let all_actions = List.map (fun c -> check_possible_actions c) !configs in
@@ -228,43 +321,10 @@ let init_prg ast env_type start verbosity seed maxstep =
         let ve = value_of_expr expr (!g,!g) in
         (match f with 
           | FuncVal(param,BodyNode(_,decla,instr)) -> 
+            (* At the start, the configs variable only contains the main thread *)
             configs := [(ref(instr),ref(create_state param decla ve),ref(Stack.create ()))] 
-          | _ -> raise (Unknown_error_main_interpretor "init_prg2"))
-      | _ -> raise (Unknown_error_main_interpretor "init_prg1")
-
-let string_of_eval_context e =
-  if (is_empty e) then "--"
-  else match (top e) with
-    | FuncCallReturnFrame(_,a) -> "(state, " ^ a ^ ") :: E" 
-    | FuncCallVoidFrame(_) -> "(state) :: E"
-    | InstrSeqFrame(i) -> "(" ^ (string_of_instr i) ^ ") :: E"
-
-let string_of_state s =
-  let seq = to_seq s in 
-  let str = Seq.fold_left (fun string_vs (name,value) -> string_vs ^ name ^ " = " ^ (string_of_val (Some(!value))) ^ "; ") "" seq in
-  if (String.equal str "") then "--" else str
-
-let print_config nb (i,s,e) =
-  print_string("  Thread " ^ (string_of_int nb) ^ ": \n");
-  print_string("    Instruction: " ^ (string_of_instr (!i))^ "\n");
-  print_string("    State: " ^ (string_of_state (!s)) ^ "\n");
-  print_string("    Evaluation Context: " ^ (string_of_eval_context (!e)) ^ "\n\n")
-
-let print_configs () =
-    print_string("\nStep " ^ (string_of_int(!nbSteps)) ^ ":\n");
-    List.iteri (fun i c -> print_config i c) (!configs)
-
-let result_to_string i s = 
-  match (!i) with
-  | Terminated(None) -> string_of_val None
-  | Terminated(Some(expr)) -> string_of_val (Some(value_of_expr expr (!g,!s)))
-  | _ -> string_of_val (Some(Deadlock))
-
-let results_to_string () =
-  if (!vb1) then 
-    let strs = List.mapi (fun nb (i,s,_) -> "    Thread " ^ (string_of_int nb) ^ ": "^ (result_to_string i s) ^ "\n")  (!configs) in
-    List.fold_left (fun str e -> str ^ e) "\n" strs
-  else let (i,s,_) = List.hd (!configs) in (result_to_string i s) ^ "\n"
+          | _ -> raise (Unknown_error_main_interpretor "init_prg"))
+      | _ -> raise (Unknown_error_main_interpretor "init_prg")
 
 let rec run_prg () =
   if (!vb3) then print_configs () else ();
