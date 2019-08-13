@@ -23,7 +23,7 @@ exception Unknown_error_expression_interpretor of string
 
 (* string_of_val: valueType option -> string
 Function converting a value into a string
-Parameters:
+Parameter:
   - v: the value to convert
 Return: string representing the value
 *)
@@ -192,7 +192,7 @@ and
 
 (* ruleValue: ast -> valueType
 Function converting a value node into a valueType
-Parameters:
+Parameter:
   - v: the abstract syntax tree representing the value 
 Return: the result corresponding to the value node
 *)

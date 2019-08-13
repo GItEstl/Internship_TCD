@@ -3,8 +3,10 @@ open ExpressionInterpretor
 open Stack
 open Hashtbl
 
+(* Type of a state *)
 type state = (string, valueType ref) Hashtbl.t
 
+(* Type of the frames inside the evaluation stack *)
 type frame = 
   | FuncCallReturnFrame of state * string
   | FuncCallVoidFrame of state
@@ -12,7 +14,9 @@ type frame =
 
 exception Unknown_error_betared_interpretor of string
 
+(* Variable representing the type environment (shared with the file MainInterpretor.ml) *)
 let envType = ref([(Lexing.dummy_pos,"",NoopNode,false)])
+(* Variable representing the global state (shared with the file MainInterpretor.ml) *)
 let g = ref (Hashtbl.create 100)
 
 (* def_value: ast -> valueType
@@ -40,11 +44,11 @@ let rec def_value t =
     | _ -> raise (Unknown_error_betared_interpretor "def_value")
 
 
-(* extend_state_with_params: ast -> (string, valueType ref) Hashtbl.t -> valueType -> unit
+(* extend_state_with_params: ast -> state -> valueType -> unit
 Function adding the parameters of a function to the state 
 Parameters:
   - paramsnode: the abstract syntax tree representing the paramerers
-  - state: hash table representing the state of all the variables
+  - state: hash table representing the state of all the local variables
   - vparams: the value of the parameters
 *)
 let extend_state_with_params paramsnode state vparams =
@@ -60,11 +64,11 @@ let extend_state_with_params paramsnode state vparams =
   in aux paramsnode vp
 
 
-(* extend_state_with_local_declas: ast -> (string, valueType ref) Hashtbl.t -> unit
+(* extend_state_with_local_declas: ast -> state -> unit
 Function adding the local variable of a function to the state 
 Parameters:
   - decla: the abstract syntax tree representing the local declarations
-  - state: hash table representing the state of all the variables
+  - state: hash table representing the state of all the local variables
 *)  
 let extend_state_with_local_declas decla state =
   match decla with
@@ -78,9 +82,8 @@ let extend_state_with_local_declas decla state =
         )
       in aux d
 
-
-(* create_local_state: ast -> ast -> valueType -> (string, valueType ref) Hashtbl.t
-Function creating a new local state containing the parameters, the global and local variables 
+(* create_state: ast -> ast -> valueType -> state
+Function creating a new local state containing the parameters and local variables 
 Parameters:
   - params: the abstract syntax tree representing the paramerers
   - decla: the abstract syntax tree representing the local declarations
@@ -93,7 +96,13 @@ let create_state params decla vparams =
   extend_state_with_local_declas decla local;
   local
 
-(* Numero 8 *)
+(* ruleSeqInstr: ast -> frame Stack.t ref -> ast
+Function processing a sequence of instructions 
+Parameters:
+  - ast: the abstract syntax tree representing the sequence
+  - e: stack of frames representing the evaluation contexts
+Return: the next instruction to execute
+*)  
 let ruleSeqInstr ast e =
   match ast with 
     | InstrSeqNode(i,None) -> i
@@ -103,7 +112,16 @@ let ruleSeqInstr ast e =
         | _ -> push (InstrSeqFrame(iseq)) (!e); i)
     | _ -> raise (Unknown_error_betared_interpretor "ruleSeqInstr1") 
 
-(* Numero 10 *)
+(* ruleAssignInstr: ast -> ast -> state ref -> ast
+Function processing an assign instruction
+Global variable: 
+  - g: the global state containing all the global variables
+Parameters:
+  - a: the abstract syntax tree representing the assignable
+  - expr: the abstract syntax tree representing the expression to assigned
+  - s: the local state containing all the local variables
+Return: a noop instruction
+*)  
 let ruleAssignInstr a expr s =
   match a with 
     | AssignNode (_,name) ->
@@ -113,7 +131,18 @@ let ruleAssignInstr a expr s =
       NoopNode
     | _ -> raise (Unknown_error_betared_interpretor "ruleAssignInstr")
 
-(* Numero 1 *)
+(* ruleCallFuncWithReturn: ast -> string -> ast -> state ref -> frame Stack.t ref -> ast
+Function processing a function call with a function having return
+Global variable: 
+  - g: the global state containing all the global variables
+Parameters:
+  - a: the abstract syntax tree representing the assignable
+  - namef: name of the called function
+  - expr: abstract syntax tree representing the expression used as parameter for the function
+  - s: the local state containing all the local variables
+  - e: stack of frames representing the evaluation contexts
+Return: a noop instruction
+*)  
 let ruleCallFuncWithReturn a namef expr s e = 
   let f = !(find !g namef) in
   let ve = value_of_expr expr (!g,!s) in
@@ -124,7 +153,17 @@ let ruleCallFuncWithReturn a namef expr s e =
       instr 
     | _ -> raise (Unknown_error_betared_interpretor "ruleCallFuncWithReturn") 
 
-(* Numero 2 *)
+(* ruleCallFuncVoid: string -> ast -> state ref -> frame Stack.t ref -> ast
+Function processing a function call with a function having void return or no return
+Global variable: 
+  - g: the global state containing all the global variables 
+Parameters:
+  - namef: name of the called function
+  - expr: abstract syntax tree representing the expression used as parameter for the function
+  - s: the local state containing all the local variables
+  - e: stack of frames representing the evaluation contexts
+Return: a noop instruction
+*)  
 let ruleCallFuncVoid namef expr s e = 
   let f = !(Hashtbl.find !g namef) in
   let ve = value_of_expr expr (!g,!s) in
@@ -135,7 +174,17 @@ let ruleCallFuncVoid namef expr s e =
       instr 
     | _ -> raise (Unknown_error_betared_interpretor "ruleCallFuncVoid")
 
-(* Numero / *)
+(* ruleIfThenElseInstr: ast -> ast -> ast -> state ref -> ast
+Function processing a conditional instruction
+Global variable: 
+  - g: the global state containing all the global variables 
+Parameters:
+  - cond: abstract syntax tree representing the expression inside the condition
+  - i1: abstract syntax tree representing the instruction inside the then branch
+  - i2: abstract syntax tree representing the instruction inside the else branch
+  - s: the local state containing all the local variables
+Return: the next instruction to execute
+*)  
 let ruleIfThenElseInstr cond i1 i2 s =
   let vcond = value_of_expr cond (!g,!s) in
   match vcond with
@@ -143,7 +192,16 @@ let ruleIfThenElseInstr cond i1 i2 s =
   | BooleanVal(false) -> i2
   | _ -> raise (Unknown_error_betared_interpretor "ruleIfThenElseInstr")
 
-(* Numero 11 et 12 *)
+(* ruleWhile: position -> ast -> ast -> state ref -> ast
+Function processing a while instruction
+Global variable: 
+  - g: the global state containing all the global variables
+Parameters:
+  - cond: abstract syntax tree representing the expression inside the condition
+  - instr: abstract syntax tree representing the instruction inside the the body
+  - s: the local state containing all the local variables
+Return: the next instruction to execute
+*)  
 let ruleWhile pos cond instr s =
   let vcond = value_of_expr cond (!g,!s) in
   match vcond with
@@ -151,18 +209,45 @@ let ruleWhile pos cond instr s =
   | BooleanVal(false) -> NoopNode
   | _ -> raise (Unknown_error_betared_interpretor "ruleWhile")
 
-(* Numero 13 et 14 *)
+(* ruleReturnBreak: ast -> frame Stack.t ref -> ast
+Function poping the last frame
+Parameters:
+  - ast: abstract syntax tree representing a return instruction
+  - e: stack of frames representing the evaluation contexts
+Return: the same return instruction
+Insight: This function is useful when a return have to break the flow of execution
+*) 
 let ruleReturnBreak ast e = 
   let _ = pop (!e) in ast
 
-(* Numero 9 *)
+(* ruleNoop: frame Stack.t ref -> ast
+Function giving the next basic instruction by poping the last frame of the evaluation
+stack and recovering the instruction inside the Sequence Frame
+Parameter:
+  - e: stack of frames representing the evaluation contexts
+Return: the next instruction to execute
+Insight: This function is useful when the execution of the precedent instruction is
+finished (noopNode) and the top frame of the evaluation stack is a Sequence Frame 
+*) 
 let ruleNoop e =
   let frame = pop (!e) in
   match frame with
     | InstrSeqFrame(i) -> i
     | _ -> raise (Unknown_error_betared_interpretor "ruleNoop")
 
-(* Numero 3 *)
+(* ruleAssignReturn: ast -> state ref -> frame Stack.t ref -> ast
+Function assigning the return of a function to a variable stocked in the evaluation stack and
+restauring the state before the call
+Global variable: 
+  - g: the global state containing all the global variables
+Parameters:
+  - ast: abstract syntax tree representing a return instruction
+  - s: the local state containing all the local variables
+  - e: stack of frames representing the evaluation contexts
+Return: a noop instruction
+Insight: This function is useful when a function call is finished and you want to 
+assign the result and restaured the old local state
+*) 
 let ruleAssignReturn ast s e =
   match ast with
   | ReturnNode (_,Some(expr)) -> 
@@ -177,7 +262,15 @@ let ruleAssignReturn ast s e =
       | _ -> raise (Unknown_error_betared_interpretor "ruleAssignReturn2"))
   | _ -> raise (Unknown_error_betared_interpretor "ruleAssignReturn1")
 
-(* Numero 4 *)
+(* ruleVoid: state ref -> frame Stack.t ref -> ast
+Function restauring the state before a function call with a void return
+Parameters:
+  - s: the local state containing all the local variables
+  - e: stack of frames representing the evaluation contexts
+Return: a noop instruction
+Insight: This function is useful when a function call is finished and you want to 
+assign the result and restaured the old local state
+*) 
 let ruleVoid s e =
   let frame = pop (!e) in
   match frame with 
@@ -186,6 +279,13 @@ let ruleVoid s e =
       NoopNode
     | _ -> raise (Unknown_error_betared_interpretor "ruleVoid")
 
+(* ruleNewChan: ast -> state ref -> ast
+Function restauring the state before a function call with a void return
+Parameters:
+  - ast: abstract syntax tree representing the assignable receiving the new channel
+  - s: the local state containing all the local variables
+Return: a noop instruction
+*) 
 let ruleNewChan ast s = 
   match ast with 
   | AssignNode (_,name) ->
@@ -195,6 +295,15 @@ let ruleNewChan ast s =
     NoopNode
   | _ -> raise (Unknown_error_betared_interpretor "ruleNewChan")
 
+(* exec_beta_step: ast -> frame option -> state ref -> frame Stack.t ref -> ast
+Function matching an instruction and the top frame with the right excution rule 
+Parameters:
+  - ast: abstract syntax tree representing the instruction to execute
+  - frame: the frame at the top of the evaluation stack if there is one 
+  - s: the local state containing all the local variables
+  - e: stack of frames representing the evaluation contexts
+Return: the next instruction to execute
+*) 
 let exec_beta_step ast frame s e =
   match (frame,ast) with 
     | (_, InstrSeqNode(_,_)) -> ruleSeqInstr ast e
@@ -208,7 +317,12 @@ let exec_beta_step ast frame s e =
     | (Some(FuncCallReturnFrame(_,_)), ReturnNode (_,_)) -> ruleAssignReturn ast s e
     | (Some(FuncCallVoidFrame(_)), ReturnNode (_,_)) -> ruleVoid s e
     | (_, NewNode(_,ast)) -> ruleNewChan ast s
+  (* Special cases *)
+      (* End of the main function of a thread with no return *)
     | (None,NoopNode) -> ReturnNode(Lexing.dummy_pos,None)
+      (* End of function call with no return *)
     | (Some(FuncCallVoidFrame(_)), NoopNode) -> ReturnNode(Lexing.dummy_pos,None)
+      (* Final return of a thread *)
     | (None,ReturnNode(_,e)) -> Terminated(e)
+      (* Something has gone wrong *)
     | (_,_) -> raise (Unknown_error_betared_interpretor "exec_beta_step")

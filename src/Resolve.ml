@@ -107,7 +107,7 @@ let well_formed_type_decla (pos,name,t,tRec) nameList =
 
 (* well_formed_envType: TenvType -> string list
 Function checking that all declared types are unique and completely well-formed
-Parameters:
+Parameter:
   - envType: list of the type declarations
 Return: the names of the declared types
 *)

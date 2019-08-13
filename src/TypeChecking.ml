@@ -469,7 +469,6 @@ type_of_binstr binstr envVar envType =
     | SpawnNode (pos,namef,e) -> ruleSpawn namef e envVar envType pos
     | NewNode (pos,a) -> ruleNew a envVar envType pos
     | ReturnNode (_,None) -> ruleReturnVoid
-    | ReturnNode (pos,Some (CallNode (_,namef,e))) -> ruleReturnFunc namef e envVar envType pos
     | ReturnNode (_,Some (e)) -> ruleReturnExpr e envVar envType
     | _ -> raise (Unknown_error_type_checking ("type_of_binstr"))
 
@@ -749,7 +748,7 @@ ruleReturnVoid = OKt(VoidType)
 
 and
 
-((* ruleReturnExpr: ast -> TenvVar -> TenvType -> instrType
+(* ruleReturnExpr: ast -> TenvVar -> TenvType -> instrType
 Function determining the type of a newChan instruction
 Parameters:
   - e: abstract syntax tree representing the expression to return
