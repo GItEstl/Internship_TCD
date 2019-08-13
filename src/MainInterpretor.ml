@@ -28,7 +28,9 @@ type execStatus =
 exception Unknown_error_main_interpretor of string
 
 (* Variable representing the configs of the threads *)
-let configs = ref([])
+let configs = ref (Hashtbl.create 100)
+
+let nbThreads = ref(0)
 
 (* Variable representing the number of executed steps *)
 let nbSteps = ref(0)
@@ -111,7 +113,7 @@ Global variables:
 *)
 let print_configs () =
     print_string("\nStep " ^ (string_of_int(!nbSteps)) ^ ":\n");
-    List.iteri (fun i c -> print_config i c) (!configs)
+    iter (fun i c -> print_config i c) (!configs)
 
 (* string_of_state: ast -> state -> string
 Function converting the result of a thread into a string
@@ -136,9 +138,8 @@ Return: string representing the result of all the threads
 *)
 let results_to_string () =
   if (!vb1) then 
-    let strs = List.mapi (fun nb (i,s,_) -> "    Thread " ^ (string_of_int nb) ^ ": "^ (result_to_string i s) ^ "\n")  (!configs) in
-    List.fold_left (fun str e -> str ^ e) "\n" strs
-  else let (i,s,_) = List.hd (!configs) in (result_to_string i s) ^ "\n"
+    fold (fun nb (i,s,_) str -> str ^ "    Thread " ^ (string_of_int nb) ^ ": "^ (result_to_string i s) ^ "\n") (!configs) "\n"
+  else let (i,s,_) = find (!configs) 0 in (result_to_string i s) ^ "\n"
 
 
 let unfold_chan ch =
@@ -147,7 +148,7 @@ let unfold_chan ch =
     | _ -> raise (Unknown_error_main_interpretor "not a channel in unfold_chan")
 
 let ruleSend ch id =
-  let (i,s,_) = List.nth (!configs) id in
+  let (i,s,_) = find (!configs) id in
   let (expr,iNew) = (
   match (!i) with
     | SendNode(_,_,exp) -> (exp,NoopNode)
@@ -167,7 +168,7 @@ let ruleSend ch id =
   value_of_expr expr (!g,!s)
 
 let ruleReceive ch id v =
-  let (i,s,_) = List.nth (!configs) id in
+  let (i,s,_) = find (!configs) id in
   let (assign,iNew) = (
   match (!i) with
     | ReceiveNode(_,AssignNode(_,name),_) -> (name,NoopNode)
@@ -188,7 +189,7 @@ let ruleReceive ch id v =
   i := iNew
 
 let ruleTau id =
-  let (i,_,_) = List.nth (!configs) id in
+  let (i,_,_) = find (!configs) id in
   match (!i) with
     | ChooseNode(_,c) ->
       let rec aux ast = 
@@ -200,7 +201,7 @@ let ruleTau id =
     | _ -> raise (Unknown_error_main_interpretor "ruleTau")
 
 let ruleSpawn id =
-  let (i,s,_) = List.nth (!configs) id in
+  let (i,s,_) = find (!configs) id in
   match (!i) with
     | SpawnNode(_,fname,expr) -> 
       let f = !(Hashtbl.find !g fname) in
@@ -209,8 +210,8 @@ let ruleSpawn id =
         | FuncVal(param,BodyNode(_,decla,instr)) -> 
           i := NoopNode;
           (ref(instr),ref(create_state param decla ve),ref(Stack.create ()))
-        | _ -> raise (Unknown_error_main_interpretor "ruleSpawn"))
-    | _ -> raise (Unknown_error_main_interpretor "ruleSpawn") 
+        | _ -> raise (Unknown_error_main_interpretor "ruleSpawn1"))
+    | _ -> raise (Unknown_error_main_interpretor "ruleSpawn2") 
      
 let prefix_to_action (_,_,action,ch) s =
   match action,ch with
@@ -219,11 +220,11 @@ let prefix_to_action (_,_,action,ch) s =
     | Receive,Some(n) -> let id = ruleIdentifier n (!g,!s) in ReceiveAction(unfold_chan id)
     | _ -> raise (Unknown_error_main_interpretor "prefix_to_actions")
 
-let check_possible_actions (i,s,_) =
+let check_possible_actions id (i,s,_) =
   match (!i) with
-    | SendNode(_,n,_) -> let ch = ruleIdentifier n (!g,!s) in [SendAction(unfold_chan ch)]
-    | ReceiveNode(_,_,n) -> let ch = ruleIdentifier n (!g,!s) in [ReceiveAction(unfold_chan ch)]
-    | SpawnNode(_,_,_) -> [SpawnAction]
+    | SendNode(_,n,_) -> let ch = ruleIdentifier n (!g,!s) in [(id,SendAction(unfold_chan ch))]
+    | ReceiveNode(_,_,n) -> let ch = ruleIdentifier n (!g,!s) in [(id,ReceiveAction(unfold_chan ch))]
+    | SpawnNode(_,_,_) -> [(id,SpawnAction)]
     | ChooseNode(_,c) ->
       let rec aux ast choices = 
       (match ast with
@@ -232,9 +233,10 @@ let check_possible_actions (i,s,_) =
         | _ -> raise (Unknown_error_main_interpretor "check_possible_actions")
       ) in 
       let list_acts = aux c [] in
-      List.map (fun p -> prefix_to_action p s) list_acts
+      List.map (fun p -> (id,prefix_to_action p s)) list_acts
+    | Terminated(None) -> if (id != 0) then remove (!configs) id else (); []
     | Terminated(_) -> []
-    | _ -> [BetaAction]
+    | _ -> [(id,BetaAction)]
 
 let find_receive chan a idsender = 
   match a with
@@ -247,7 +249,6 @@ let find_send chan a idreceiver =
     | _ -> false
 
 let find_next_steps actions =
-  let flat_list_actions =  List.flatten (List.mapi (fun i e -> List.map (fun a -> (i,a)) e ) actions) in
   let rec aux list_act steps =  
     match list_act with
       | (id,BetaAction)::q -> aux q ((BetaStep(id))::steps)
@@ -256,10 +257,10 @@ let find_next_steps actions =
       | (id,ReceiveAction(chan))::q -> aux q ((List.map (fun (ids,_) -> ComStep(chan,ids,id)) (List.find_all (fun a -> find_send chan a id) q))@steps)
       | (id,SpawnAction)::q -> aux q ((SpawnStep(id))::steps)
       | [] -> steps
-  in aux flat_list_actions []
+  in aux actions []
 
 let exec_beta_steps id =
-  let (i,s,e) = List.nth (!configs) id in
+  let (i,s,e) = find (!configs) id in
   let rec aux instr = 
     let frame = if (is_empty (!e)) then None else Some(Stack.top (!e)) in
     match instr with
@@ -268,7 +269,7 @@ let exec_beta_steps id =
   in aux (!i) 
 
 let exec_step ()=
-  let all_actions = List.map (fun c -> check_possible_actions c) !configs in
+  let all_actions = fold (fun id c l -> (check_possible_actions id c)@l) (!configs) [] in
   let all_steps = find_next_steps all_actions in
   let size = List.length all_steps in
   if (size > 0) then
@@ -278,7 +279,8 @@ let exec_step ()=
       | ComStep (ch,idsender,idreceiver) -> let v = ruleSend ch idsender in ruleReceive ch idreceiver v
       | BetaStep(id) -> exec_beta_steps id
       | TauStep(id) -> ruleTau id
-      | SpawnStep(id) -> let newc = ruleSpawn id in configs := (!configs)@[newc]);
+      | SpawnStep(id) -> let newc = ruleSpawn id in add (!configs) (!nbThreads) newc; 
+                         nbThreads := (!nbThreads) + 1);
     if (!vb2) then print_exec_step all_steps step else ();
     Running
   else
@@ -322,7 +324,9 @@ let init_prg ast env_type start verbosity seed maxstep =
         (match f with 
           | FuncVal(param,BodyNode(_,decla,instr)) -> 
             (* At the start, the configs variable only contains the main thread *)
-            configs := [(ref(instr),ref(create_state param decla ve),ref(Stack.create ()))] 
+            configs := Hashtbl.create 100;
+            add (!configs) 0 (ref(instr),ref(create_state param decla ve),ref(Stack.create ()));
+            nbThreads := 1 
           | _ -> raise (Unknown_error_main_interpretor "init_prg"))
       | _ -> raise (Unknown_error_main_interpretor "init_prg")
 
