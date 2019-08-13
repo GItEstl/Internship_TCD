@@ -1,8 +1,0 @@
-int globalVar
-
-func int main (int x, boolean b) {
-    globalVar = x;
-    return y + x
-}
-
-start foo(0)

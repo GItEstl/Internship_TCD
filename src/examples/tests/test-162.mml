@@ -1,18 +1,26 @@
 // Without error: crossed recursivity: parity of positive integer
 
 func boolean evenfunc (int n) {
+def
+    boolean b
+in
     if (n==0) {
         return true
     } else {
-        return oddfunc(n-1)
+        b = oddfunc(n-1);
+        return b
     }
 }
 
 func boolean oddfunc (int n) {
+def
+    boolean b
+in
     if (n == 0) {
         return false
     } else {
-        return evenfunc(n-1)
+        b = evenfunc(n-1);
+        return b
     }
 }
 

@@ -36,7 +36,7 @@ let string_of_val v =
         | ListVal(l) -> "[" ^ (List.fold_left (fun s e ->  s ^ ", " ^ (aux e)) (aux (List.nth l 0)) (List.tl l)) ^ "]"
         | TupleVal(t) -> "(" ^ (List.fold_left (fun s e ->  s ^ ", " ^ (aux e)) (aux (List.nth t 0)) (List.tl t)) ^ ")"
         | ChannelVal(id) -> "Chan@" ^ (string_of_int id)
-        | Deadlock -> "Deadlock reached"
+        | Deadlock -> "Deadlock or maximum number of step reached"
         | _ -> "ERROR"
       in aux vs 
 

@@ -1,10 +1,14 @@
 // Without error: fibonacci
 
 func int fibonacci (int total, int valprec,int n) {
+def
+    int f
+in 
     if (n == 0) {
         return total
-    } else {    
-        return fibonacci (total+valprec,total,n-1)
+    } else {
+        f = fibonacci (total+valprec,total,n-1);
+        return f
     }
 
 }

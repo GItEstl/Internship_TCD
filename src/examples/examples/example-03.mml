@@ -1,20 +1,56 @@
-func void main (int num) {
+type StringChan = channel string
+
+func void True(channel (StringChan,StringChan) l) {
 def
-    int i;
-    boolean b;
-    char c;
-    string s;
-    channel list[int] chan;
-    list[int] l;
-    (string,int,boolean) tuple
-in
-    i = (2 + 2 * 3) / 4 - 1;
-    b = true || (false && true) && true;
-    c = 'a';
-    s = "test";
-    chan = newChan();
-    tuple = ("John",20,true);
-    return;;;;
+    (StringChan, StringChan) b;
+    StringChan t
+
+in 
+        b = receive(l);
+        t = fst(b);
+        send(t,"True")
 }
 
-start main(0)
+func void False(channel (StringChan,StringChan) l) {
+def
+    (StringChan, StringChan) b;
+    StringChan f
+in 
+        b = receive(l);
+        f = snd(b);
+        send(f,"False")
+}
+
+func void cond (channel (StringChan,StringChan) l) {
+def
+    StringChan t;
+    StringChan f;
+    string v
+in
+    t = newChan();
+    f = newChan();
+    send(l,(t,f));
+    choose {
+        | v = receive(t) -> {spawn test1(v)} 
+        | v = receive(f) -> {spawn test2(v)}
+    } 
+}
+
+func string test1(string s) {return "test1"}
+
+func string test2(string s) {return "test2"}
+
+func void main(string s) {
+def
+    channel (StringChan,StringChan) l
+in
+    l = newChan();
+    spawn True(l);
+    cond(l);
+
+}
+
+start main("test")
+
+
+

@@ -1,15 +1,23 @@
 // Without error: factorial
 
 func int aux (int n, int val) {
+def
+    int v
+in
     if (n == 1) {
         return val
-    } else {    
-        return aux(n-1,val*(n-1))
+    } else {
+        v = aux(n-1,val*(n-1));
+        return v
     }
 }
 
 func int fact(int n) {
-    return aux(n,n)
+def
+    int r
+in
+    r = aux(n,n);
+    return r
 }
 
 start fact(10)

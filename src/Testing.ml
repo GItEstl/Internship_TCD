@@ -20,9 +20,8 @@ let report_error filename lexbuf msg =
   let _ = (well_formed_envVar envVar nameListType) in
   let _ = well_formed_start start envVar in
   let _ = type_check_prg envVar envType nameListType ast in
-  Random.init 0;
-  init_prg ast envType start;
-  run_prg_test ()
+  init_prg ast envType start 0 0 10000;
+  run_prg ()
   with
   | Lexer.Error _ -> "lexical error (unexpected character)"
   | Parser.Error -> "syntax error"
@@ -243,11 +242,9 @@ let%expect_test _ = print_string (main "../../examples/test_type_checker/test-15
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-157.mml"); [%expect{| Incorrect assignment: the function addint does not have a return |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-158.mml"); [%expect{| Wrong type: The type (integer, char, list integer) was found but the type (integer, boolean, list integer) was expected |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-159.mml"); [%expect{| 0 |}]
-(*
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-160.mml"); [%expect{| 21 |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-161.mml"); [%expect{| 3628800 |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-162.mml"); [%expect{| true |}]
-*)
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-163.mml"); [%expect{| Inconsistent types: The return type integer and boolean were found in the then and else branch |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-164.mml"); [%expect{| 113 |}]
 let%expect_test _ = print_string (main "../../examples/test_type_checker/test-165.mml"); [%expect{| 64 |}]

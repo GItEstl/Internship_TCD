@@ -1,50 +1,78 @@
-func void test (int a) {
-def
-    channel int ch1;
-    channel boolean ch2
-in
-    ch1 = newChan();
-    ch2 = newChan();
-    spawn sys1(a+100,ch1,ch2);
-    spawn sys3(a+100,ch1,ch2)
+func void barmanNewTable (channel channel string bar, channel string table) {
+    send(bar,table);
+    spawn barmanFillTable(bar,table)
 }
 
-func void sys1 (int i, channel int ch1, channel boolean ch2) {
+func void barmanFillTable (channel channel string bar, channel string table) {
 def
-    boolean b
+    channel string ntable
 in
-    b = receive (ch2);
-    if (b) {
-        send (ch1,i) 
-    } else {
-        spawn sys1(i,ch1,ch2)
+    send(bar,table);
+    ntable = newChan();
+    spawn barmanNewTable(bar,ntable)
+}
+
+func void waitingWiseMan (channel channel string bar, string secret) {
+def
+    channel string table
+in
+    table = receive(bar);
+    spawn sitWiseMan(bar,secret,table)
+}
+
+func void sitWiseMan (channel channel string bar, string secret, channel string table) {
+def
+    string answer;
+    string notTheSecret
+in
+    notTheSecret = "notTheSecret";
+    choose {
+        | send(table,secret) -> {spawn waitingWiseMan(bar,secret)}
+        | answer = receive(table) -> {spawn waitingWiseMan(bar,secret)}
+        | send(table,notTheSecret) -> {spawn waitingWiseMan(bar,secret)}
     }
 }
 
-func string sys2 (int i, channel int ch1, channel boolean ch2) {
+func void waitingNaiveMan (channel channel string bar) {
 def
+    channel string table
+in
+    table = receive(bar);
+    spawn sitNaiveMan(bar,table)
+}
+
+func void sitNaiveMan (channel channel string bar, channel string table) {
+def
+    string answer;
+    string notTheSecret
+in
+    notTheSecret = "notTheSecret";
+    choose {
+        | answer = receive(table) -> {if (answer == "notTheSecret") {
+                                         spawn waitingNaiveMan(bar)
+                                    } else {
+                                        spawn waitingWiseMan(bar,answer)
+                                    }}
+        | send(table,notTheSecret) -> {spawn waitingNaiveMan(bar)}
+    }
+}
+
+func void main (string secret, int nbNaiveMan) {
+def
+    channel channel string bar;
+    channel string firstTable;
     int c;
-    int x
 in
+    bar = newChan();
+    firstTable = newChan();
+    spawn barmanNewTable(bar,firstTable);
+    spawn waitingWiseMan(bar,secret);
     c = 0;
-    while (c != 30) {
-        send (ch2,false);
+    while (c < nbNaiveMan) {
+        spawn waitingNaiveMan(bar);
         c = c + 1
-    };
-    send (ch2,true);
-    x = receive (ch1);
-    if (x == i) {
-        return "OK"
-    } else {
-        return "Error"
     }
 }
 
-func void sys3 (int i, channel int ch1, channel boolean ch2) {
-def
-    string s
-in 
-    s = sys2 (i,ch1,ch2)
-}
+start main ("ItIsRaining",2)
 
-start test (0)

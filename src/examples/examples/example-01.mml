@@ -1,10 +1,66 @@
-int globalVar
-
-type IntChan = channel int
-
-func int main (int x, int y) {
-    globalVar = x;
-    return y + x
+func void buff (channel int l, channel int r) {
+def
+    int x
+in 
+    x = receive(l);
+    spawn cell(x,l,r)
 }
 
-start main(0,0)
+func void cell (int x, channel int l, channel int r) {
+    send(r,x);
+    spawn buff(l,r)
+}
+
+func void buffn (int n, channel int l, channel int r) {
+def
+    int c;
+    channel int ch1;
+    channel int ch2
+in
+    ch1 = newChan();
+    spawn buff(l,ch1);
+    c = 1;
+    while (c < n-1) {
+        ch2 = newChan();
+        spawn buff(ch1,ch2);
+        ch1 = ch2;
+        c = c + 1
+    };
+    spawn buff(ch1,r)
+}
+
+func string main (int n) {
+def
+    channel int l;
+    channel int r;
+    int x;
+    int c 
+in
+    l = newChan();
+    r = newChan();
+    c = 0;
+    x = 1;
+    buffn(n,l,r);
+    while (c < n) {
+        send(l,x);
+        x = x * 10;
+        c = c + 1
+    };
+    x = receive(r);
+    if (n > 1) {
+        if (x == 1) {
+            x = receive(r);
+            if (x == 10) {
+                return "Success"
+            } else {
+                return "Error"
+            } 
+        } else {
+            return "Error"
+        }
+    } else {
+        return "test_impossible"
+    }
+}
+
+start main(5)

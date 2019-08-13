@@ -1,5 +1,97 @@
-func void main (int x) {}
+type IntChan = channel int
+type Switch = channel (IntChan,Switch)
+type Gain = channel (IntChan,Switch,IntChan) 
+type Lose = channel (IntChan,Switch)
 
-start main(0)     
+func void system (int pos) {
+def
+    IntChan talk1;
+    Switch switch1;
+    Gain gain1;
+    Lose lose1;
+    IntChan transmit1;
+    IntChan talk2;
+    Switch switch2;
+    Gain gain2;
+    Lose lose2;
+    IntChan transmit2
+in
+    talk1 = newChan();
+    switch1 = newChan();
+    gain1 = newChan();
+    lose1 = newChan();
+    transmit1 = newChan();
+    talk2 = newChan();
+    switch2 = newChan();
+    gain2 = newChan();
+    lose2 = newChan();
+    transmit2 = newChan();
+    spawn car(talk1,switch1,0);
+    spawn trans(talk1,switch1,gain1,lose1,transmit1);
+    spawn idTrans(gain2,lose2);
+    spawn control(talk1,switch1,gain1,lose1,transmit1,talk2,switch2,gain2,lose2,transmit2)
+}
 
+func void car (IntChan talk, Switch switch, int pos) {
+def
+    IntChan t;
+    Switch s;
+    int newPos
+in
+    newPos = move(pos);
+    choose {
+        | (t,s) = receive (switch) -> {spawn car(t,s,newPos)} 
+        | send (talk,newPos) -> {spawn car(talk,switch,newPos)} 
+    }
+}
 
+func void trans (IntChan talk, Switch switch, Gain gain, Lose lose, IntChan transmit) {
+def
+    int pos;
+    IntChan t;
+    Switch s
+in
+    choose {
+        | pos = receive (talk) -> {send(transmit,pos);
+                                   spawn trans(talk,switch,gain,lose,transmit)
+                                  }
+        | (t,s) = receive (lose) -> {send (switch, (t,s));
+                                    spawn idTrans(gain,lose)
+                                    }
+    }
+}
+
+func void idTrans (Gain gain, Lose lose) {
+def
+    IntChan ta;
+    Switch s;
+    IntChan tr
+in
+    (ta,s,tr) = receive (gain);
+    spawn trans(ta,s,gain,lose,tr)
+}
+
+func void control (IntChan talk1, Switch switch1, Gain gain1, Lose lose1, IntChan  transmit1,
+              IntChan  talk2, Switch switch2, Gain gain2, Lose lose2, IntChan  transmit2) {
+def
+    int pos
+in
+    while (true) {
+        choose {
+            | pos = receive (transmit1) -> {if (pos > 100) {send (lose1, (talk2,switch2));
+                                                            send (gain2, (talk2,switch2,transmit2))
+                                                           } else {}
+                                            }
+            | pos = receive (transmit2) -> {if (pos < 100) {send (lose2, (talk1,switch1));
+                                                            send (gain1, (talk1,switch1,transmit1))
+                                                           } else {}
+                                            }
+        }
+    }
+}
+
+func int move (int pos) {
+    return pos + 1
+}
+
+start system(0) 

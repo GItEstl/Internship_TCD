@@ -10,7 +10,7 @@ let report_error filename lexbuf msg =
  let lc = e.pos_cnum - b.pos_bol + 1 in
  Printf.eprintf "File \"%s\", line %d, characters %d-%d: %s\n" filename b.pos_lnum fc lc msg
 
- let main file =
+ let main verbosity maxstep ?seed:(seed = -1) file =
   let input = open_in file in
   let filebuf = Lexing.from_channel input in
   try
@@ -25,11 +25,11 @@ let report_error filename lexbuf msg =
   print_string ("Environment well-formed \n");
   let _ = type_check_prg envVar envType nameListType ast in
   print_string ("Program type-checked \n");
-  init_seed ();
-  init_prg ast envType start;
+  init_prg ast envType start verbosity seed maxstep;
   let result = run_prg () in
-  print_string ("\nProgram executed \n");
-  print_string("Result: " ^ result)
+  print_string ("Program executed \n\n");
+  print_string("Result: " ^ result ^ "\n")
+
   with
   | Lexer.Error _ ->
       report_error file filebuf "lexical error (unexpected character)";

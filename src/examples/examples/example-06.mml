@@ -1,9 +1,0 @@
-func int increment10 (int num, int c) {
-    if (c == 10) {
-        return num
-    } else {
-        return increment10(num+1,c+1)
-    }
-} 
-
-start increment10(17,0)

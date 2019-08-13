@@ -30,6 +30,8 @@ let vb1 = ref(false)
 let vb2 = ref(false)
 let vb3 = ref(false)
 
+let max = ref(10000)
+
 let unfold_chan ch =
   match ch with 
     | ChannelVal(i) -> i
@@ -173,8 +175,6 @@ let print_exec_step all_steps step =
 let exec_step ()=
   let all_actions = List.map (fun c -> check_possible_actions c) !configs in
   let all_steps = find_next_steps all_actions in
-  let s = List.fold_left (fun string_vs e -> string_vs ^ (string_of_step e) ^ "; ") "" all_steps in
-  print_string("Possible steps: " ^ s ^ "\n");
   let size = List.length all_steps in
   if (size > 0) then
     let n = (Random.bits ()) mod size in
@@ -190,26 +190,22 @@ let exec_step ()=
     (if (!vb2) then print_string("Possible Steps: -- \nChosen Step: -- \n") else ();
     Executed)
 
-let init_seed () =
-  print_string("Do you want to initialise the execution with a seed? Y or N\n");
-  let answer = read_line () in
-  let seed = 
-    (match answer with
-      | "Y" | "y" -> print_string("Please enter the seed :"); read_int ()
-      | "N" | "n" -> self_init (); bits ()
-      | _ -> print_string("Wrong input! The seed has been chosen randomly \n"); self_init (); bits ()
-    ) in Random.init seed;
-  print_string("The program will be excuted with the seed " ^ (string_of_int seed) ^ "\n");
-  print_string("How much verbose do you want? 0, 1, 2 or 3 \n");
-  let vb = read_int () in
-  match vb with
-    | 0 -> vb1 := false; vb2:= false; vb3:= false
-    | 1 -> vb1 := true; vb2:= false; vb3:= false
-    | 2 -> vb1 := true; vb2:= true; vb3:= false
-    | 3 -> vb1 := true; vb2:= true; vb3:= true
-    | _ -> print_string("Incorrect value: the verbose has not been set up correctly \n")
-
-let init_prg ast env_type start = 
+let init_prg ast env_type start verbosity seed maxstep =
+  (* Cofiguration of the verbosity *)
+  (match verbosity with
+  | 0 -> vb1 := false; vb2:= false; vb3:= false
+  | 1 -> vb1 := true; vb2:= false; vb3:= false
+  | 2 -> vb1 := true; vb2:= true; vb3:= false
+  | 3 -> vb1 := true; vb2:= true; vb3:= true
+  | _ -> vb1 := false; vb2:= false; vb3:= false);
+  (* Initialisation of the seed *)
+  let init_seed = if (seed < 0) then (self_init (); bits ()) else seed in
+  Random.init init_seed;
+  if (!vb1) then
+    print_string("The program will be excuted with the seed " ^ (string_of_int init_seed) ^ "\n")
+  else ();
+  (* Configuration of the maximum number of steps *)
+  max := maxstep; 
   (* Assignment of the type environment and creation of the global state *)
   envType := env_type;
   g := Hashtbl.create 100;
@@ -247,7 +243,7 @@ let string_of_state s =
   if (String.equal str "") then "--" else str
 
 let print_config nb (i,s,e) =
-  print_string("  Config " ^ (string_of_int nb) ^ ": \n");
+  print_string("  Thread " ^ (string_of_int nb) ^ ": \n");
   print_string("    Instruction: " ^ (string_of_instr (!i))^ "\n");
   print_string("    State: " ^ (string_of_state (!s)) ^ "\n");
   print_string("    Evaluation Context: " ^ (string_of_eval_context (!e)) ^ "\n\n")
@@ -264,7 +260,7 @@ let result_to_string i s =
 
 let results_to_string () =
   if (!vb1) then 
-    let strs = List.mapi (fun nb (i,s,_) -> "    Config " ^ (string_of_int nb) ^ ": "^ (result_to_string i s) ^ "\n")  (!configs) in
+    let strs = List.mapi (fun nb (i,s,_) -> "    Thread " ^ (string_of_int nb) ^ ": "^ (result_to_string i s) ^ "\n")  (!configs) in
     List.fold_left (fun str e -> str ^ e) "\n" strs
   else let (i,s,_) = List.hd (!configs) in (result_to_string i s) ^ "\n"
 
@@ -272,14 +268,7 @@ let rec run_prg () =
   if (!vb3) then print_configs () else ();
   nbSteps := (!nbSteps) + 1;
   let status = exec_step () in
-  if (status == Running) then
-  let _ = read_int () in
+  if ((status == Running) && (!nbSteps <= !max)) then
     run_prg ()
   else 
     results_to_string ()
-
-let run_prg_test () =
-  vb1 := false;
-  vb2 := false;
-  vb3 := false;
-  run_prg();
