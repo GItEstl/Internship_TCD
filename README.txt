@@ -17,10 +17,10 @@ You will now be able to compile any examples by executing the following command:
         Main.main <verbosity> <maxstep> ~seed:<nb> "<path of the file you want to compile>";;
 - verbosity: between 0 and 3
 - maxstep: positive integer
-- seed: positive integer
+- nb: positive integer
 For example:
         Main.main 1 10000 ~seed:25 "examples/examples/example-00.mml";;
-However, the seed is optional.
+The seed is optional thus the compilation is possible without one
 For example:
         Main.main 1 10000 "examples/examples/example-00.mml";;
 To exit dune use:
