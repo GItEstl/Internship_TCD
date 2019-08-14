@@ -14,9 +14,15 @@ First you have to build the folder, execute the following command in the src fol
 When the folder is successfully build you have to import the library corresponding to the programming language:
         open MyML;;
 You will now be able to compile any examples by executing the following command:
-        Main.main "<path of the file you want to compile>";;
-For example :
-        Main.main "examples/examples/example-00.mml";;
+        Main.main <verbosity> <maxstep> ~seed:<nb> "<path of the file you want to compile>";;
+- verbosity: between 0 and 3
+- maxstep: positive integer
+- seed: positive integer
+For example:
+        Main.main 1 10000 ~seed:25 "examples/examples/example-00.mml";;
+However, the seed is optional.
+For example:
+        Main.main 1 10000 "examples/examples/example-00.mml";;
 To exit dune use:
         exit 0;;
         
