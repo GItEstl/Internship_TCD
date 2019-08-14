@@ -33,4 +33,4 @@ You will find in the text file src/Tests.txt a short description of each test
 
 How to add an automated test?
 Add the following line to the Testing.ml file:
-        let%expect_test _ = print_string (main "<path of the test>"); [%expect{| <string corresponding to the output> |}]
+        let%expect_test _ = print_string (main <verbosity> "<path of the test>"); [%expect{| <string corresponding to the output> |}]
