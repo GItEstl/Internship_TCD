@@ -349,7 +349,7 @@ ruleTupleExpr exprs envVar envType =
     (match exs with
       | ExprsNode (e,None) -> List.rev ((type_of_expr e envVar envType)::l)
       | ExprsNode (e1,Some(e2)) -> aux e2 ((type_of_expr e1 envVar envType)::l)
-      | _ -> raise (Unknown_error_type_checking ("ruleTupleExpr")))
+      | _ -> raise (Unknown_error_type_checking "ruleTupleExpr"))
   in aux exprs [])
 
 and
@@ -379,7 +379,7 @@ ruleValue v envType =
             | ValueSeqNode (v2,Some(vs2)) ->
               let bv,_ = compare envType (ruleValue v1 envType) (ruleValue v2 envType) in
               if (bv) then (aux v2 vs2) else raise (Different_types_in_list)
-            | _ -> raise (Unknown_error_type_checking ("ruleValue")))
+            | _ -> raise (Unknown_error_type_checking "ruleValue"))
         in aux v vs)
     | ValueSeqNode (v,None) -> ruleValue v envType
     | ValueSeqNode (_,Some(_)) -> TupleType (
@@ -387,7 +387,7 @@ ruleValue v envType =
           (match vals with
             | ValueSeqNode (v1,None) -> List.rev ((ruleValue v1 envType)::l)
             | ValueSeqNode (v1,Some(v2)) -> aux v2 ((ruleValue v1 envType)::l)
-            | _ -> raise (Unknown_error_type_checking ("ruleValue")))
+            | _ -> raise (Unknown_error_type_checking "ruleValue"))
         in aux v [])  
     | _ -> raise (Unknown_error_type_checking "ruleValue")
 
@@ -443,7 +443,7 @@ let rec ruleInstr i  envVar envType =
       | InstrSeqNode(NoopNode,Some(i)) -> aux i tInstr
       | InstrSeqNode (bi,None) -> unify_instr (type_of_binstr bi envVar envType) tInstr envType
       | InstrSeqNode (bi,Some(i)) -> aux i (unify_instr (type_of_binstr bi envVar envType) tInstr envType)
-      | _ -> raise (Unknown_error_type_checking ("ruleInstr"))
+      | _ -> raise (Unknown_error_type_checking "ruleInstr")
   in aux i OK 
     
 and
@@ -470,7 +470,7 @@ type_of_binstr binstr envVar envType =
     | NewNode (pos,a) -> ruleNew a envVar envType pos
     | ReturnNode (_,None) -> ruleReturnVoid
     | ReturnNode (_,Some (e)) -> ruleReturnExpr e envVar envType
-    | _ -> raise (Unknown_error_type_checking ("type_of_binstr"))
+    | _ -> raise (Unknown_error_type_checking "type_of_binstr")
 
 and
 
@@ -489,9 +489,9 @@ type_of_params paramNode envType =
         match params with
           | Some(ParamsNode (_,t,_,None)) -> List.rev ((type_of_tree t envType)::l)
           | Some(ParamsNode (_,t,_,ps)) -> aux ps ((type_of_tree t envType)::l)
-          | _ -> raise (Unknown_error_type_checking ("type_of_params"))        
+          | _ -> raise (Unknown_error_type_checking "type_of_params")        
       in aux paramNode []))
-    | _ -> raise (Unknown_error_type_checking ("type_of_params"))
+    | _ -> raise (Unknown_error_type_checking "type_of_params")
 
 and
 
@@ -680,7 +680,7 @@ rulePrefix p envVar envType =
       | PrefixNode(_,_,Tau,_) -> OK
       | PrefixNode(pos,Some(e),Send,Some(namechan)) -> ruleSend namechan e envVar envType pos
       | PrefixNode(pos,Some(a),Receive,Some(namechan)) -> ruleReceive a namechan envVar envType pos
-      | _ -> raise (Unknown_error_type_checking ("rulePrefix"))
+      | _ -> raise (Unknown_error_type_checking "rulePrefix")
 
 and
 
@@ -697,7 +697,7 @@ ruleChoose c envVar envType =
     match choice with 
       | ChoicesNode(_,p,i,None) -> let _ = rulePrefix p envVar envType in unify_instr (ruleInstr i envVar envType) typeInstr envType
       | ChoicesNode(_,p,i,Some(cs)) -> let _ = rulePrefix p envVar envType in aux cs (unify_instr (ruleInstr i envVar envType) typeInstr envType) 
-      | _ -> raise (Unknown_error_type_checking ("ruleChoose"))
+      | _ -> raise (Unknown_error_type_checking "ruleChoose")
   in aux c OK
 
 and
@@ -771,7 +771,7 @@ let rec extend_envVar_with_params params envVar =
     match params with
       | ParamsNode (pos,t,name,None) -> (pos,t,name,None,false)::(List.filter (fun (_,_,namevar,_,_) -> not (String.equal name namevar)) envVar)
       | ParamsNode (pos,t,name,Some(p)) -> extend_envVar_with_params p ((pos,t,name,None,false)::(List.filter (fun (_,_,namevar,_,_) -> not (String.equal name namevar)) envVar))
-      | _ -> raise (Unknown_error_type_checking ("extend_params"))
+      | _ -> raise (Unknown_error_type_checking "extend_params")
 
 (* extend_envVar_with_local_declas: ast -> TenvVar -> string list -> TenvVar
 Function checking the well-formedness of the local declarations inside a function and extending
@@ -788,7 +788,7 @@ let extend_envVar_with_local_declas declas envVar nameListType =
     match d with
       | VariableDeclasNode (VariableDeclaNode (pos,t,name),None) -> ((pos,t,name,None,false)::l)
       | VariableDeclasNode (VariableDeclaNode (pos,t,name),Some(vs)) -> aux vs ((pos,t,name,None,false)::l)
-      | _ -> raise (Unknown_error_type_checking ("extend_ldecla"))
+      | _ -> raise (Unknown_error_type_checking "extend_ldecla")
     in aux declas []) in
   (* Checking of the well-formedness of those declarations *)
   let _ = well_formed_envVar addedDecla nameListType in
@@ -813,7 +813,7 @@ let extend_envVar params b envVar nameListType =
   match b with
     | BodyNode (_,None,_) -> extended_envVar
     | BodyNode (_,Some(declas),_) -> extend_envVar_with_local_declas declas extended_envVar nameListType
-    | _ -> raise (Unknown_error_type_checking ("extend_envVar")) 
+    | _ -> raise (Unknown_error_type_checking "extend_envVar") 
 
 (* ruleFunction: ast -> TenvVar -> TenvType -> string list -> bool
 Function type checking the body of a function thanks to a local variable environment
@@ -836,7 +836,7 @@ let ruleFunction f envVar envType nameListType =
               ruleInstr i local_envVar envType
             with
               | Impossible_unify_instr (_,_) -> raise (Different_type_of_return_func (posb,namef))) 
-          | _ -> raise (Unknown_error_type_checking ("ruleFunction"))) in
+          | _ -> raise (Unknown_error_type_checking "ruleFunction")) in
         (* Determining the declared return type of the function *)
         let ft = type_of_tree ftnode envType in
         (* Comparing the real type of return and the declared type *)
@@ -851,16 +851,15 @@ let ruleFunction f envVar envType nameListType =
                          else raise (Return_not_match_with_decla (pos,rt,ft,namef))
                        with
                          | Invalid_argument _ -> raise (Return_not_match_with_decla (pos,rt,ft,namef))))
-    | _ -> raise (Unknown_error_type_checking ("ruleFunction")))
+    | _ -> raise (Unknown_error_type_checking "ruleFunction"))
 
-(* type_check_prg: TenvVar -> TenvType -> string list -> ast -> bool
+(* type_check_prg: TenvVar -> TenvType -> string list -> ast -> unit
 Function type checking a program
 Parameters:
   - envVar: list of the variable/function declarations 
   - envType: list of the type declarations
   - nameListType: list of names of declared types
   - prg: abstract syntax tree representing a program 
-Return: true if the program is well-typed, false if not
 *)
 let type_check_prg envVar envType nameListType prg = 
   (* Creation of list containing all the functions of the file*)
@@ -894,4 +893,5 @@ let type_check_prg envVar envType nameListType prg =
         | _ -> l 
     in aux [] prg) in
   (* Type checking of all the functions *) 
-  List.for_all (fun f -> ruleFunction f envVar envType nameListType) all_func
+  let b = List.for_all (fun f -> ruleFunction f envVar envType nameListType) all_func in
+  if (b) then () else raise (Unknown_error_type_checking "type_check_prg")

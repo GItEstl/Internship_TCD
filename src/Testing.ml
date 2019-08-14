@@ -1,27 +1,31 @@
-open Lexing
 open Resolve
 open TypeChecking
 open MainInterpretor
 
-let report_error filename lexbuf msg =
- let (b,e) = (lexeme_start_p lexbuf, lexeme_end_p lexbuf) in
- let fc = b.pos_cnum - b.pos_bol + 1 in
- let lc = e.pos_cnum - b.pos_bol + 1 in
- Printf.eprintf "File \"%s\", line %d, characters %d-%d: %s\n" filename b.pos_lnum fc lc msg
-
+ (* main: string -> unit
+Function compiling a file
+Parameter:
+  - file: path of the file to compile
+*)
  let main file =
+  (* Opening the file *)
   let input = open_in file in
+  (* Lexing *)
   let filebuf = Lexing.from_channel input in
   try
+  (* Parsing *)
   let ast = Parser.main Lexer.token filebuf  in
-  let (envType,envVar,start) = create_env ([],[],None) ast in
-  let (envType,envVar) = (List.rev envType, List.rev envVar) in
-  let nameListType = (well_formed_envType envType) in
-  let _ = (well_formed_envVar envVar nameListType) in
-  let _ = well_formed_start start envVar in
-  let _ = type_check_prg envVar envType nameListType ast in
+  (* Creation of the variable and type environments *)
+  let (envType,envVar,start) = create_env ast in
+  (* Checking of the well-formedness *)
+  let nameListType = well_formedness_check envType envVar start in
+  (* Type Checking *)
+  type_check_prg envVar envType nameListType ast;
+  (* Initialization of the execution *)
   init_prg ast envType start 0 0 10000;
+  (* Execution *)
   run_prg ()
+  (* Catching of the exceptions *)
   with
   | Lexer.Error _ -> "lexical error (unexpected character)"
   | Parser.Error -> "syntax error"
@@ -83,6 +87,7 @@ let report_error filename lexbuf msg =
   | BetaRedInterpretor.Unknown_error_betared_interpretor(m) -> "Unknown error during execution: please check the function " ^ m ^ " in the file BetaRedInterpretor.ml"
   | MainInterpretor.Unknown_error_main_interpretor(m) -> "Unknown error during execution: please check the function " ^ m ^ " in the file MainInterpretor.ml"
 
+(* Tests *)
 let%expect_test _ = print_string (main "../../examples/tests/test-00.mml"); [%expect{| unit |}]
 let%expect_test _ = print_string (main "../../examples/tests/test-01.mml"); [%expect{| Unknown variable: unbound value i |}]
 let%expect_test _ = print_string (main "../../examples/tests/test-02.mml"); [%expect{| Wrong type: The type boolean was found but the type integer was expected |}]

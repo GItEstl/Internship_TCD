@@ -39,17 +39,15 @@ let rec find_rec typeNode name =
   TenvType * TenvVar *
   (position * string * ast) option
 Function creating the type and variable environments thanks to the ast of the program
-Parameters:
-  - envType: list of the type declarations already found
-  - envVar: list of the the variable/function declarations already found
-  - start: the ast representing the start function if already found
-  - tree: ast to analyze
+Parameter:
+  - tree: abstract syntax tree to analyze
 Return: Type and variable environments
 *)
-let rec create_env (envType,envVar,start) tree =
+let create_env ast =
+  let rec aux (envType,envVar,start) tree =
     match tree with
         | ProgramNode (p1,p2) -> 
-      create_env (create_env (envType,envVar,start) p1) p2
+      aux (aux (envType,envVar,start) p1) p2
         | FunctionNode (pos,ft,name,params,_) ->
       (envType,(pos,ft,name,Some(params),true)::envVar,start)
         | GlobalVarDeclaNode (pos,t,name,_) -> 
@@ -59,9 +57,10 @@ let rec create_env (envType,envVar,start) tree =
         | TypeDeclaNode (pos,name,t) ->
       ((pos,name,t,find_rec t name)::envType,envVar,start)
         | CallNode (pos,name,expr) ->
-      (envType,envVar,Some((pos,name,expr))) 
+      (List.rev envType,List.rev envVar,Some((pos,name,expr))) 
         | _ -> 
-      (envType,envVar,start)
+      raise (Unknow_error_in_resolve "create_env") 
+  in aux ([],[],None) ast
 
 (* well_formed_type_aux: ast -> string list -> bool
 Function checking that the type declared is well-formed 
@@ -215,3 +214,17 @@ let well_formed_start decla envVar =
                             with
                               | Not_found -> raise (Function_not_found (pos,name)))
     | _ -> raise (Unknow_error_in_resolve "well_formed_start")
+
+(* well_formedness: TenvType -> TenvVar -> (position * string * ast) option -> string list
+Function executing all the well-formedness checks
+Parameters:
+  - envType: list of the type declarations
+  - envVar: list of the the variable/function declarations
+  - start: tuple representing the start function
+Return: a list of names of all the declared types
+*)
+let well_formedness_check envType envVar start =
+    let nameListType = (well_formed_envType envType) in
+    let _ = (well_formed_envVar envVar nameListType) in
+    let _ = well_formed_start start envVar in
+    nameListType

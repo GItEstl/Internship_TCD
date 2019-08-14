@@ -93,7 +93,13 @@ type ast =
   | Terminated of ast option
 ;;
 
-(* Convert an AST into a string *)
+(* string_of_ast: ast -> string
+Function converting an ast into a string
+Parameter:
+  - tree: abstract syntax tree
+Return: string corresponding to the tree
+Insight: this function is not up to date
+*)
 let rec string_of_ast tree =
 match tree with
     | ProgramNode (p1,p2) -> 
@@ -247,6 +253,12 @@ match tree with
     | _ -> 
   "unknownPrinting" 
 
+(* string_of_instr: ast -> string
+Function converting an instruction into a string
+Parameter:
+  - ast: abstract syntax tree representing the instruction
+Return: string corresponding to the instruction
+*)
 let rec string_of_instr ast =
   match ast with 
     | InstrSeqNode (NoopNode,Some(i)) ->
