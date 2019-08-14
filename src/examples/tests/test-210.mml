@@ -1,0 +1,27 @@
+// Without error: spawn of a thread (verification of the config of the thread)
+
+func string test210 (string s) {
+    spawn thread1(1);
+    spawn thread2('K');
+    return s
+}
+
+func int thread1(int i) {
+def
+    int x
+in
+    x = i;
+    return x
+} 
+
+func char thread2(char c) {
+def
+    char x;
+    int y
+in
+    x = c;
+    y = 3*3;
+    return x
+}
+
+start test210("OK")

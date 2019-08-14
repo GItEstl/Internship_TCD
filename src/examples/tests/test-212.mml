@@ -1,0 +1,12 @@
+// Without error: receive instruction with no sender
+
+func void test212 (string s) {
+def
+    channel int chan;
+    int i
+in
+    chan = newChan();
+    i = receive(chan)
+}
+
+start test212("")

@@ -1,0 +1,33 @@
+// Without error: communication and then newchan on one of the side
+
+func int funcreceive (channel int chi) {
+def
+    int i
+in
+    i = receive(chi);
+    return i
+}
+
+func string funcsend (channel int chi) {
+def
+    int i
+in
+    i = 3;
+    send(chi,i);
+    chi = newChan();
+    send(chi,i);
+    return "Sent"
+}
+
+func void test217 (string s) {
+def
+    channel int chi;
+    int c
+in
+        spawn funcreceive(chi);
+        spawn funcreceive(chi);
+        spawn funcsend(chi);
+
+}
+
+start test217("")

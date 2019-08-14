@@ -1,0 +1,30 @@
+// Type error: not a channel type passed for a communication
+
+func boolean funcreceive (channel int chi) {
+def
+    int i;
+    int ch
+in
+    i = receive(ch);
+    return i
+}
+
+func string funcsend (channel int chi) {
+def
+    int i;
+    int ch
+in
+    i = 2;
+    send(ch,i);
+    return "Sent"
+}
+
+func void test222 (string s) {
+def
+    channel int chi;
+in
+    spawn funcsend(chi);
+    spawn funcreceive(chi)
+}
+
+start test222("")

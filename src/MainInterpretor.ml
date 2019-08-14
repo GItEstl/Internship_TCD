@@ -87,8 +87,7 @@ Parameter:
 Return: string representing the state
 *)
 let string_of_state s =
-  let seq = to_seq s in 
-  let str = Seq.fold_left (fun string_vs (name,value) -> string_vs ^ name ^ " = " ^ (string_of_val (Some(!value))) ^ "; ") "" seq in
+  let str = fold (fun name value str -> str ^ name ^ " = " ^ (string_of_val (Some(!value))) ^ "; ") s "" in
   if (String.equal str "") then "--" else str
 
 (* print_config: int -> (ast ref * state ref * frame Stack.t ref) -> unit
@@ -392,7 +391,7 @@ let exec_step () =
     (if (!vb2) then print_string("Possible Steps: -- \nChosen Step: -- \n") else ();
     Executed)
 
-(* init_prg: ast -> envType -> ast -> int -> int -> int -> unit
+(* init_prg: ast -> envType -> ast -> int -> int -> int -> bool -> unit
 Function intializing all the global variables necessary for the execution
 Global variables:
   - vb1, vb2, vb3: verbose parameters
@@ -408,9 +407,10 @@ Paraneters:
   - start: abstract syntax tree representing the main call
   - verbosity: the amount of verbosity
   - seed: the seed to initialize the number generator
-  - maxstep: the maximum number of steps 
+  - maxstep: the maximum number of steps
+  - testmode: if true some displays will not appear
 *)
-let init_prg ast env_type start verbosity seed maxstep =
+let init_prg ast env_type start verbosity seed maxstep testmode =
   (* Cofiguration of the verbosity *)
   (match verbosity with
   | 0 -> vb1 := false; vb2:= false; vb3:= false
@@ -421,9 +421,8 @@ let init_prg ast env_type start verbosity seed maxstep =
   (* Initialisation of the seed *)
   let init_seed = if (seed < 0) then (self_init (); bits ()) else seed in
   Random.init init_seed;
-  if (!vb1) then
-    print_string("The program will be excuted with the seed " ^ (string_of_int init_seed) ^ "\n")
-  else ();
+  if (testmode) then ()
+  else print_string("The program will be excuted with the seed " ^ (string_of_int init_seed) ^ "\n");
   (* Configuration of the maximum number of steps *)
   max := maxstep; 
   (* Assignment of the type environment and creation of the global state *)

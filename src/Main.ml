@@ -43,7 +43,7 @@ let main verbosity maxstep ?seed:(seed = -1) file =
   type_check_prg envVar envType nameListType ast;
   print_string ("Program type-checked \n");
   (* Initialization of the execution *)
-  init_prg ast envType start verbosity seed maxstep;
+  init_prg ast envType start verbosity seed maxstep false;
   (* Execution *)
   let result = run_prg () in
   print_string ("Program executed \n\n");
@@ -112,12 +112,12 @@ let main verbosity maxstep ?seed:(seed = -1) file =
      let c = pos.pos_cnum - pos.pos_bol + 1 in
      let t_assign= string_of_type ta in
      let t_chan = string_of_type st in
-      Printf.eprintf "File \"%s\", line %d, character %d: Incorrect assignment of the channel reception: the elements passed along the channel have the type %s but the type %s was found\n" file pos.pos_lnum c t_assign t_chan;
+      Printf.eprintf "File \"%s\", line %d, character %d: Incorrect assignment of the channel reception: the elements passed along the channel have the type %s but the type %s was found\n" file pos.pos_lnum c t_chan t_assign;
    | TypeChecking.Wrong_type_chan_send (pos,te,st) ->
      let c = pos.pos_cnum - pos.pos_bol + 1 in
      let t_elt = string_of_type te in
      let t_chan = string_of_type st in
-      Printf.eprintf "File \"%s\", line %d, character %d: Wrong type of element send: the elements passed along the channel have the type %s but the type %s was found\n" file pos.pos_lnum c t_elt t_chan;
+      Printf.eprintf "File \"%s\", line %d, character %d: Wrong type of element send: the elements passed along the channel have the type %s but the type %s was found\n" file pos.pos_lnum c t_chan t_elt;
    | TypeChecking.Different_type_of_return_if (pos,t1,t2) ->
      let t_then = string_of_type t1 in
      let t_else = string_of_type t2 in

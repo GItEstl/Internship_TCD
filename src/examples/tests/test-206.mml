@@ -1,0 +1,34 @@
+// Without error: spawn of threads using different functions
+
+func string test206 (string s) {
+    spawn thread1(1);
+    spawn thread2('K');
+    spawn thread3(true);
+    return s
+}
+
+func int thread1(int i) {
+def
+    int x
+in
+    x = i;
+    return x
+} 
+
+func char thread2(char c) {
+def
+    char x
+in
+    x = c;
+    return x
+} 
+
+func boolean thread3(boolean b) {
+def
+    boolean x
+in
+    x = b;
+    return x
+} 
+
+start test206("OK")

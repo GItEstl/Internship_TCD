@@ -1,0 +1,37 @@
+// Without error: send/receive instruction inside a while instruction
+
+func int funcreceive (channel int chi) {
+def
+    int i;
+    int c
+in
+    while(c < 3){
+        i = receive(chi);
+        c = c + 1
+    };
+    return i
+}
+
+func string funcsend (channel int chi) {
+def
+    int i;
+    int c
+in
+    i = 3;
+    while(c < 3){
+        send(chi,i);
+        i = i + 1;
+        c = c + 1
+    };
+    return "Sent"
+}
+
+func void test219 (string s) {
+def
+    channel int chi;
+in
+    spawn funcsend(chi);
+    spawn funcreceive(chi);
+}
+
+start test219("")

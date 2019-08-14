@@ -1,0 +1,28 @@
+// Type error: wrong type for the assignable of receive instruction
+
+func int funcreceive (channel boolean chb) {
+def
+    int i
+in
+    i = receive(chb);
+    return i
+}
+
+func string funcsend (channel boolean chb) {
+def
+    boolean b
+in
+    b = true;
+    send(chb,b);
+    return "Sent"
+}
+
+func void test220 (string s) {
+def
+    channel boolean chb;
+in
+    spawn funcsend(chb);
+    spawn funcreceive(chb)
+}
+
+start test220("")

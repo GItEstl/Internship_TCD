@@ -1,0 +1,37 @@
+// Without error: different spawn using a conditional instruction
+
+func string test207 (string s) {
+    if (false) { 
+        spawn thread1(1);
+    } else {
+        spawn thread2('K');
+        spawn thread3(true);
+    };
+    return s
+}
+
+func int thread1(int i) {
+def
+    int x
+in
+    x = i;
+    return x
+} 
+
+func char thread2(char c) {
+def
+    char x
+in
+    x = c;
+    return x
+} 
+
+func boolean thread3(boolean b) {
+def
+    boolean x
+in
+    x = b;
+    return x
+} 
+
+start test207("OK")

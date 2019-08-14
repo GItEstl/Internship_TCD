@@ -1,0 +1,19 @@
+// Without error: spawn inside a while instruction
+
+func string test204 (string s) {
+    spawn thread(10);
+    spawn thread(100);
+    spawn thread(1000);
+    return s
+}
+
+func int thread(int i) {
+def
+    int x
+in
+    x = i;
+    return x
+} 
+
+
+start test204("OK")

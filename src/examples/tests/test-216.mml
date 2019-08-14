@@ -1,0 +1,32 @@
+// Without error: multiple communication on a channel
+
+func (int,int) funcreceive (channel int chi) {
+def
+    int i1;
+    int i2
+in
+    i1 = receive(chi);
+    i2 = receive(chi);
+    return (i1,i2)
+}
+
+func string funcsend (channel int chi) {
+def
+    int i
+in
+    i = 3;
+    send(chi,i);
+    i = i + 2;
+    send(chi,i);
+    return "Sent"
+}
+
+func void test216 (string s) {
+def
+    channel int chi;
+in
+    spawn funcsend(chi);
+    spawn funcreceive(chi);
+}
+
+start test216("")

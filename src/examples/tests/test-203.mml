@@ -1,0 +1,16 @@
+// Wihtout error: spawn of a thread which returns an expression
+
+func string test203 (string s) {
+    spawn thread(5);
+    return s
+}
+
+func int thread(int i) {
+def
+    int x
+in
+    x = i;
+    return x
+} 
+
+start test203("OK")

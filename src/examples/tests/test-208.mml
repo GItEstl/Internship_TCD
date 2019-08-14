@@ -1,0 +1,25 @@
+// Without error: spawn of a thread spawning another thread
+
+func string test208 (string s) {
+    spawn thread1(1);
+    return s
+}
+
+func int thread1(int i) {
+def
+    int x
+in
+    x = i;
+    spawn thread2('K');
+    return x
+} 
+
+func char thread2(char c) {
+def
+    char x
+in
+    x = c;
+    return x
+}
+
+start test208("OK")

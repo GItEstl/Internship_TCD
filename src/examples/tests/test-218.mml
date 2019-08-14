@@ -1,0 +1,40 @@
+// Without error: send/receive instruction inside a conditional instruction
+
+func (int,int) funcreceive (channel int chi) {
+def
+    int i;
+    int c1;
+    int c2
+in
+    if (true){
+        c1 = receive(chi);
+    } else {
+        c2 = receive(chi)
+    };
+    return (c1,c2)
+}
+
+func string funcsend (channel int chi) {
+def
+    int i;
+    int c
+in
+    i = 3;
+    if (false){
+        send(chi,i)
+    } else {
+        i = i * 2;
+        send(chi,i)
+    };
+    return "Sent"
+}
+
+func void test218 (string s) {
+def
+    channel int chi;
+in
+    spawn funcsend(chi);
+    spawn funcreceive(chi);
+}
+
+start test218("")

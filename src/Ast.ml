@@ -266,7 +266,7 @@ let rec string_of_instr ast =
     | InstrSeqNode (NoopNode,None) ->
   "Noop"
     | InstrSeqNode (bi,None) ->
-  (string_of_instr bi) ^ "6465461651"
+  (string_of_instr bi)
     | InstrSeqNode (bi,Some(i)) ->
   (string_of_instr bi) ^ "; " ^ (string_of_instr i)
     | BinaryNode (_,a,Assign,e) -> 

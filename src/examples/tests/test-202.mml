@@ -1,0 +1,17 @@
+// Without error: spawn of a thread which returns void
+
+func string test202 (string s) {
+    spawn thread(5);
+    return s
+}
+
+func void thread(int i) {
+def
+    int x
+in
+    x = i;
+    return
+} 
+
+
+start test202("OK")

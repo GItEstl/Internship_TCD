@@ -1,0 +1,18 @@
+// Without error: succesful communication between two threads
+
+func int test213 (string s) {
+def
+    int i;
+    channel int ch
+in
+    i = 5;
+    spawn thread(3,ch);
+    i = receive(ch);
+    return i
+}
+
+func void thread (int x, channel int cha) {
+    send(cha,x)
+}
+
+start test213("")

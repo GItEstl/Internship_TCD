@@ -1,0 +1,30 @@
+// Without error: spawn of two sender threads and one receiver thread. So, one of the two senders will not be able to communicate
+// It is an indeterministic situation because we don't know which sender will send
+
+func int funcreceive (channel int chi) {
+def
+    int i
+in
+    i = receive(chi);
+    return i
+}
+
+func string funcsend (channel int chi) {
+def
+    int i
+in
+    i = 3;
+    send(chi,i);
+    return "Sent"
+}
+
+func void test215 (string s) {
+def
+    channel int chi;
+in
+    spawn funcsend(chi);
+    spawn funcsend(chi);
+    spawn funcreceive(chi)
+}
+
+start test215("")

@@ -249,3 +249,31 @@ Binary operator equal for channels
    test-199: Type error: use of the operator with a variable which is not a channel
    test-200: Without error: use of the operator inside a condition
 
+Spawn instruction
+   test-201: Without error: spawn of a thread which terminates
+   test-202: Without error: spawn of a thread which returns void
+   test-203: Wihtout error: spawn of a thread which returns an expression
+   test-204: Wihtout error: spawn of multiple thread executing the same function
+   test-205: Without error: spawn inside a while instruction
+   test-206: Without error: spawn of threads using different functions
+   test-207: Without error: different spawn using a conditional instruction
+   test-208: Wihtout error: spawn of a thread spawning another thread
+   test-209: Type error: spawn of a thread whith an unbound function
+   test-210: Without error: spawn of a thread (verification of the config of the thread)
+
+Communication instructions
+   test-211: Without error: send instruction with no receiver
+   test-212: Without error: receive instruction with no sender
+   test-213: Without error: succesful communication between two threads
+   test-214: Without error: spawn of two receiver threads and one sender thread
+   test-215: Without error: spawn of two sender threads and one receiver thread
+   test-216: Without error: multiple communication on a channel
+   test-217: Without error: communication and then newchan on one of the side
+   test-218: Without error: send/receive instruction inside a conditional instruction
+   test-219: Without error: send/receive instruction inside a while instruction
+   test-220: Type error: wrong type for the assignable of receive instruction
+   test-221: Type error: wrong type for the expression of a send instruction
+   test-222: Type error: not a channel type passed for a communication
+
+Choose instruction
+   test-223:*

@@ -18,6 +18,7 @@
 \usepackage{hyperref}
 \onehalfspacing
 \usepackage{fancyhdr}
+\usepackage{cleveref}
 \begin{document}
 \begin{center}
 \includegraphics[scale = 1]{index.png}
@@ -64,8 +65,8 @@ most powerful techniques for program equivalence in a concurrent setting, which 
 
 \newpage
 \phantomsection
-\addcontentsline{toc}{chapter}{Description of the package src} 
-\centerline{\textbf{\Huge Description of the package src}}
+\addcontentsline{toc}{chapter}{Description of the sources} 
+\centerline{\textbf{\Huge Description of the sources}}
 \vspace*{3pt}
 \vspace*{20pt}
 
@@ -76,18 +77,18 @@ most powerful techniques for program equivalence in a concurrent setting, which 
 \addcontentsline{toc}{section}{Parser} 
 \tabto{0cm} {\LARGE \textbf{Parser}}
 \\ \\
-For the parsing step the files concerned are:
+For the parsing stage the files concerned are:
 \begin{itemize}
 \item lexer.mll: The lexical analyzer -> It converts the source code into a list of tokens and transmits this to the parser
-\item parser.mly: The syntaxic analyzer -> The analyzer checks what it receives from the lexer. To do this, it builds the corresponding abstract syntax tree thanks to the Ast file and if the construction is possible, the source code is well written (according to the defined grammar)
-\item Ast.ml: The abstract syntax tree corresponding to the language
+\item parser.mly: The syntaxic analyzer -> The analyzer checks what it receives from the lexer. To do this, it builds the corresponding abstract syntax tree thanks to the Ast file and if the construction is possible, the source code is considered well written (according to the defined grammar)
+\item Ast.ml: The type of the abstract syntax tree corresponding to the language
 \end{itemize}
 
 \phantomsection
 \addcontentsline{toc}{section}{Type Checker} 
 \tabto{0cm} {\LARGE \textbf{Type Checker}}
 \\ \\
-For the type checker step the files concerned are:
+For the type checker stage the files concerned are:
 \begin{itemize}
 \item Resolve.ml: Creates the types environment (all the named types declared) and the variables environment (all functions and variables declared at top level) and for each element of these two environments checks if it is well-formed
 \item TypeChecking.ml: Checks the consistency of all the expressions and instructions types
@@ -97,13 +98,13 @@ For the type checker step the files concerned are:
 \addcontentsline{toc}{section}{Interpretor} 
 \tabto{0cm} {\LARGE \textbf{Interpretor}}
 \\ \\
-For the interpretation step there are 4 files concerned. For this step, it is important to differentiate the functional part and the concurrent part because they are not treated by the same files. In addition, in this part we have defined in the file Channel.ml what channels are. (Channels are defined by an id and so two channels are equal if they have the same id)
+For the interpretation stage there are 4 files concerned. For this stage, it is important to differentiate the functional part and the concurrent part because they are not treated by the same files. In addition, the file Channel.ml defined what channels are. Channels are defined by an identifier - which is an integer - and so two channels are equal if they have the same id.
 \vspace*{10pt}
 \phantomsection
 \addcontentsline{toc}{subsection}{Functional}
 \tabto{1cm} {\Large \textsc{Functional}}
 \\
-For this part, there are 2 useful files:
+For the functional part, there are 2 useful files:
 \begin{itemize}
 \item ExpressionInterpretor.ml: Interpretor for the expressions using big-step semantics
 \item BetaRedInterpretor.ml: Interpretor for the functional instructions using Beta reductions (small-step semantics)
@@ -113,48 +114,50 @@ For this part, there are 2 useful files:
 \addcontentsline{toc}{subsection}{Concurrent} 
 \tabto{1cm} {\Large \textsc{Concurrent}}
 \\
-For this part, there is only 1 useful file:
+The code processing and executing the concurrent instructions is contained in the following file:
 \begin{itemize}
 \item MainInterpretor.ml: Main file for the interpretation step. In this file, all expressions and instructions (functional or concurrent) are treated. Concurrent instructions are treated using small-step semantic.
 \end{itemize}
 
 
 \phantomsection
-\addcontentsline{toc}{section}{Run the package}
-\tabto{0cm} {\LARGE \textbf{Run the package}}
+\addcontentsline{toc}{section}{Run the compiler}
+\tabto{0cm} {\LARGE \textbf{Run the compiler}}
 \\ \\
-To run the package only one file is useful: Main.ml: \\ 
+To run the compiler only one file is useful: Main.ml: \\ 
 
 In this file, all the previous stages are executed in the order in which they were presented. If an error occurs, it appears on the terminal as an exception giving as much detail as possible to allow the error to be corrected. 
 To execute an example 3 things are to be chosen:
 \begin{itemize}
 \item the seed: a number that will make the execution deterministic (meaning that each seed will always lead to the same result).
-\item verbosity, it concerns the detail of elements to be displayed. There are 4 different levels of verbosity:
+\item verbosity: the amount of details to be displayed. There are 4 different levels of verbosity:
     \begin{itemize}
-        \item Level 0: the result displayed corresponds to the result of the main thread. 
-        \item Level 1: the result is displayed for each thread at the end of the execution. 
-        \item Level 2: at each step are displayed the possible actions and the one chosen + Level 1
-        \item Level 3: the most detailed level. It displays  the next instruction to be processed, the evaluation environment and the state for each thread + Level 2
+        \item Level 0: only the result of the main thread is displayed. 
+        \item Level 1: the result is displayed for all the threads having a result which is not void + Level 0 
+        \item Level 2: all the possible actions and the one chosen are displayed at each step + Level 1
+        \item Level 3: the most detailed level. It displays the configuration - next instruction to be processed, the evaluation environment and the state - of all the threads at each step + Level 2
         \end{itemize}
 \item the maximum number of steps: this is useful for programs that are not destined to end
 \end{itemize}
 
+To know how to run the compiler, refer to the README file.
 
 \phantomsection
-\addcontentsline{toc}{section}{Test the package}
-\tabto{0cm} {\LARGE \textbf{Test the package}}
+\addcontentsline{toc}{section}{Test the compiler}
+\tabto{0cm} {\LARGE \textbf{Test the compiler}}
 \\ \\
-To test the package two files are concerned:
+To test the compiler two files are useful:
 \begin{itemize}
 \item Testing.ml: This file corresponds to the Main.ml file presented above without all the displays. Also, it is implemented to run the tests with the following set-up:
 \begin{itemize}
-    \item the level used for verbocity is 0 (only the result of the main thread matters)
     \item the seed used is 0
     \item the maximum number of steps used is 10000
 \end{itemize}
-In this file, all test results are converted into a string to be compared to an expected result. When an error occurs, it also works because exceptions return a string.
+In this file, all test results are converted into a string to be compared to an expected result. When an exception are raised, the testing process also works because exceptions return a string.
 \item Tests.txt: This file corresponds to a catalogue of the different tests. They are classified by category and for each one a sentence explains the interest of the test.
 \end{itemize}
+
+To know how to test the compiler, refer to the README file.
 
 \phantomsection
 \addcontentsline{toc}{section}{Others}
@@ -163,10 +166,20 @@ In this file, all test results are converted into a string to be compared to an 
 The last two important files are the following:
 
 \begin{itemize}
-\item dune: In this file, the name of the library corresponding to our language and the package ppx\_expect test which allows to check the tests is imported
-\item dune-project: This file defines the versions used for dune and menhir and so if a version is not supported by a system it is easy to modify it.
+\item dune: This file contains the configuration used by dune to build the module of the compiler. Among other thins, it mentions the name of the module corresponding to our language and the package ppx\_expect which allows to run the tests 
+\item dune-project: This file defines the versions used for dune and menhir and so if a version is not supported by a system, it is possible to modify it.
 \end{itemize}
 
+\phantomsection
+\addcontentsline{toc}{section}{Description of the examples folder} 
+\tabto{0cm} {\LARGE \textbf{Description of the examples folder}}
+\\ \\
+
+\tabto{1cm} The "examples" folder is comprised of 2 different folders:
+\begin{itemize}
+    \item examples: It contains complex examples using the notion of pi-calculus. These examples are presented in the section \hyperref[Examples]{Examples} of this document
+    \item tests: This folder contains all the unit tests classified in the Tests.txt catalogue. From test 00 to 200 theses are tests that focus only on the functional part and the tests 201 to --- are unit tests on the concurrent part.
+\end{itemize}
 
 \newpage
 \phantomsection
@@ -179,8 +192,10 @@ The last two important files are the following:
 \vspace*{3pt}
 \vspace*{20pt}
 \tabto{1cm}First of all, this language is procedural meaning that procedures/functions are declared at top-level and can then be called anywhere in the program. This language contains basic and convenient features that you can find in most programming languages : basic types (integer, boolean, char, string), lists, 
-tuples, local and global variables, functions declaration and call, different binary and unary operators for expressions, if-then-else, while and return instructions, ...
-\\ \\
+tuples, local and global variables, functions declaration and call, different binary and unary operators for expressions, if-then-else, while and return instructions, ... \\ 
+
+\tabto{1cm}The language has several rules concerning the declaration of variables. First, all global variables have to be initialized when declared and cannot be modify after that. All local declarations of a function have to be written in its "def" part and can then be used inside the "in" part. The "def" part can only contain variable declarations and the "in" part only instructions. \\
+
 \tabto{1cm}However, what is making this language different from others is the integration of pi-calculus notions inside the language. Indeed, it is possible to declare channels as variables. Those channels can be used in different instructions : newChan, send and receive.
 \begin{itemize}
 \item \ ch = newChan(): create a new channel of the same type as the variable ch and assign it this new channel to it.
@@ -190,7 +205,7 @@ tuples, local and global variables, functions declaration and call, different bi
 
 \tabto{1cm}The notion of input-guarded choice is also available in this language thanks to the instruction choose. The choose instructions allows you to use prefixes (new, send, receive, spawn, tau). The purpose of this instruction is the following: when the action of the prefix is possible, the action is made and the instructions corresponding to that prefix are executed after. In the case where actions of two different prefixes are possible at the same time, the program will choose one of them in a non-deterministic way.
 \\ \\
-\tabto{1cm} Finally, we have also added the instruction spawn to represent the parallelization of processes. Spawn can be seen as the "|" operator of the pi-calculus. It is important to note that spawn is not representing the immediate launch of a new thread. Indeed, when you code a sequence of spawn instructions, it's represents a simultaneous launch of all processes and not a sequential launch. The function and expression passed in arguments of the spawn instruction are used to create the new process.
+\tabto{1cm} Finally, we have also added the instruction spawn to represent the parallelization of processes. Spawn can be seen as the "|" operator of the pi-calculus. It is important to note that spawn is not representing the immediate launch of a new thread. The function and expression passed in arguments of the spawn instruction are used to create the new process.
 \\ \\
 \tabto{1cm} You will find below the grammar describing the language and a section about technical decisions that have impacted the language.
 
@@ -230,7 +245,9 @@ Body ::= { Instruction } | { def VariableDeclas in Instruction }
 \vspace*{3pt}
 
 \begin{verbnobox}[\normalfont]
-VariableDeclaGlobal ::= Typ identifier = Value | Typ identifier = (ValueSeq)
+VariableDeclaGlobal ::= Typ identifier = Value 
+                            | Typ identifier = (ValueSeq)
+                            | Typ identifier = newChan()
 \end{verbnobox}
 \vspace*{3pt}
 
@@ -267,7 +284,6 @@ Binstruction ::= Expression = Expression
                  | Expression = newChan()
                  | return
                  | return Expression
-                 | return name (ExpressionSeq)
 \end{verbnobox}
 \vspace*{3pt}
 
@@ -318,7 +334,6 @@ ExpressionSeq ::= Expression | Expression , ExpressionSeq
 \begin{verbnobox}[\normalfont]
 Constant ::= integer
              | ' char '
-             | ""
              | " string "
              | true
              | false
@@ -326,7 +341,7 @@ Constant ::= integer
 \vspace*{3pt}
 
 \begin{verbnobox}[\normalfont]
-Value ::= Constant | [ ValueSeq ] | []
+Value ::= Constant | [ ValueSeq ] | [ ]
 \end{verbnobox}
 \vspace*{3pt}
 
@@ -857,23 +872,32 @@ Finally, we have to check that the function used in the start function is declar
 
 \phantomsection
 \addcontentsline{toc}{chapter}{Examples}
+\label{Examples}
 \centerline{\textbf{\Huge Examples}}
 
 \vspace*{15pt}
+
+\centerline{Presentation of the different examples present in the examples folder of the package examples.}
+\vspace*{5pt}
+\tabto{0cm}{The first 3 examples are from the book \textit{Communicating and mobile systems: the $\pi$-calculus} by Robin Milner }
 
 \phantomsection
 \addcontentsline{toc}{section}{Mobiles phones (example-00)}
 \tabto{0cm}{\textbf{\LARGE Mobiles phones (example-00)}}
 \vspace*{3pt}
-\vspace*{10pt}
+\vspace*{20pt}
 \\
-This example is highly inspired by the "mobile phones system" example - page 82 - of the book: \\
-\textit{Communicating and mobile systems: the $\pi$-calculus} by Robin Milner 
-
+\tabto{0cm}{This example is highly inspired by the "mobile phones system" example - page 82.}
+\vspace*{3pt}
+\vspace*{10pt}
 \begin{center}
-\includegraphics[scale = 0.45]{mobile-phone-system.jpg}
+\includegraphics[scale = 0.7]{mobile-phone-system.jpg}
 \end{center}
-In our example, we made some modifications compared to the original example from the book. To allow the control to know when it needs to act we add an other channel between Control and Trans named transmit1. This channel transmit the message received by Trans from Car. This message is an integer which represents the position of the car. We arbitrarily decide at which position the links between the Trans and the car must be switched to the other trans : Idtrans. So, when the position is greater than the threshold the Control tells to Trans to lose the car and to IdTrans to gain the car.
+\vspace*{3pt}
+\vspace*{10pt}
+
+\tabto{0cm}{In our example, we made some modifications compared to the original example from the book. To allow the control to know when it needs to act we add an other channel between Control and Trans named transmit1. This channel transmit the message received by Trans from Car. This message is an integer which represents the position of the car. We arbitrarily decide at which position the links between the Trans and the car must be switched to the other trans : Idtrans. So, when the position is greater than the threshold the Control tells to Trans to lose the car and to IdTrans to gain the car.}
+\newpage
 
 \vspace*{15pt}
 \phantomsection
@@ -882,27 +906,42 @@ In our example, we made some modifications compared to the original example from
 \vspace*{3pt}
 \vspace*{10pt}
 \\
+\tabto{1cm}{This example is highly inspired by the "Buffer of size n" example - page 84.} \\ \\
 In this example, we consider a buffer of n cells. First, in $\pi$-calculus the definition of a buffer cell by :
 $B(l,r) = l(x).C \langle x,l,r \rangle$ and $C(x,l,r) = \bar{r} \langle x \rangle .B \langle l,r \rangle$
-
+\vspace*{3pt}
+\vspace*{10pt}
 \begin{center}
-\includegraphics[scale = 0.25]{BufferCell.png}
+\includegraphics[scale = 0.5]{BufferCell.png}
 \end{center}
 So to create a buffer of size n, we make a chain of n buffer cells. This system is defined by linking :
 $B^{(n)} = \overbrace{B^{ \frown} \ldots ^{\frown} B}^{\text{n times}}$
-
-\begin{center}
-\includegraphics[scale = 0.4]{Buffern.png}
-\end{center}
-
-\newpage
-
-\phantomsection
-\addcontentsline{toc}{section}{Chemical reaction (example-02)}
-\tabto{0cm} {\LARGE \textbf{Chemical reaction (example-02)}}
 \vspace*{3pt}
 \vspace*{10pt}
+\begin{center}
+\includegraphics[scale = 0.6]{Buffern.png}
+\end{center}
+
+\phantomsection
+\addcontentsline{toc}{section}{Condition with channels (example-02)}
+\tabto{0cm} {\LARGE \textbf{Condition with channels (example-02)}} \\
+\vspace*{3pt}
 \\
+\tabto{1cm}{This example is highly inspired by the "Condition with channels" example - page 104.} \\ \\
+In this example, we use a condition of type if then else based on channels. First, we created the true and false value thanks to channels. We can defined those values in $\pi$-calculus : \\ \\
+\centerline{$True(l) = l(t,f). \bar{t}$ \ and \ $False(l) = l(t,f). \bar{f}$} \\
+\\ Then we can create a condition by using those values.
+The condition needs a channel l which corresponds to the location of a value true or false. It is defined as follow : \\ \\
+\centerline{$ Cond(P,Q)(l) = (new (t,f)) \bar{l} \langle t,f \rangle .(t.P + f.Q)$} \\
+\\Depending on that the condition process will launch a different process. The processes P and Q are represented in our grammar by function which has to be spawned by the process condition. 
+
+\phantomsection
+\addcontentsline{toc}{section}{Chemical reaction (example-03)}
+\tabto{0cm} {\LARGE \textbf{Chemical reaction (example-03)}}
+\vspace*{3pt}
+\vspace*{10pt}
+
+\tabto{1cm}{This example is highly inspired by the "KNa2Cl" example - slide 14  from the course \textit{On pi-Calculus and its Applications} by Luca Gardelli } \\ \\
 In this example we are trying to simulate the following chemical reaction : \\
 $K + Na + 2Cl = K^+ + Na^+ + 2Cl^-$ \\
 For each type of atoms, there are dedicated channels on which they liberate or capture an electron. The ionization and deionization process are associated with the receive and send instruction. An atom can capture an electron only if an another atom is ready to liberate one and vice-versa. In our example, the thermochemical laws are not respected because the reaction can occur in both ways at anytime.  
@@ -921,42 +960,31 @@ For each type of atoms, there are dedicated channels on which they liberate or c
 \end{figure}
 
 \phantomsection
-\addcontentsline{toc}{section}{Condition with channels (example-03)}
-\tabto{0cm} {\LARGE \textbf{Condition with channels (example-03)}}
-\vspace*{3pt}
-\\
-In this example, we use a condition of type if then else based on channels. First, we created the true and false value thanks to channels. We can defined those values in $\pi$-calculus : \\
-$True(l) = l(t,f). \bar{t}$ \ and \ $False(l) = l(t,f). \bar{f}$
-\\ Then we can create a condition by using those values.
-The condition needs a channel l which corresponds to the location of a value true or false. It is defined as follow : \\
-$ Cond(P,Q)(l) = (new (t,f)) \bar{l} \langle t,f \rangle .(t.P + f.Q)$
-\\Depending on that the condition process will launch a different process. The processes P and Q are represented in our grammar by function which has to be spawned by the process condition. 
-\newpage
-
-\phantomsection
 \addcontentsline{toc}{section}{Dining philosophers problem (example-04)}
 \tabto{0cm} {\LARGE \textbf{Dining philosophers problem (example-04)}}
 \vspace*{3pt}
 \vspace*{10pt}
-\\
-In this example, we have chosen to represent the dining philosophers problem, a recurring concurrent problem.
+\tabto{1cm}In this example, we have chosen to represent the dining philosophers problem, a recurring concurrent problem.
 \begin{center}
-\includegraphics[scale = 0.5]{Dining.png}
+\includegraphics[scale = 0.55]{Dining.png}
 \end{center}
 
-N philosophers sit at a round table with meal plates. Forks are placed between each pair of adjacent philosophers.
+\tabto{0cm}N philosophers sit at a round table with meal plates. Forks are placed between each pair of adjacent philosophers.
 \\ Each philosopher must alternately think and eat. However, a philosopher can only eat the meal when they have both left and right forks. Each fork can be held by only one philosopher and so a philosopher can use the fork only if it is not being used by another philosopher. After an individual philosopher finishes eating, they need to put down both forks so that the forks become available to others. A philosopher can take the fork on their right or the one on their left as they become available, but cannot start eating before getting both forks.
-
+\\ \\
 \phantomsection
 \addcontentsline{toc}{section}{Whispering problem (example-05)}
 \tabto{0cm} {\LARGE \textbf{Whispering problem (example-05)}}
 \vspace*{3pt}
 \vspace*{10pt}
-\\
-In this example, we have represented a situation in a bar. In this one there is a barman, customers who don't know the secret and a customer who knows the secret (There is only one secret). The barman can install 2 people at a table.  One of the 2 people will speak first, the other will listen and then both will leave the table. So, several situations are possible: \\
-- the 2 people don't know the secret: they discuss and leave the table without knowing the secret \\
-- one of the 2 people knows the secret and the wise man speaks first: he reveals the secret to the second person who now knows it and can spread it to other customers \\
-- one of the 2 people knows the secret but the wise man doesn't speak first: the person who did not know the secret still does not know it when he leaves the table \\
-- the 2 people know the secret: the person who speaks first reveals the secret but as the other person already knows it, the situation does not change, they leave the table knowing the secret.
+\tabto{1cm}{This example is highly inspired by the "The Rumor Mill at the Hannenfass bar" example by Thomas Schneider}
+
+\tabto{0cm}In this example, we have represented a situation in a bar. In this one there is a barman, customers who don't know the secret and a customer who knows the secret (There is only one secret). The barman can install 2 people at a table.  One of the 2 people will speak first, the other will listen and then both will leave the table. So, several situations are possible:
+\begin{itemize}
+    \item the 2 people don't know the secret: they discuss and leave the table without knowing the secret \\
+    \item  one of the 2 people knows the secret and the wise man speaks first: he reveals the secret to the second person who now knows it and can spread it to other customers \\
+    \item one of the 2 people knows the secret but the wise man doesn't speak first: the person who did not know the secret still does not know it when he leaves the table \\
+    \item the 2 people know the secret: the person who speaks first reveals the secret but as the other person already knows it, the situation does not change, they leave the table knowing the secret.
+\end{itemize}
 The secret can be transmitted and spread throughout the bar.
 \end{document}

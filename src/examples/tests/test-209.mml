@@ -1,0 +1,17 @@
+// Type error: spawn of a thread whith an unbound function  
+
+func string test209 (string s) {
+    spawn thread1(1);
+    return s
+}
+
+func int thread1(int i) {
+def
+    int x
+in
+    x = i;
+    spawn thread2('K');
+    return x
+}
+
+start test209("OK")
