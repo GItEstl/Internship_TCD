@@ -7,7 +7,6 @@ You can use the following commands:
         opam install ppx_expect
 /!\ You have to autorize opam to install all the necessary packages for all installations
 
-
 How to use this project?
 First you have to build the folder, execute the following command in the src folder:
         dune utop
