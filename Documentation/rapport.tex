@@ -42,7 +42,6 @@
 \vspace*{\stretch{1}}
 \newpage
 \setlength{\voffset}{-2.35cm}
-\setcounter{tocdepth}{4}
 \tableofcontents
 \setlength{\headheight}{52pt}
 \renewcommand{\headrulewidth}{0pt}
@@ -68,11 +67,10 @@ most powerful techniques for program equivalence in a concurrent setting, which 
 \addcontentsline{toc}{chapter}{Description of the sources} 
 \centerline{\textbf{\Huge Description of the sources}}
 \vspace*{3pt}
-\vspace*{20pt}
+\vspace*{10pt}
 
 \tabto{1cm} The main "src" package is comprised of 14 main files. Here is the explanation of the content for each of them.
 
-\vspace*{10pt}
 \phantomsection
 \addcontentsline{toc}{section}{Parser} 
 \tabto{0cm} {\LARGE \textbf{Parser}}
@@ -102,8 +100,7 @@ For the interpretation stage there are 4 files concerned. For this stage, it is 
 \vspace*{10pt}
 \phantomsection
 \addcontentsline{toc}{subsection}{Functional}
-\tabto{1cm} {\Large \textsc{Functional}}
-\\
+\tabto{1cm} {\Large \textsc{Functional}} \\ \\
 For the functional part, there are 2 useful files:
 \begin{itemize}
 \item ExpressionInterpretor.ml: Interpretor for the expressions using big-step semantics
@@ -113,7 +110,7 @@ For the functional part, there are 2 useful files:
 \phantomsection
 \addcontentsline{toc}{subsection}{Concurrent} 
 \tabto{1cm} {\Large \textsc{Concurrent}}
-\\
+\\ \\
 The code processing and executing the concurrent instructions is contained in the following file:
 \begin{itemize}
 \item MainInterpretor.ml: Main file for the interpretation step. In this file, all expressions and instructions (functional or concurrent) are treated. Concurrent instructions are treated using small-step semantic.
@@ -383,7 +380,6 @@ CallMain ::= start name ( ExpressionSeq )
 \addcontentsline{toc}{section}{Technical choices for the parser} 
 \vspace*{3pt}
 \vspace*{10pt}
-\vspace*{10pt}
 \phantomsection
 \addcontentsline{toc}{subsection}{Conflicts resolution} 
 \tabto{1cm} {\Large \textsc{Conflicts resolution}}
@@ -424,23 +420,54 @@ We have also used semi-colons to resolve conflicts. \\ \\
 
 \newpage
 
-
 \phantomsection
 \addcontentsline{toc}{chapter}{Type Checker}
 \centerline{\textbf{\Huge Type Checker}}
 \vspace*{15pt}
 
 \phantomsection
-\addcontentsline{toc}{section}{Type Grammar}
-\tabto{0cm}{\textbf{\LARGE Type Grammar}}
-\vspace*{3pt}
-\vspace*{10pt}
-\tabto{0.5cm}We have created types that simplify our grammar and so allow us to perform a more efficient type checking. We have separated the types for expressions and instructions.
-\vspace*{10pt}
-\phantomsection
-\addcontentsline{toc}{subsection}{Simplified type for Expressions}
-\tabto{1cm} {\Large \textsc{Simplified type for Expressions}}
+\addcontentsline{toc}{section}{Environments and well-formedness}
+\tabto{0cm}{\textbf{\LARGE Environments and well-formedness}}
 
+\vspace*{10pt}
+\vspace*{3pt}
+\phantomsection
+\addcontentsline{toc}{subsection}{Creation of the environments}
+\tabto{1cm} {\Large \textsc{Creation of the environments}}
+
+\tabto{0cm} Before checking the types of the expressions and instructions, we have to create 2 environments:
+\begin{itemize}
+\item The type environment: composed of the different declared types (named types). This environments is represented by a list of tuples with each element representing a declared type. An element of this list contains the declaration position, the abstract syntax tree of the type, the name of the declared type and finally a boolean telling if the type is recursive. This information will later be used by the well-formedness checker.
+\item The variable environment composed of all defined global variables and defined functions. This environments is also represented by a list of tuples with each element representing a global variable or a function. An element of this list contains the declaration position, an abstract syntax tree representing the variable type or the function return type, a name, eventually a tree for function parameters and finally a boolean telling that the variable/function is global. This information will later be used by the type checker.
+\end{itemize}
+So, the environments only concern what is declared at the top level.\\
+
+\addcontentsline{toc}{subsection}{Checking of the well-formedness}
+\tabto{1cm} {\Large \textsc{Checking of the well-formedness}}
+
+\tabto{0cm}In order to create these 2 environments, it is necessary to verify that each declared element is well formed before adding it to its corresponding environment.\\ \\
+Concerning the type environment, being well-formed means: 
+The name used is unique in the environment, the other types used to declare this type are well-formed types i.e. other named types defined above or a basic type defined in our language (int, string, char...) and the declared type is recursive only if it is a channel type\\ \\
+Concerning the variable environment, first it is  necessary to distinguish functions and variables.
+\begin{itemize}
+    \item  For variables, being well-formed means: The name used is unique in the environment and the variables's type is a well formed type
+    \item For functions, being well-formed means: The name used is unique in the environment, the function return's type is a well formed type, and the parameters are well-formed (all parameters type are well formed and each parameter has an unique name)
+\end{itemize}
+Finally, we have to check that the function used in the start function is declared.
+
+\newpage
+
+\phantomsection
+\addcontentsline{toc}{section}{Type Checking}
+\tabto{0cm}{\textbf{\LARGE Type Checking}}
+
+\vspace*{10pt}
+\vspace*{3pt}
+\phantomsection
+\addcontentsline{toc}{subsection}{Type grammar}
+\tabto{1cm} {\Large \textsc{Type grammar}}
+
+\tabto{0cm}To simplify the type checker and allow a more efficient type checking, we use the following types instead of the abstract syntax tree. This type grammar is separated into two categories: the types for expressions and the types for instructions.
 
 \tabto{0cm}The possible types for an expression of this language are described by the following syntax:
 \\ \\
@@ -451,36 +478,19 @@ We have also used semi-colons to resolve conflicts. \\ \\
 \tabto{6,6cm}$ namedtype(string)$ \\
 \tabto{6,6cm}$ Error $
 
-\vspace*{10pt}
-\phantomsection
-\addcontentsline{toc}{subsection}{Simplified type for Instructions}
-\tabto{1cm} {\Large \textsc{Simplified type for Instructions}}
-
 \tabto{0cm}The possible types for an instruction of this language are described by the following syntax:
 \\ \\
 \centerline{$OK \ | \ OK_t(\tau)$}
 
 \vspace*{10pt}
+\vspace*{3pt}
 \phantomsection
-\addcontentsline{toc}{subsection}{Environments}
-\tabto{1cm} {\Large \textsc{ Environments}}
+\addcontentsline{toc}{subsection}{Technical explanations}
+\tabto{1cm} {\Large \textsc{Technical explanations}}
 
-\tabto{0cm} Before checking the types of the expressions and instructions, we create 2 environments:
-\begin{itemize}
-\item The type environment: composed of the different declared types (named types)
-\item The variable environment composed of all defined global variables and defined functions
-\end{itemize}
-So, the environments only concern what is declared at the top level.\\
+\tabto{0cm}The language is type-safe so the implemented type checking is static. It is based on a pattern matching system: the abstract syntax tree representing an expression or an instruction is matched with the correct rule. Then the appropriate rule converts the tree into a type if that is possible. When the type checker cannot determine the type of a bit of code, it means that there is a type error in the program.
 
-In order to create these 2 environments, it is necessary to verify that each declared element is well formed before adding it to its corresponding environment.\\ \\
-Concerning the type environment, being well-formed means: 
-The name used is unique in the environment, the other types used to declare this type are well-formed types i.e. other named types defined above or a basic type defined in our language (int, string, char...) and the declared type is recursive only if it is a channel type\\ \\ \\
-Concerning the variable environment, first it is  necessary to distinguish functions and variables.
-\begin{itemize}
-    \item  For variables, being well-formed means: The name used is unique in the environment and the variables's type is a well formed type
-    \item For functions, being well-formed means: The name used is unique in the environment, the function return's type is a well formed type, and the parameters are well-formed (all parameters type are well formed and each parameter has an unique name)
-\end{itemize}
-Finally, we have to check that the function used in the start function is declared.
+\tabto{0cm}The type checker works from the top level. First, it collects all the functions and execute the type checking on the body of those functions. In the body, the instructions are checked one after the other and the return type of the body is updated after each instruction. At the end of the body (or when a return is found), the return type of the body is compared to return type of the function declaration. If the two are identical, the function is well-typed. An instruction is considered well-typed when the type checker is able to validate the coherence of type used inside the instruction. You will find below the rules used to type check a program. 
 
 \newpage
 \phantomsection
@@ -687,11 +697,49 @@ Finally, we have to check that the function used in the start function is declar
 
 
 \newpage
+\centerline{\textbf{\Huge Interpretor}}
+\vspace*{15pt}
+
+
+
+\begin{figure}[htbp]
+%\hspace*{-2cm}
+\centering
+\includegraphics[scale = 0.4]{Interpretor_loop.jpg}
+\caption{Interpretor loop}
+\end{figure}
+
+\newpage
 
 \phantomsection
 \addcontentsline{toc}{chapter}{Interpretor}
 \centerline{\textbf{\Huge Interpretor}}
 \vspace*{15pt}
+
+\phantomsection
+\addcontentsline{toc}{section}{General explanations}
+\tabto{0cm}{\textbf{\LARGE General explanations}}
+\vspace*{3pt}
+\vspace*{10pt}
+
+\tabto{1cm}The interpretor of the language can be divided in three main parts: from the top to the bottom, the concurrent (or main) interpretor, the beta reduction interpretor and the expression interpretor. \\
+
+\tabto{1cm}The last two constitute the functional side of the compiler. It is important to note that this side mixes small and big steps semantics. Indeed, the expression are interpreted using big-step semantics and the instructions using small step semantics. The evaluation of expressions uses two states to find the value of the variables. Those two states, one global and one local are passed as arguments to the function evaluating the expressions. \\
+
+\tabto{1cm}The instructions are evaluated using small steps semantics and also needs an evaluation context represented by a stack of \textit{frame}. A frame allows the interpretor to know where to put a result or where to continue the execution. When the interpretor uses a frame, it pops it from the top of the stack to retrieve a context. For all beta reductions, the execution of a rule returns the next instruction to run and update the local state and the evaluation context.
+The newchan instruction is special because it is the only beta reduction using channels. In the implementation channels are represented by an identifier which is unique in the program. \\
+
+\tabto{1cm} The concurrent interpretor is tasked to run all the instructions involving the use of threads or communications. In this part, the interpretor needs a set of configurations to run the instructions. Each configuration is the description of a thread, it contains the next instruction to run for this thread, its local state and its evaluation context. The global state is shared in all thread and implemented as a global variable. The concurrent interpretor run the program by analyzing the set of configurations and then executing a step. \\
+
+\phantomsection
+\addcontentsline{toc}{section}{Execution of a step}
+\tabto{0cm}{\textbf{\LARGE Execution of a step}}
+\vspace*{3pt}
+\vspace*{10pt}
+
+\tabto{1cm}In this section, we are going to explain how the main interpretor execute a step, the different stages of this process and how they work. First we can divide the execution of a step in 4 main s   
+
+\newpage
 
 \phantomsection
 \addcontentsline{toc}{section}{Semantic Rules}
