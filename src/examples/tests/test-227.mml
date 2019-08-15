@@ -1,0 +1,17 @@
+// Without error: several tau possible in the choose and one is executed
+
+func int funcchoose (channel int chi) {
+    choose {
+        | tau -> {return 10}
+        | tau -> {return 20}
+    }
+}
+
+func void test227 (string s) {
+def
+    channel int chi
+in
+    spawn funcchoose(chi)
+}
+
+start test227("")

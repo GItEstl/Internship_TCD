@@ -36,11 +36,14 @@ func void car (IntChan talk, Switch switch, int pos) {
 def
     IntChan t;
     Switch s;
+    (IntChan,Switch) tuple;
     int newPos
 in
     newPos = move(pos);
     choose {
-        | (t,s) = receive (switch) -> {spawn car(t,s,newPos)} 
+        | tuple = receive (switch) -> { t = fst(tuple);
+                                        s = snd(tuple);
+                                        spawn car(t,s,newPos)} 
         | send (talk,newPos) -> {spawn car(talk,switch,newPos)} 
     }
 }
@@ -48,15 +51,19 @@ in
 func void trans (IntChan talk, Switch switch, Gain gain, Lose lose, IntChan transmit) {
 def
     int pos;
+    (IntChan,Switch) tuple;
     IntChan t;
-    Switch s
+    Switch s;
+    int blabla
 in
     choose {
         | pos = receive (talk) -> {send(transmit,pos);
                                    spawn trans(talk,switch,gain,lose,transmit)
                                   }
-        | (t,s) = receive (lose) -> {send (switch, (t,s));
-                                    spawn idTrans(gain,lose)
+        | tuple = receive (lose) -> { t = fst(tuple);
+                                      s = snd(tuple);
+                                      send (switch, (t,s));
+                                      spawn idTrans(gain,lose)
                                     }
     }
 }
@@ -65,9 +72,13 @@ func void idTrans (Gain gain, Lose lose) {
 def
     IntChan ta;
     Switch s;
-    IntChan tr
+    IntChan tr;
+    (IntChan,Switch,IntChan) tuple;
 in
-    (ta,s,tr) = receive (gain);
+    tuple = receive (gain);
+    ta = fst(tuple);
+    s = snd(tuple);
+    tr = get(2,tuple);
     spawn trans(ta,s,gain,lose,tr)
 }
 

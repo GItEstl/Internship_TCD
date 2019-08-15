@@ -1,0 +1,32 @@
+// Without error: only one possible action in the choice and this one is executed
+
+func int funcchoose (channel int chi) {
+def
+    int i;
+    channel int chi2
+in
+    choose {
+        | i = receive(chi) -> {return 10}
+        | send(chi2,i) -> {return 20}
+        | i = receive(chi2) -> {return 30}
+    }
+}
+
+func string funcsend (channel int chi) {
+def
+    int i;
+in
+    i = 2;
+    send(chi,i);
+    return "Sent"
+}
+
+func void test223 (string s) {
+def
+    channel int chi;
+in
+    spawn funcsend(chi);
+    spawn funcchoose(chi)
+}
+
+start test223("")

@@ -1,0 +1,33 @@
+// Without error: several send on the same channel and one on a different channel which is impossible
+
+func int funcchoose (channel int chi, channel string chs) {
+def
+    int i;
+    string s
+in
+    choose {
+        | send(chi,i) -> {return 10}
+        | send(chi,(i+1)*4) -> {return 20}
+        | s = receive(chs) -> {return 30}
+    }
+}
+
+func (string,int) funcreceive (channel int chi) {
+def 
+    int i
+in
+    i = receive(chi);
+    return ("Received",i)
+}
+
+
+func void test229 (string s) {
+def
+    channel int chi;
+    channel string chs
+in
+    spawn funcreceive(chi);
+    spawn funcchoose(chi, chs)
+}
+
+start test229("")

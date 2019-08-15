@@ -1,3 +1,5 @@
+// Without error: simple test with one communication
+
 func int funcreceive (channel int chi) {
 def
     int i
@@ -14,7 +16,7 @@ in
     send(chi,i)
 }
 
-func boolean main (string s) {
+func boolean test235 (string s) {
 def
     channel int chi;
     int i
@@ -24,4 +26,4 @@ in
     if (i == 3) { return true} else {return false}
 }
 
-start main("")
+start test235("")

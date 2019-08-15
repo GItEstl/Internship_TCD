@@ -168,18 +168,27 @@ let ruleSend ch id =
     | SendNode(_,_,exp) -> (exp,NoopNode)
     (* If the sending is a send prefix inside a choose instruction *)
     | ChooseNode(_,c) ->
-      let rec aux ast = 
+      (* Collect of the choices corresponding to the exact prefix *)
+      let rec aux ast l = 
       (match ast with
-        (* Last choice of the choose instruction ie necesaarily the right one *)
-        | ChoicesNode(_,PrefixNode(_,Some(exp),Send,_),ipref,None) -> (exp,ipref)
-        (* The prefix is a send, we check that is the right one, if not we skip to the next chocie *)
+        (* The prefix is a send, we check that is the right one, 
+           if not we skip to the next chocie or return the list *)
+        | ChoicesNode(_,PrefixNode(_,Some(exp),Send,Some(n)),ipref,None) ->
+          let idch = unfold_chan (ruleIdentifier n (!g,!s)) in 
+          if (idch == ch) then (exp,ipref)::l else l
         | ChoicesNode(_,PrefixNode(_,Some(exp),Send,Some(n)),ipref,Some(cs)) ->
           let idch = unfold_chan (ruleIdentifier n (!g,!s)) in 
-          if (idch == ch) then (exp,ipref) else aux cs
-        (* The prefix is not a send, we skip to the next choice *)
-        | ChoicesNode(_,_,_,Some(cs)) -> aux cs 
-        | _ -> raise (Unknown_error_main_interpretor "ruleSend"))
-      in aux c
+          if (idch == ch) then aux cs ((exp,ipref)::l) else aux cs l
+        (* The prefix is not a send, we skip to the next choice or return the list *)
+        | ChoicesNode(_,_,_,None) -> l
+        | ChoicesNode(_,_,_,Some(cs)) -> aux cs l
+        | _ -> raise (Unknown_error_main_interpretor "ruleSend")
+      ) in
+      (* Picking of one of the choices corresponding to the prefix *)
+      let list_matching = aux c [] in
+      let size = List.length list_matching in
+      let nb = (Random.bits ()) mod size in
+      List.nth list_matching nb
     | _ -> raise (Unknown_error_main_interpretor "ruleSend")
   ) in 
   i := iNew;
@@ -201,18 +210,27 @@ let ruleReceive ch id v =
     | ReceiveNode(_,AssignNode(_,name),_) -> (name,NoopNode)
     (* If the reception is a receive prefix inside a choose instruction *)
     | ChooseNode(_,c) ->
-      let rec aux ast = 
+      (* Collect of the choices corresponding to the exact prefix *)
+      let rec aux ast l = 
       (match ast with
-        (* Last choice of the choose instruction ie necesaarily the right one *)
-        | ChoicesNode(_,PrefixNode(_,Some(AssignNode(_,name)),Receive,Some(_)),ipref,None) -> (name,ipref)
-        (* The prefix is a receive, we check that is the right one, if not we skip to the next chocie *)
+        (* The prefix is a receive, we check that is the right one, 
+           if not we skip to the next chocie or return the list *)
+        | ChoicesNode(_,PrefixNode(_,Some(AssignNode(_,name)),Receive,Some(n)),ipref,None) ->
+          let idch = unfold_chan (ruleIdentifier n (!g,!s)) in  
+          if (idch == ch) then (name,ipref)::l else l
         | ChoicesNode(_,PrefixNode(_,Some(AssignNode(_,name)),Receive,Some(n)),ipref,Some(cs)) ->
           let idch = unfold_chan (ruleIdentifier n (!g,!s)) in  
-          if (idch == ch) then (name,ipref) else aux cs
-        (* The prefix is not a receive, we skip to the next choice *)
-        | ChoicesNode(_,_,_,Some(cs)) -> aux cs 
-        | _ -> raise (Unknown_error_main_interpretor "ruleReceive"))
-      in aux c
+          if (idch == ch) then aux cs ((name,ipref)::l) else aux cs l
+        (* The prefix is not a receive, we skip to the next choice or return the list *)
+        | ChoicesNode(_,_,_,None) -> l
+        | ChoicesNode(_,_,_,Some(cs)) -> aux cs l
+        | _ -> raise (Unknown_error_main_interpretor "ruleReceive")
+      ) in 
+      (* Picking of one of the choices corresponding to the prefix *)
+      let list_matching = aux c [] in
+      let size = List.length list_matching in
+      let nb = (Random.bits ()) mod size in
+      List.nth list_matching nb
     | _ -> raise (Unknown_error_main_interpretor "ruleReceive")
   ) in 
   let pa = find (!s) assign in
@@ -225,17 +243,29 @@ Global variable:
   - configs: hashtable matching the id of a thread to its config
 Parameter:
   - id: identifier of the thread executing the tau step
+  - nb: number representing the place of the Tau prefix inside the choose instruction
 *)
 let ruleTau id =
   let (i,_,_) = find (!configs) id in
   match (!i) with
     | ChooseNode(_,c) ->
-      let rec aux ast = 
+      (* Collect of all tau choices *)
+      let rec aux ast l = 
       (match ast with
-        | ChoicesNode(_,PrefixNode(_,_,Tau,_),ipref,_) -> i := ipref
-        | ChoicesNode(_,_,_,Some(cs)) -> aux cs 
-        | _ -> raise (Unknown_error_main_interpretor "ruleTau"))
-      in aux c
+        (* The prefix is a tau, we add the choice to the list and continue the collect or return the list *)
+        | ChoicesNode(_,PrefixNode(_,_,Tau,_),ipref,None) -> (ipref::l) 
+        | ChoicesNode(_,PrefixNode(_,_,Tau,_),ipref,Some(cs)) -> aux cs (ipref::l)
+        (* The prefix is not a tau, we skip to the next choice or return the list *)
+        | ChoicesNode(_,_,_,None) -> l 
+        | ChoicesNode(_,_,_,Some(cs)) -> aux cs l
+        | _ -> raise (Unknown_error_main_interpretor "ruleTau")
+      ) in
+      (* Picking of one of the choices corresponding to the prefix *) 
+      let list_matching = aux c [] in
+      let size = List.length list_matching in
+      let nb = (Random.bits ()) mod size in
+      let newi = List.nth list_matching nb in
+      i := newi
     | _ -> raise (Unknown_error_main_interpretor "ruleTau")
 
 (* ruleSpawn: int -> (ast ref * state ref * frame Stack.t ref)
@@ -252,14 +282,17 @@ let ruleSpawn id =
     | SpawnNode(_,fname,expr) -> 
       let f = !(Hashtbl.find !g fname) in
       let ve = value_of_expr expr (!g,!s) in
+      (* Creation of the new thread configuration *)
       (match f with 
         | FuncVal(param,BodyNode(_,decla,instr)) -> 
           i := NoopNode;
-          (ref(instr),ref(create_state param decla ve),ref(Stack.create ()))
+          (match instr with
+            | InstrSeqNode(bi,None) -> (ref(bi),ref(create_state param decla ve),ref(Stack.create ()))
+            | _ -> (ref(instr),ref(create_state param decla ve),ref(Stack.create ())))
         | _ -> raise (Unknown_error_main_interpretor "ruleSpawn"))
     | _ -> raise (Unknown_error_main_interpretor "ruleSpawn") 
 
-(* prefix_to_action: (position * ast * prefixAction * string) -> state ref -> action
+(* prefix_to_action: int -> (position * ast * prefixAction * string) -> state ref -> action
 Function converting a prefix into an action
 Parameter:
   - action: the action of the prefix

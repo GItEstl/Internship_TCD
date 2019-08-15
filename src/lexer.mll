@@ -14,7 +14,7 @@ let alphanum = alphabet | digit | '_'
 let alphanum_extended = alphanum | ' ' | ':' | ',' | '.' | '(' | ')' | '&' | '%' | ';' | '{' | '}' | '[' | ']' | '?' | '=' | '+' | '*' | '^' | '!' | '@' | '<' | '>' | '$' | '|' | '/' | '-'
 let id = alphanum alphanum*
 let char = '\'' alphanum? '\''
-let string = '"' alphanum* '"'
+let string = '"' alphanum_extended* '"'
 let comments =
   (* Comments end of line *)
   "//" [^'\n']*

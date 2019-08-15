@@ -1,0 +1,45 @@
+// Without error: Choose between a receive on a channel, send on another and tau
+
+func int funcchoose (channel int chi, channel int chi2, channel string chs) {
+def
+    int i
+in
+    choose {
+        | i = receive(chi) -> {send(chs,"Receive Chosen")}
+        | send(chi2,20) -> {send(chs,"Send Chosen")}
+        | tau -> {return 30}
+    }
+}
+
+func string funcsend (channel int chi) {
+def
+    int i
+in
+    i = 2;
+    send(chi,i);
+    return "Sent"
+}
+
+func string funcreceive (channel int chi) {
+def 
+    int i
+in
+    i = receive(chi);
+    return "Received"
+}
+
+func string test233 (string s) {
+def
+    channel int chi;
+    channel int chi2;
+    channel string chs;
+    string s
+in
+    spawn funcsend(chi);
+    spawn funcreceive(chi2);
+    spawn funcchoose(chi,chi2,chs);
+    s = receive(chs);
+    return s
+}
+
+start test233("")

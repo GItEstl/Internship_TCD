@@ -1,0 +1,40 @@
+// Syntax error : Expression used instead of an instruction 
+
+func int funcchoose (channel int chi) {
+def
+    int i
+in
+    choose {
+        | i = receive(chi) -> {return 10}
+        | send(chi,i) -> {i + 4}
+        | tau -> {return 30}
+    }
+}
+
+func string funcsend (channel int chi) {
+def
+    int i
+in
+    i = 2;
+    send(chi,i);
+    return "Sent"
+}
+
+func string funcreceive (channel int chi) {
+def 
+    int i
+in
+    i = receive(chi);
+    return "Received"
+}
+
+func void test224 (string s) {
+def
+    channel int chi
+in
+    spawn funcsend(chi);
+    spawn funcreceive(chi);
+    spawn funcchoose(chi,chi2)
+}
+
+start test231("")

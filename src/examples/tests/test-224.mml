@@ -1,0 +1,41 @@
+// Without error: several actions possible and one is executed
+
+func int funcchoose (channel int chi, channel int chi2) {
+def
+    int i
+in
+    choose {
+        | i = receive(chi) -> {return 10}
+        | send(chi2,i) -> {return 20}
+        | tau -> {return 30}
+    }
+}
+
+func string funcsend (channel int chi) {
+def
+    int i
+in
+    i = 2;
+    send(chi,i);
+    return "Sent"
+}
+
+func string funcreceive (channel int chi) {
+def 
+    int i
+in
+    i = receive(chi);
+    return "Received"
+}
+
+func void test224 (string s) {
+def
+    channel int chi;
+    channel int chi2
+in
+    spawn funcsend(chi);
+    spawn funcreceive(chi2);
+    spawn funcchoose(chi,chi2)
+}
+
+start test224("")

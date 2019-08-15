@@ -1,0 +1,32 @@
+// Without error: several receive possible in the choose on only one channel and one is executed
+
+func int funcchoose (channel int chi) {
+def
+    int i1;
+    int i2
+in
+    choose {
+        | i1 = receive(chi) -> {return 10}
+        | i2 = receive(chi) -> {return 20}
+    }
+}
+
+func string funcsend (channel int chi) {
+def
+    int i
+in
+    i = 2;
+    send(chi,i);
+    return "Sent"
+}
+
+
+func void test225 (string s) {
+def
+    channel int chi
+in
+    spawn funcsend(chi);
+    spawn funcchoose(chi)
+}
+
+start test225("")

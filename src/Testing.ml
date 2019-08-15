@@ -447,4 +447,86 @@ let%expect_test _ = print_string (main 3 "../../examples/tests/test-210.mml"); [
       Thread 2: 'K'
       Thread 0: "OK"
       Thread 1: 1 |}]
-let%expect_test _ = print_string (main 1 "../../examples/tests/test-211.mml"); [%expect{| Thread 0: "OK" |}]
+let%expect_test _ = print_string (main 1 "../../examples/tests/test-211.mml"); [%expect{| Thread 0: Deadlock or maximum number of step reached |}]
+let%expect_test _ = print_string (main 1 "../../examples/tests/test-212.mml"); [%expect{| Thread 0: Deadlock or maximum number of step reached |}]
+let%expect_test _ = print_string (main 1 "../../examples/tests/test-213.mml"); [%expect{| Thread 0: 3 |}]
+let%expect_test _ = print_string (main 1 "../../examples/tests/test-214.mml"); [%expect{|
+  Thread 2: 3
+  Thread 0: unit
+  Thread 1: Deadlock or maximum number of step reached |}]
+let%expect_test _ = print_string (main 1 "../../examples/tests/test-215.mml"); [%expect{|
+  Thread 2: "Sent"
+  Thread 0: unit
+  Thread 3: 3
+  Thread 1: Deadlock or maximum number of step reached |}]
+let%expect_test _ = print_string (main 1 "../../examples/tests/test-216.mml"); [%expect{|
+  Thread 2: (3, 5)
+  Thread 0: unit
+  Thread 1: "Sent" |}]
+let%expect_test _ = print_string (main 1 "../../examples/tests/test-217.mml"); [%expect{|
+  Thread 2: 3
+  Thread 0: unit
+  Thread 3: Deadlock or maximum number of step reached
+  Thread 1: Deadlock or maximum number of step reached |}]
+let%expect_test _ = print_string (main 1 "../../examples/tests/test-218.mml"); [%expect{|
+  Thread 2: (6, 0)
+  Thread 0: unit
+  Thread 1: "Sent" |}]
+let%expect_test _ = print_string (main 1 "../../examples/tests/test-219.mml"); [%expect{|
+  Thread 2: 5
+  Thread 0: unit
+  Thread 1: "Sent" |}]
+let%expect_test _ = print_string (main 1 "../../examples/tests/test-220.mml"); [%expect{| Incorrect assignment of the channel reception: the elements passed along the channel have the type boolean but the type integer was found |}]
+let%expect_test _ = print_string (main 1 "../../examples/tests/test-221.mml"); [%expect{| Wrong type of element send: the elements passed along the channel have the type boolean but the type integer was found |}]
+let%expect_test _ = print_string (main 1 "../../examples/tests/test-222.mml"); [%expect{| Wrong type: The type integer was found but the type channel was expected |}]
+let%expect_test _ = print_string (main 1 "../../examples/tests/test-223.mml"); [%expect{|
+  Thread 2: 10
+  Thread 0: unit
+  Thread 1: "Sent" |}]
+let%expect_test _ = print_string (main 1 "../../examples/tests/test-224.mml"); [%expect{|
+  Thread 2: "Received"
+  Thread 0: unit
+  Thread 3: 20
+  Thread 1: Deadlock or maximum number of step reached |}]
+let%expect_test _ = print_string (main 1 "../../examples/tests/test-225.mml"); [%expect{|
+  Thread 2: 20
+  Thread 0: unit
+  Thread 1: "Sent" |}]
+let%expect_test _ = print_string (main 1 "../../examples/tests/test-226.mml"); [%expect{|
+  Thread 2: 20
+  Thread 0: unit
+  Thread 1: "Received" |}]
+let%expect_test _ = print_string (main 1 "../../examples/tests/test-227.mml"); [%expect{|
+  Thread 0: unit
+  Thread 1: 20 |}]
+let%expect_test _ = print_string (main 1 "../../examples/tests/test-228.mml"); [%expect{|
+  Thread 2: 20
+  Thread 0: unit
+  Thread 1: "Sent" |}]
+let%expect_test _ = print_string (main 1 "../../examples/tests/test-229.mml"); [%expect{|
+  Thread 2: 20
+  Thread 0: unit
+  Thread 1: ("Received", 4) |}]
+let%expect_test _ = print_string (main 1 "../../examples/tests/test-230.mml"); [%expect{|
+  Thread 2: Deadlock or maximum number of step reached
+  Thread 0: unit
+  Thread 3: 10
+  Thread 1: "Sent" |}]
+let%expect_test _ = print_string (main 1 "../../examples/tests/test-231.mml"); [%expect{| syntax error |}]
+let%expect_test _ = print_string (main 1 "../../examples/tests/test-232.mml"); [%expect{| syntax error |}]
+let%expect_test _ = print_string (main 1 "../../examples/tests/test-233.mml"); [%expect{|
+  Thread 2: "Received"
+  Thread 0: "Send Chosen"
+  Thread 1: Deadlock or maximum number of step reached |}]
+let%expect_test _ = print_string (main 1 "../../examples/tests/test-234.mml"); [%expect{|
+  Thread 2: ("Sent", 6)
+  Thread 7: ("Received", 1)
+  Thread 0: "Communication ok"
+  Thread 5: ("Sent", 15)
+  Thread 6: ("Received", 0)
+  Thread 9: ("Received", 3)
+  Thread 3: ("Sent", 9)
+  Thread 1: ("Sent", 3)
+  Thread 8: ("Received", 2)
+  Thread 4: ("Sent", 12) |}]
+let%expect_test _ = print_string (main 1 "../../examples/tests/test-235.mml"); [%expect{| Thread 0: true |}]

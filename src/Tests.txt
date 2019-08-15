@@ -276,4 +276,19 @@ Communication instructions
    test-222: Type error: not a channel type passed for a communication
 
 Choose instruction
-   test-223:*
+   test-223: Without error: only one possible action in the choice and this one is executed
+   test-224: Without error: several actions possible and one is executed
+   test-225: Without error: several receive possible in the choose on only one channel and one is executed
+   test-226: Without error: several send possible in the choose on only one channel and one is executed
+   test-227: Without error: several tau possible in the choose and one is executed
+   test-228: Without error: several receive on the same channel and one on a different channel which is impossible
+   test-229: Without error: several send on the same channel and one on a different channel which is impossible
+   test-230: Without error: Communication possible in the choose and before
+   test-231: Syntax error : Expression used as prefix
+   test-232: Syntax error : Expression used instead of an instruction 
+
+Concurrent examples:
+
+   test-233: Without error: Choose between a receive on a channel, send on another and tau
+   test-234: Without error: Without error: several communication possible
+   test-235: Without error: simple test with one communication

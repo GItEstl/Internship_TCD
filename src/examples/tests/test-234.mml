@@ -1,0 +1,42 @@
+// Without error: several communication possible
+
+func (string,int) funcsend (channel int chi, int c) {
+    c = (c+1) * 3;
+    send(chi,c);
+    return ("Sent",c)
+}
+
+func (string,int) funcreceive (channel int chi,int c) {
+def 
+    int i
+in
+    i = receive(chi);
+    return ("Received",c)
+}
+
+func string test234 (string s) {
+def
+    channel int chi;
+    int c;
+    int i;
+    string s
+in
+    c = 0;
+    while( c < 5){
+        spawn funcsend(chi, c);
+        c = c + 1
+    };
+    i = receive(chi);
+    if (i < 4) {
+        c = 0;
+        while(c < 4){
+            spawn funcreceive(chi,c);
+            c = c + 1
+        };
+        return "Communication ok"
+    } else {
+        return "Communication blocked"
+    }
+}
+
+start test234("")
