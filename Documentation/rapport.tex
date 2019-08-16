@@ -113,7 +113,7 @@ For the functional part, there are 2 useful files:
 \\ \\
 The code processing and executing the concurrent instructions is contained in the following file:
 \begin{itemize}
-\item MainInterpretor.ml: Main file for the interpretation step. In this file, all expressions and instructions (functional or concurrent) are treated. Concurrent instructions are treated using small-step semantic.
+\item MainInterpretor.ml: Main file for the interpretation step. In this file, all expressions and instructions (functional or concurrent) are treated. Concurrent instructions are treated using small-step semantics.
 \end{itemize}
 
 
@@ -150,7 +150,7 @@ To test the compiler two files are useful:
     \item the seed used is 0
     \item the maximum number of steps used is 10000
 \end{itemize}
-In this file, all test results are converted into a string to be compared to an expected result. When an exception are raised, the testing process also works because exceptions return a string.
+In this file, all test results are converted into a string to be compared to an expected result. When an exception is raised, the testing process also works because exceptions return a string.
 \item Tests.txt: This file corresponds to a catalogue of the different tests. They are classified by category and for each one a sentence explains the interest of the test.
 \end{itemize}
 
@@ -170,12 +170,11 @@ The last two important files are the following:
 \phantomsection
 \addcontentsline{toc}{section}{Description of the examples folder} 
 \tabto{0cm} {\LARGE \textbf{Description of the examples folder}}
-\\ \\
 
-\tabto{1cm} The "examples" folder is comprised of 2 different folders:
+\tabto{0cm} The "examples" folder is comprised of 2 different folders:
 \begin{itemize}
     \item examples: It contains complex examples using the notion of pi-calculus. These examples are presented in the section \hyperref[Examples]{Examples} of this document
-    \item tests: This folder contains all the unit tests classified in the Tests.txt catalogue. From test 00 to 200 theses are tests that focus only on the functional part and the tests 201 to --- are unit tests on the concurrent part.
+    \item tests: This folder contains all the unit tests classified in the Tests.txt catalogue. From test 00 to 200 theses are tests that focus only on the functional part and the tests 201 to 235 are unit tests on the concurrent part.
 \end{itemize}
 
 \newpage
@@ -191,16 +190,16 @@ The last two important files are the following:
 \tabto{1cm}First of all, this language is procedural meaning that procedures/functions are declared at top-level and can then be called anywhere in the program. This language contains basic and convenient features that you can find in most programming languages : basic types (integer, boolean, char, string), lists, 
 tuples, local and global variables, functions declaration and call, different binary and unary operators for expressions, if-then-else, while and return instructions, ... \\ 
 
-\tabto{1cm}The language has several rules concerning the declaration of variables. First, all global variables have to be initialized when declared and cannot be modify after that. All local declarations of a function have to be written in its "def" part and can then be used inside the "in" part. The "def" part can only contain variable declarations and the "in" part only instructions. \\
+\tabto{1cm}The language has several rules concerning the declaration of variables. First, all global variables have to be initialized when they are declared and cannot be modify after that. All local declarations of a function have to be written in its "def" part and can then be used inside the "in" part. The "def" part can only contain variable declarations and the "in" part only instructions. \\
 
 \tabto{1cm}However, what is making this language different from others is the integration of pi-calculus notions inside the language. Indeed, it is possible to declare channels as variables. Those channels can be used in different instructions : newChan, send and receive.
 \begin{itemize}
-\item \ ch = newChan(): create a new channel of the same type as the variable ch and assign it this new channel to it.
+\item \ ch = newChan(): create a new channel of the same type as the variable ch and assign it this new channel to it. The new channel created has an id different to the old channel.
 \item \ send(ch,e): send the expression e along the channel ch
 \item \ v = receive(ch): receive an expression along the channel ch and assign it to the variable v
 \end{itemize}
 
-\tabto{1cm}The notion of input-guarded choice is also available in this language thanks to the instruction choose. The choose instructions allows you to use prefixes (new, send, receive, spawn, tau). The purpose of this instruction is the following: when the action of the prefix is possible, the action is made and the instructions corresponding to that prefix are executed after. In the case where actions of two different prefixes are possible at the same time, the program will choose one of them in a non-deterministic way.
+\tabto{1cm}The notion of input-guarded choice is also available in this language thanks to the instruction choose. The choose instructions allows you to use prefixes (send, receive, tau). The purpose of this instruction is the following: when the action of the prefix is possible, the action is made and the instructions corresponding to that prefix are executed after. In the case where actions of two different prefixes are possible at the same time, the program will choose one of them in a non-deterministic way.
 \\ \\
 \tabto{1cm} Finally, we have also added the instruction spawn to represent the parallelization of processes. Spawn can be seen as the "|" operator of the pi-calculus. It is important to note that spawn is not representing the immediate launch of a new thread. The function and expression passed in arguments of the spawn instruction are used to create the new process.
 \\ \\
@@ -376,14 +375,11 @@ CallMain ::= start name ( ExpressionSeq )
 
 \newpage
 \phantomsection
-\tabto{0cm}{\textbf{\LARGE Technical choices for the parser}}
-\addcontentsline{toc}{section}{Technical choices for the parser} 
+\tabto{0cm}{\textbf{\LARGE Technical choices for conflicts resolution}}
+\addcontentsline{toc}{section}{Technical choices for conflicts resolution} 
 \vspace*{3pt}
 \vspace*{10pt}
-\phantomsection
-\addcontentsline{toc}{subsection}{Conflicts resolution} 
-\tabto{1cm} {\Large \textsc{Conflicts resolution}}
-\\ \\ 
+
 \tabto{1cm} In order to remove ambiguities in our grammar and so resolve shift/reduce conflicts we have added some rules. It is important to note that in our grammar the majority of our conflicts refer to binary operators.  \\ \\
 By declaring precedence and associative rules for all tokens involved in the conflicts, this force derivations to be done in a particular way.
 \\ \\ 
@@ -409,9 +405,9 @@ We have decided that the operators: $*$, $+$, $-$, $/$, $=$, $\ne$, $\&\&$ and $
 \newpage
 We have also used semi-colons to resolve conflicts. \\ \\
 \phantomsection
-\addcontentsline{toc}{subsubsection}{Semi-colon} 
-\tabto{2cm} \textbf{Semi-colon} \\ \\
-\tabto{1cm}Semi-colons allow to separate instructions from each other and so that avoid shift-reduce conflicts at the level of the assign and return operators. It also makes our grammar more resistant and so easier for someone to add new instructions without causing conflicts. \\ \\
+\addcontentsline{toc}{subsubsection}{Semicolons} 
+\tabto{2cm} \textbf{Semicolons} \\ \\
+\tabto{1cm}Semicolons allow to separate instructions from each other and so that avoid shift-reduce conflicts at the level of the assign and return operators. It also makes our grammar more resistant and so easier for someone to add new instructions without causing conflicts. \\ \\
 \tabto{1cm} In our grammar, the semicolon should not be interpreted as an end of line indication but simply as a separator between variable declarations or instructions:
 \begin{itemize}
 \item For instructions: a semicolon sequence is translated by the parser as a sequence of empty instructions.
@@ -437,8 +433,8 @@ We have also used semi-colons to resolve conflicts. \\ \\
 
 \tabto{0cm} Before checking the types of the expressions and instructions, we have to create 2 environments:
 \begin{itemize}
-\item The type environment: composed of the different declared types (named types). This environments is represented by a list of tuples with each element representing a declared type. An element of this list contains the declaration position, the abstract syntax tree of the type, the name of the declared type and finally a boolean telling if the type is recursive. This information will later be used by the well-formedness checker.
-\item The variable environment composed of all defined global variables and defined functions. This environments is also represented by a list of tuples with each element representing a global variable or a function. An element of this list contains the declaration position, an abstract syntax tree representing the variable type or the function return type, a name, eventually a tree for function parameters and finally a boolean telling that the variable/function is global. This information will later be used by the type checker.
+\item The types environment: composed of the different declared types (named types). This environments is represented by a list of tuples where each element represents a declared type. An element of this list contains the declaration position, the abstract syntax tree of the type, the name of the declared type and finally a boolean telling if the type is recursive. This information will later be used by the well-formedness checker.
+\item The variables environment composed of all defined global variables and defined functions. This environment is also represented by a list of tuples where each element represents a global variable or a function. An element of this list contains the declaration position, an abstract syntax tree representing the variable type or the function return type, a name, eventually a tree for function parameters and finally a boolean telling that the variable/function is global. This information will later be used by the type checker.
 \end{itemize}
 So, the environments only concern what is declared at the top level.\\
 
@@ -487,10 +483,10 @@ Finally, we have to check that the function used in the start function is declar
 \phantomsection
 \addcontentsline{toc}{subsection}{Technical explanations}
 \tabto{1cm} {\Large \textsc{Technical explanations}}
-
-\tabto{0cm}The language is type-safe so the implemented type checking is static. It is based on a pattern matching system: the abstract syntax tree representing an expression or an instruction is matched with the correct rule. Then the appropriate rule converts the tree into a type if that is possible. When the type checker cannot determine the type of a bit of code, it means that there is a type error in the program.
-
-\tabto{0cm}The type checker works from the top level. First, it collects all the functions and execute the type checking on the body of those functions. In the body, the instructions are checked one after the other and the return type of the body is updated after each instruction. At the end of the body (or when a return is found), the return type of the body is compared to return type of the function declaration. If the two are identical, the function is well-typed. An instruction is considered well-typed when the type checker is able to validate the coherence of type used inside the instruction. You will find below the rules used to type check a program. 
+\\ \\
+\tabto{1cm}The language is type-safe so the implemented type checking is static. It is based on a pattern matching system: the abstract syntax tree representing an expression or an instruction is matched with the correct rule. Then the appropriate rule converts the tree into a type if that is possible. When the type checker cannot determine the type of a bit of code, it means that there is a type error in the program.
+\\ \\
+\tabto{1cm}The type checker works from the top level. First, it collects all the functions and executes the type checking on the body of those functions. In the body, the instructions are checked one after the other and the return type of the body is updated after each instruction. At the end of the body (or when a return is found), the return type of the body is compared to the return type of the function declaration. If the two are identical, the function is well-typed. An instruction is considered well-typed when the type checker is able to validate the coherence of types used inside the instruction. You will find below the rules used to type check a program. 
 
 \newpage
 \phantomsection
@@ -590,9 +586,9 @@ Finally, we have to check that the function used in the start function is declar
 \tabto{0cm} {\large \textbf{Function Call with return}}
 \begin{prooftree}
 \AxiomC{$\Gamma_t ; \ \Gamma_v \vdash a : \tau_2 $}
-\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_2 : \tau_1 \rightarrow \tau_2 $}
-\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_3 : \tau_1 $}
-\TrinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash a = e_2 (e_3) : OK $}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_1 : \tau_1 \rightarrow \tau_2 $}
+\AxiomC{$\Gamma_t ; \ \Gamma_v \vdash e_2 : \tau_1 $}
+\TrinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash a = e_1 (e_2) : OK $}
 \end{prooftree}
 
 \tabto{0cm} {\large \textbf{Function Call without return}}
@@ -695,20 +691,6 @@ Finally, we have to check that the function used in the start function is declar
 \BinaryInfC{$\Gamma_t ; \ \Gamma_v \vdash func \ void \ n  (\overrightarrow{\tau \ \ x}) \ \{def \  \overrightarrow{\tau^\prime \ \ y}\} \ in \ i \} \ : OK $}
 \end{prooftree}
 
-
-\newpage
-\centerline{\textbf{\Huge Interpretor}}
-\vspace*{15pt}
-
-
-
-\begin{figure}[htbp]
-%\hspace*{-2cm}
-\centering
-\includegraphics[scale = 0.4]{Interpretor_loop.jpg}
-\caption{Interpretor loop}
-\end{figure}
-
 \newpage
 
 \phantomsection
@@ -724,12 +706,14 @@ Finally, we have to check that the function used in the start function is declar
 
 \tabto{1cm}The interpretor of the language can be divided in three main parts: from the top to the bottom, the concurrent (or main) interpretor, the beta reduction interpretor and the expression interpretor. \\
 
-\tabto{1cm}The last two constitute the functional side of the compiler. It is important to note that this side mixes small and big steps semantics. Indeed, the expression are interpreted using big-step semantics and the instructions using small step semantics. The evaluation of expressions uses two states to find the value of the variables. Those two states, one global and one local are passed as arguments to the function evaluating the expressions. \\
+\tabto{1cm}The last two constitute the functional side of the compiler. It is important to note that this side mixes small and big steps semantics. Indeed, the expressions are interpreted using big-step semantics and the instructions using small step semantics. The evaluation of expressions uses two states to find the value of the variables. Those two states, one global and one local are passed as arguments to the function evaluating the expressions. They are implemented as hash tables with the key being the name of the variables\\
 
-\tabto{1cm}The instructions are evaluated using small steps semantics and also needs an evaluation context represented by a stack of \textit{frame}. A frame allows the interpretor to know where to put a result or where to continue the execution. When the interpretor uses a frame, it pops it from the top of the stack to retrieve a context. For all beta reductions, the execution of a rule returns the next instruction to run and update the local state and the evaluation context.
+\tabto{1cm}The instructions are evaluated using small steps semantics and also need an evaluation context represented by a stack of \textit{frame}. A frame allows the interpretor to know where to put a result or where to continue the execution. When the interpretor uses a frame, it pops it from the top of the stack to retrieve a context. For all beta reductions, the execution of a rule returns the next instruction to run and updates the local state and the evaluation context.
 The newchan instruction is special because it is the only beta reduction using channels. In the implementation channels are represented by an identifier which is unique in the program. \\
 
-\tabto{1cm} The concurrent interpretor is tasked to run all the instructions involving the use of threads or communications. In this part, the interpretor needs a set of configurations to run the instructions. Each configuration is the description of a thread, it contains the next instruction to run for this thread, its local state and its evaluation context. The global state is shared in all thread and implemented as a global variable. The concurrent interpretor run the program by analyzing the set of configurations and then executing a step. \\
+\tabto{1cm} The concurrent interpretor is tasked to run all the instructions involving the use of threads or communications. In this part, the interpretor needs a set of configurations to run the instructions. Each configuration is the description of a thread, it contains the next instruction to run for this thread, its local state and its evaluation context. This set of configurations are represented with a hash table with the key being the identifier of the thread. The global state is shared in all threads and implemented as a global variable. The concurrent interpretor runs the program by analyzing the set of configurations and then executing a step. \\
+
+\newpage
 
 \phantomsection
 \addcontentsline{toc}{section}{Execution of a step}
@@ -737,7 +721,100 @@ The newchan instruction is special because it is the only beta reduction using c
 \vspace*{3pt}
 \vspace*{10pt}
 
-\tabto{1cm}In this section, we are going to explain how the main interpretor execute a step, the different stages of this process and how they work. First we can divide the execution of a step in 4 main s   
+\tabto{1cm}In this section, we are going to explain how the main interpretor executes a step, the different stages of this process and how they work. First we can divide a step in 4 main stages:
+\begin{itemize}
+    \item Determine the possible actions for each thread
+    \item Determine the possible steps
+    \item Choose the step to execute
+    \item Execute the step
+    \item Decide if the program should loop again or not
+\end{itemize}
+
+\vspace*{3pt}
+We can represented the step with the following figure:
+
+\begin{figure}[htbp]
+%\hspace*{-2cm}
+\centering
+\includegraphics[scale = 0.4]{Interpretor_loop.jpg}
+\caption{Interpretor loop}
+\end{figure}
+
+\newpage
+
+\phantomsection
+\addcontentsline{toc}{subsection}{Collection of the actions}
+\tabto{1cm} {\Large \textsc{Collection of the actions}}
+\vspace*{10pt}
+\tabto{1cm}The first stage is to collect all the possible actions for each thread. There are five types of actions: tau, send, receive, spawn and beta actions. This last action corresponds to any of the beta reductions. Each thread can have a single possible action or a list of actions if the instruction for the thread is a choose.
+\\ \\
+\tabto{1cm}The communication actions - send and receive - contain an integer which is the identifier of the communication channel. When an action is found, it is coupled with the identifier of the thread and added to a list. So, for a thread we obtain a list of at least one couple. The list of all the actions is obtained by concatenating the list of all the threads.
+
+\vspace*{10pt}
+\vspace*{10pt}
+\phantomsection
+\addcontentsline{toc}{subsection}{Collection of the steps}
+\tabto{1cm} {\Large \textsc{Collection of the steps}}
+\vspace*{10pt}
+
+\tabto{1cm}The next stage is to collect all the possible steps. There are four kind of steps: the tau, spawn, beta and communication steps. The last one contains the identifier of the channel, the sender and the receiver whereas the other steps just have the identifier of the thread on which they have to be executed. 
+\\ \\
+\tabto{1cm}To find the steps, we browse trough the list of actions. When the compiler finds an action that is not a communication actions, it converts the action into a step and add it to a list. For the communication actions, it adds the identifier of the thread and channel to a list of senders or receivers. When all actions have been analyzed, the compiler tries to find all the communication couples by matching each sender to all the possible receivers (the channel of the sender and receiver have to be identical).
+
+\vspace*{10pt}
+\vspace*{10pt}
+\phantomsection
+\addcontentsline{toc}{subsection}{Choice of the step}
+\tabto{1cm} {\Large \textsc{Choice of the step}}
+\vspace*{10pt}
+
+\tabto{1cm}After collecting all the possible steps, the compiler has to choose which one to execute. To do that, the compiler generates a positive integer thanks to random number generator. So the index of the chosen step in the list is the remainder of the division of the number by the size of the list. Finally, the compiler retrieve the step by extracting it from the list of all the possible steps.
+
+\vspace*{10pt}
+\vspace*{10pt}
+\phantomsection
+\addcontentsline{toc}{subsection}{Execution of the step}
+\tabto{1cm} {\Large \textsc{Execution of the step}}
+\vspace*{10pt}
+
+\tabto{1cm}To execute the step, the interpretor matches the step with the corresponding rule. In the case of a spawn step, it will retrieve a new configuration from the rule execution and add this configuration as a new thread. For the communication step, the compiler will first execute the send rule which returns the sent value and then run the receive rule which takes this value in argument. Finally, it is important to know that a beta step on a thread will in fact execute several beta steps. Indeed, the interpretor tries to run the maximum of beta steps when this type of steps is selected for a thread.  
+
+\vspace*{10pt}
+\vspace*{10pt}
+\phantomsection
+\addcontentsline{toc}{subsection}{Decision to loop or not}
+\tabto{1cm} {\Large \textsc{Decision to loop or not}}
+\vspace*{10pt}
+
+\tabto{1cm}The execution of a step returns a status. This status can be two things "Running" or "Executed". The first one means that the compiler has found at least one step and has executed it. In this case, the interpretor will loop again at the first stage because it may have more steps to run. The second status means that the compiler has found no possible steps and so run nothing. In this case, the flow of execution is deadlock or finished, so the compiler returns the results. 
+
+\vspace*{10pt}
+\vspace*{10pt}
+\phantomsection
+\addcontentsline{toc}{section}{Technical notes}
+\tabto{0cm}{\textbf{\LARGE Technical notes}}
+\vspace*{3pt}
+\vspace*{10pt}
+
+\phantomsection
+\addcontentsline{toc}{subsection}{Local and global variables}
+\tabto{1cm} {\Large \textsc{Local and global variables}}
+\vspace*{10pt}
+
+\tabto{1cm}The programming language allows the declaration of global and local variables. However they are treated and initialized in a different way. The global variables have to be initialized when they are declared and cannot be modified after that. This choice has been made to avoid consideration on how to modify the global state.
+\\ \\
+\tabto{1cm} The local variables have to be declared in the "def" part of a function and can be used after in the "in" part. In fact, they do not need to be initialize even though not initializing the local variables is not a good practice. When the compiler calls a function, it immediately creates a new local state. This state contains the function parameters initialized  with expression passed as argument. Those parameters can be used like local variables inside the function. This new state also contains the local variable declarations. However those variables - having no initialization in the "def" part - are initialized to a default value depending on the type of the variable.
+
+\vspace*{10pt}
+\vspace*{10pt}
+\phantomsection
+\addcontentsline{toc}{subsection}{Garbage collector}
+\tabto{1cm} {\Large \textsc{Garbage collector}}
+\vspace*{10pt}
+
+\tabto{1cm}To optimized the execution of a program, the compiler uses a garbage collector. This garbage collector detects the finished thread that do not return a value or return a void. This detection takes place when the compiler searches for the possible actions. When the thread is detected, the compiler immediately deletes its configuration from the hash table representing the threads. This allows the system to run faster because it is not hindered by useful threads. 
+\\ \\
+\tabto{1cm}This detection relies on the "Terminated" instruction. This instruction is set as the next instruction of the thread when its execution is complete, it can contain the final expression return by the thread if there is one. So the garbage collector will only delete dead threads - where the next instruction is "Terminated" without return - and not active or waiting threads.
 
 \newpage
 
@@ -866,7 +943,7 @@ The newchan instruction is special because it is the only beta reduction using c
 \tabto{0cm} {\large \textbf{Return Break}}
 \begin{prooftree}
 \AxiomC{$ $}
-\UnaryInfC{$G;S;(noop;seqi)::E \vdash return \ e \rightarrow_{\beta} G;S;E \vdash return \ e$}
+\UnaryInfC{$G;S;(seqi)::E \vdash return \ e \rightarrow_{\beta} G;S;E \vdash return \ e$}
 \end{prooftree}
 
 \tabto{0cm} {\large \textbf{Sequence of Instructions}}
@@ -944,7 +1021,7 @@ The newchan instruction is special because it is the only beta reduction using c
 \vspace*{3pt}
 \vspace*{10pt}
 
-\tabto{0cm}{In our example, we made some modifications compared to the original example from the book. To allow the control to know when it needs to act we add an other channel between Control and Trans named transmit1. This channel transmit the message received by Trans from Car. This message is an integer which represents the position of the car. We arbitrarily decide at which position the links between the Trans and the car must be switched to the other trans : Idtrans. So, when the position is greater than the threshold the Control tells to Trans to lose the car and to IdTrans to gain the car.}
+\tabto{0cm}{In our example, we made some modifications compared to the original example from the book. To allow the control to know when it needs to act we add an other channel between Control and Trans named transmit1. This channel transmits the message received by Trans from Car. This message is an integer which represents the position of the car. We arbitrarily decide at which position the links between the Trans and the car must be switched to the other trans : Idtrans. So, when the position is greater than the threshold the Control tells to Trans to lose the car and to IdTrans to gain the car.}
 \newpage
 
 \vspace*{15pt}
@@ -955,7 +1032,7 @@ The newchan instruction is special because it is the only beta reduction using c
 \vspace*{10pt}
 \\
 \tabto{1cm}{This example is highly inspired by the "Buffer of size n" example - page 84.} \\ \\
-In this example, we consider a buffer of n cells. First, in $\pi$-calculus the definition of a buffer cell by :
+In this example, we consider a buffer of n cells. First, in $\pi$-calculus the definition of a buffer cell is :
 $B(l,r) = l(x).C \langle x,l,r \rangle$ and $C(x,l,r) = \bar{r} \langle x \rangle .B \langle l,r \rangle$
 \vspace*{3pt}
 \vspace*{10pt}
@@ -976,7 +1053,7 @@ $B^{(n)} = \overbrace{B^{ \frown} \ldots ^{\frown} B}^{\text{n times}}$
 \vspace*{3pt}
 \\
 \tabto{1cm}{This example is highly inspired by the "Condition with channels" example - page 104.} \\ \\
-In this example, we use a condition of type if then else based on channels. First, we created the true and false value thanks to channels. We can defined those values in $\pi$-calculus : \\ \\
+In this example, we use a condition of type \textit{if then else} based on channels. First, we created the true and false value thanks to channels. We can defined those values in $\pi$-calculus : \\ \\
 \centerline{$True(l) = l(t,f). \bar{t}$ \ and \ $False(l) = l(t,f). \bar{f}$} \\
 \\ Then we can create a condition by using those values.
 The condition needs a channel l which corresponds to the location of a value true or false. It is defined as follow : \\ \\
@@ -992,7 +1069,7 @@ The condition needs a channel l which corresponds to the location of a value tru
 \tabto{1cm}{This example is highly inspired by the "KNa2Cl" example - slide 14  from the course \textit{On pi-Calculus and its Applications} by Luca Gardelli } \\ \\
 In this example we are trying to simulate the following chemical reaction : \\
 $K + Na + 2Cl = K^+ + Na^+ + 2Cl^-$ \\
-For each type of atoms, there are dedicated channels on which they liberate or capture an electron. The ionization and deionization process are associated with the receive and send instruction. An atom can capture an electron only if an another atom is ready to liberate one and vice-versa. In our example, the thermochemical laws are not respected because the reaction can occur in both ways at anytime.  
+For each type of atoms, there are dedicated channels on which they liberate or capture an electron. The ionization and deionization process are associated with the receive and send instructions. An atom can capture an electron only if an another atom is ready to liberate one and vice-versa. In our example, the thermochemical laws are not respected because the reaction can occur in both ways at anytime.  
 
 \begin{figure}[!h]
     \centering
@@ -1029,10 +1106,10 @@ For each type of atoms, there are dedicated channels on which they liberate or c
 
 \tabto{0cm}In this example, we have represented a situation in a bar. In this one there is a barman, customers who don't know the secret and a customer who knows the secret (There is only one secret). The barman can install 2 people at a table.  One of the 2 people will speak first, the other will listen and then both will leave the table. So, several situations are possible:
 \begin{itemize}
-    \item the 2 people don't know the secret: they discuss and leave the table without knowing the secret \\
-    \item  one of the 2 people knows the secret and the wise man speaks first: he reveals the secret to the second person who now knows it and can spread it to other customers \\
-    \item one of the 2 people knows the secret but the wise man doesn't speak first: the person who did not know the secret still does not know it when he leaves the table \\
-    \item the 2 people know the secret: the person who speaks first reveals the secret but as the other person already knows it, the situation does not change, they leave the table knowing the secret.
+    \item the 2 people don't know the secret: they discuss and leave the table without knowing the secret. \\
+    \item  one of the 2 people knows the secret and the wise man speaks first: He's going to tell this secret or not to the second person. If he reveals the secret to the second person, this person now knows it and can spread it to other customers, if he does not reveal it the person who did not know the secret still does not know it when he leaves the table.   \\
+    \item one of the 2 people knows the secret but the wise man doesn't speak first: the person who did not know the secret still does not know it when he leaves the table. \\
+    \item the 2 people know the secret: The situation will not change, they leave the table knowing the secret.
 \end{itemize}
 The secret can be transmitted and spread throughout the bar.
 \end{document}
