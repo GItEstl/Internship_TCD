@@ -100,7 +100,7 @@ Parameter:
 *)
 let print_config nb (i,s,e) =
   print_string("  Thread " ^ (string_of_int nb) ^ ": \n");
-  print_string("    Instruction: " ^ (string_of_instr (!i))^ "\n");
+  print_string("    Instruction: " ^ (string_of_instr_with_line (!i))^ "\n");
   print_string("    State: " ^ (string_of_state (!s)) ^ "\n");
   print_string("    Evaluation Context: " ^ (string_of_eval_context (!e)) ^ "\n\n")
 

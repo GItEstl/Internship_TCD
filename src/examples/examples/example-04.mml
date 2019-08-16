@@ -15,8 +15,8 @@ func void WaitingPhilosophe (channel boolean fl, channel boolean fr, channel boo
 func void EatingPhilosophe (channel boolean fl, channel boolean fr) {
     choose {
         | tau -> {spawn EatingPhilosophe(fl,fr)}
-        | send(fl,true) -> {spawn ThinkingPhilosophe(fl,fr)}
-        | send(fr,true) -> {spawn ThinkingPhilosophe(fl,fr)}
+        | send(fl,true) -> {send(fr,true);
+                            spawn ThinkingPhilosophe(fl,fr)}
     }
 }
 

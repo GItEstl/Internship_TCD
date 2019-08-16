@@ -1,56 +1,68 @@
-type StringChan = channel string
-
-func void True(channel (StringChan,StringChan) l) {
-def
-    (StringChan, StringChan) b;
-    StringChan t
-
-in 
-        b = receive(l);
-        t = fst(b);
-        send(t,"True")
+func void Na (channel int ion, channel int deion) {
+    send(ion,1);
+    spawn NaPlus(ion,deion)
 }
 
-func void False(channel (StringChan,StringChan) l) {
+func void NaPlus (channel int ion, channel int deion) {
 def
-    (StringChan, StringChan) b;
-    StringChan f
-in 
-        b = receive(l);
-        f = snd(b);
-        send(f,"False")
-}
-
-func void cond (channel (StringChan,StringChan) l) {
-def
-    StringChan t;
-    StringChan f;
-    string v
+    int e
 in
-    t = newChan();
-    f = newChan();
-    send(l,(t,f));
+    e = receive(deion);
+    spawn Na(ion,deion)
+}
+
+func void K (channel int ion, channel int deion) {
+    send(ion,1);
+    spawn KPlus(ion,deion)
+}
+
+func void KPlus (channel int ion, channel int deion) {
+def
+    int e
+in
+    e = receive(deion);
+    spawn K(ion,deion)
+}
+
+func void Cl (channel int ion1, channel int deion1, channel int ion2, channel int deion2) {
+def 
+    int e
+in
     choose {
-        | v = receive(t) -> {spawn test1(v)} 
-        | v = receive(f) -> {spawn test2(v)}
-    } 
+        | e = receive(ion1) -> {spawn ClMinus(ion1,deion1,ion2,deion2)}
+        | e = receive(ion2) -> {spawn ClMinus(ion1,deion1,ion2,deion2)}
+    }
 }
 
-func string test1(string s) {return "test1"}
-
-func string test2(string s) {return "test2"}
-
-func void main(string s) {
-def
-    channel (StringChan,StringChan) l
+func void ClMinus (channel int ion1, channel int deion1, channel int ion2, channel int deion2) {
+def 
+    int e
 in
-    l = newChan();
-    spawn True(l);
-    cond(l);
-
+    choose {
+        | send(deion1,-1) -> {spawn Cl(ion1,deion1,ion2,deion2)}
+        | send(deion2,-1) -> {spawn Cl(ion1,deion1,ion2,deion2)}
+    }
 }
 
-start main("test")
+func void main (int n) {
+def
+    int c;
+    channel int ionNa;
+    channel int deionNa;
+    channel int ionK;
+    channel int deionK
+in
+    c = 0;
+    while (c < n){
+        spawn Na(ionNa,deionNa);
+        spawn K(ionK,deionK);
+        spawn Cl(ionNa,deionNa,ionK,deionK);
+        spawn Cl(ionNa,deionNa,ionK,deionK);
+        c = c + 1
+    }
+}
+
+start main(3)
 
 
 

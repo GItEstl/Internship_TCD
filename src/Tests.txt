@@ -288,7 +288,6 @@ Choose instruction
    test-232: Syntax error : Expression used instead of an instruction 
 
 Concurrent examples:
-
    test-233: Without error: Choose between a receive on a channel, send on another and tau
-   test-234: Without error: Without error: several communication possible
+   test-234: Without error: several communication possible
    test-235: Without error: simple test with one communication

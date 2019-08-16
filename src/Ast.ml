@@ -131,7 +131,7 @@ match tree with
     | BinaryNode (_,a,Assign,e) -> 
   (string_of_ast a) ^ " = " ^ (string_of_ast e)
     | CallNode (_,f,e) ->
-  "call " ^ f ^ "(" ^ (string_of_ast e) ^ ")" 
+  f ^ "(" ^ (string_of_ast e) ^ ")" 
     | ReceiveNode (_,a,n) ->
   (string_of_ast a) ^ " = receive(" ^ n ^ ")"
     | SendNode (_,n,e) ->
@@ -361,3 +361,50 @@ let rec string_of_instr ast =
   "--"
     | _ ->
   "unknownPrinting"
+
+(* string_of_instr_with_line: ast -> string
+Function converting an instruction into a string
+Parameter:
+  - ast: abstract syntax tree representing the instruction
+Return: string corresponding to the instruction
+*)
+let rec string_of_instr_with_line ast =
+  match ast with 
+    | InstrSeqNode (bi,None) ->
+  (string_of_instr_with_line bi)
+    | InstrSeqNode (bi1,Some(InstrSeqNode(bi2,None))) ->
+  (string_of_instr_with_line bi1) ^ "; " ^ (string_of_instr bi2)
+    | InstrSeqNode (bi1,Some(InstrSeqNode(bi2,Some(_)))) ->
+  (string_of_instr_with_line bi1) ^ "; " ^ (string_of_instr bi2) ^ "; seqi"
+    | InstrSeqNode (bi,Some(i)) ->
+  (string_of_instr_with_line bi) ^ "; " ^ (string_of_instr i)
+    | BinaryNode (pos,a,Assign,CallNode (_,f,e)) ->
+  "l." ^ (string_of_int pos.pos_lnum) ^ ": " ^ (string_of_instr a) ^ " = " ^ f ^ "(" ^ (string_of_instr e) ^ ")" 
+    | BinaryNode (pos,a,Assign,e) -> 
+  "l." ^ (string_of_int pos.pos_lnum) ^ ": " ^ (string_of_instr a) ^ " = " ^ (string_of_instr e)
+    | CallNode (pos,f,e) ->
+  "l." ^ (string_of_int pos.pos_lnum) ^ ": " ^ f ^ "(" ^ (string_of_instr e) ^ ")" 
+    | ReceiveNode (pos,a,n) ->
+  "l." ^ (string_of_int pos.pos_lnum) ^ ": " ^ (string_of_instr a) ^ " = receive(" ^ n ^ ")"
+    | SendNode (pos,n,e) ->
+  "l." ^ (string_of_int pos.pos_lnum) ^ ": " ^ "send(" ^ n ^ ", " ^ (string_of_instr e) ^ ")"
+    | IfthenelseInstrNode (pos,cond,_,_) ->
+  "l." ^ (string_of_int pos.pos_lnum) ^ ": " ^ "if (" ^ (string_of_instr cond) ^ ") {i1} else {i2}"
+    | WhileNode (pos,e,_) ->
+  "l." ^ (string_of_int pos.pos_lnum) ^ ": " ^ "while (" ^ (string_of_instr e) ^ ") {i}"
+    | ChooseNode (pos,_) ->
+  "l." ^ (string_of_int pos.pos_lnum) ^ ": " ^ "choose { | p -> c ...}"
+    | SpawnNode (pos,f,e) ->
+  "l." ^ (string_of_int pos.pos_lnum) ^ ": " ^ "spawn " ^ f ^ "(" ^ (string_of_instr e) ^ ")" 
+    | NewNode (pos,a) ->
+  "l." ^ (string_of_int pos.pos_lnum) ^ ": " ^ (string_of_instr a) ^ " = newChan()" 
+    | ReturnNode (pos,Some (e)) ->
+  "l." ^ (string_of_int pos.pos_lnum) ^ ": " ^ "return " ^ (string_of_instr e)
+    | ReturnNode (pos,None) ->
+  "l." ^ (string_of_int pos.pos_lnum) ^ ": " ^ "return "   
+    | NoopNode -> 
+  "noop"
+    | Terminated (_) -> 
+  "--"
+    | i ->
+  string_of_instr i
